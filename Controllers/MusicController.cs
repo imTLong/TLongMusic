@@ -41,8 +41,10 @@ namespace TLongMusic.Controllers
             if (userId.HasValue)
             {
                 var activeSub = await _context.Subscriptions
+                    .Include(s => s.Package)
                     .Where(s => s.UserId == userId.Value && s.Status == "Active" && s.EndDate >= DateTime.UtcNow)
-                    .OrderByDescending(s => s.EndDate)
+                    .OrderByDescending(s => s.Package != null ? s.Package.Price : (s.PackageId == "Premium" ? 199000 : s.PackageId == "Standard" ? 99000 : 0))
+                    .ThenByDescending(s => s.EndDate)
                     .FirstOrDefaultAsync();
 
                 if (activeSub != null)
@@ -51,13 +53,28 @@ namespace TLongMusic.Controllers
                 }
             }
 
-            // Check Demo rule for TrackSlot
+            // Check Demo rule for Slot & VIP Tracks (SRS: Standard & Free only get 30s demo on Slot)
             bool isDemo = false;
             int demoLimit = 0;
 
-            if (music.CategoryCode == "TrackSlot" || music.CategoryCode == "NonstopSlot")
+            bool isSlotTrack = music.CategoryCode == "TrackSlot" || 
+                               music.CategoryCode == "NonstopSlot" || 
+                               (music.Category != null && music.Category.RequiredTierToDownload == "Premium");
+
+            bool isAdminOrProducer = User.IsInRole("Admin") || User.IsInRole("Producer");
+
+            if (!isAdminOrProducer)
             {
-                if (userTier != "Premium" && !User.IsInRole("Admin") && !User.IsInRole("Producer"))
+                if (isSlotTrack)
+                {
+                    // Kho Slot VIP: Chỉ duy nhất Premium được nghe full, Standard và Free chỉ được nghe Demo (30s)
+                    if (userTier != "Premium")
+                    {
+                        isDemo = true;
+                        demoLimit = music.DemoLimitSeconds > 0 ? music.DemoLimitSeconds : 30;
+                    }
+                }
+                else if (userTier == "Free" && music.IsDemoOnlyForFree)
                 {
                     isDemo = true;
                     demoLimit = music.DemoLimitSeconds > 0 ? music.DemoLimitSeconds : 30;
@@ -107,6 +124,7 @@ namespace TLongMusic.Controllers
                 bpm = music.Bpm,
                 musicalKey = music.MusicalKey,
                 durationSeconds = music.DurationSeconds,
+                categoryCode = music.CategoryCode,
                 isDemo = isDemo,
                 demoLimit = demoLimit,
                 qualityAvailable = music.QualityAvailable,

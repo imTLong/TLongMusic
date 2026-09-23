@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TLongMusic")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0dafcbb9263d5cffd3b2de71fd7c6dc64707368f")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d2a14f7427e9e69b33530f0f09d5ddf5dbd07ec3")]
 [assembly: System.Reflection.AssemblyProductAttribute("TLongMusic")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TLongMusic")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

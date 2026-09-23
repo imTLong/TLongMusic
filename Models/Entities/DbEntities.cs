@@ -55,6 +55,15 @@ namespace TLongMusic.Models.Entities
         [StringLength(20)]
         public string Status { get; set; } = "Active"; // 'Active', 'Locked', 'Disabled'
 
+        [StringLength(100)]
+        public string? BankName { get; set; }
+
+        [StringLength(50)]
+        public string? BankAccountNumber { get; set; }
+
+        [StringLength(100)]
+        public string? BankAccountHolder { get; set; }
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 

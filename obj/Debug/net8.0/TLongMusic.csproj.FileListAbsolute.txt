@@ -88,14 +88,13 @@ D:\Code\WEB NGHE NHẠC\bin\Debug\net8.0\NAudio.Midi.dll
 D:\Code\WEB NGHE NHẠC\bin\Debug\net8.0\NAudio.Wasapi.dll
 D:\Code\WEB NGHE NHẠC\bin\Debug\net8.0\NAudio.WinMM.dll
 D:\Code\WEB NGHE NHẠC\bin\Debug\net8.0\login_std.json
-D:\Code\WEB NGHE NHẠC\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
 C:\Users\Nguyen Thanh Long\Documents\GitHub\TLongMusic\bin\Debug\net8.0\appsettings.Development.json
 C:\Users\Nguyen Thanh Long\Documents\GitHub\TLongMusic\bin\Debug\net8.0\appsettings.json
 C:\Users\Nguyen Thanh Long\Documents\GitHub\TLongMusic\bin\Debug\net8.0\login_std.json
-C:\Users\Nguyen Thanh Long\Documents\GitHub\TLongMusic\bin\Debug\net8.0\TLongMusic.staticwebassets.endpoints.json
 C:\Users\Nguyen Thanh Long\Documents\GitHub\TLongMusic\bin\Debug\net8.0\libmp3lame.32.dll
 C:\Users\Nguyen Thanh Long\Documents\GitHub\TLongMusic\bin\Debug\net8.0\libmp3lame.64.dll
 C:\Users\Nguyen Thanh Long\Documents\GitHub\TLongMusic\bin\Debug\net8.0\TLongMusic.staticwebassets.runtime.json
+C:\Users\Nguyen Thanh Long\Documents\GitHub\TLongMusic\bin\Debug\net8.0\TLongMusic.staticwebassets.endpoints.json
 C:\Users\Nguyen Thanh Long\Documents\GitHub\TLongMusic\bin\Debug\net8.0\TLongMusic.exe
 C:\Users\Nguyen Thanh Long\Documents\GitHub\TLongMusic\bin\Debug\net8.0\TLongMusic.deps.json
 C:\Users\Nguyen Thanh Long\Documents\GitHub\TLongMusic\bin\Debug\net8.0\TLongMusic.runtimeconfig.json

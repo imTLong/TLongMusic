@@ -60,6 +60,10 @@ wwwroot\lib\jquery\dist\jquery.js
 wwwroot\lib\jquery\dist\jquery.min.js
 wwwroot\lib\jquery\dist\jquery.min.map
 wwwroot\lib\jquery\LICENSE.txt
+wwwroot\uploads\avatars\db5eda527bbb4b85a57bc1bf38b0d9e3.png
+wwwroot\uploads\music\1069435967a14e88bc2233ad8e2fc48b.mp3
+wwwroot\uploads\music\1069435967a14e88bc2233ad8e2fc48b_320k.mp3
+wwwroot\uploads\music\1069435967a14e88bc2233ad8e2fc48b_master.wav
 wwwroot\uploads\music\12424a58469b4b92a592bbeb820aedd1.mp3
 wwwroot\uploads\music\12424a58469b4b92a592bbeb820aedd1_320k.mp3
 wwwroot\uploads\music\12bf1bad328a410ea4900f93b4f88890_master.wav
@@ -67,6 +71,9 @@ wwwroot\uploads\music\3c00932fa1624f5592d303b7b1ee6588_test_beat_drop.mp3
 wwwroot\uploads\music\3c00932fa1624f5592d303b7b1ee6588_test_beat_drop_320k.mp3
 wwwroot\uploads\music\4ec73c39043043ddb467e629e8c01fd7_320k.mp3
 wwwroot\uploads\music\4ec73c39043043ddb467e629e8c01fd7_master.wav
+wwwroot\uploads\music\52c1b90c6ee14b739386d4360fe5f11f.mp3
+wwwroot\uploads\music\52c1b90c6ee14b739386d4360fe5f11f_320k.mp3
+wwwroot\uploads\music\52c1b90c6ee14b739386d4360fe5f11f_master.wav
 wwwroot\uploads\music\565ffe3e6c29448ca3afbcf5e4b79bcd.wav
 wwwroot\uploads\music\57ccf776a782403e97d31308811b1663_320k.mp3
 wwwroot\uploads\music\580ea098287f4c989e7f533fd73110ad_master.wav

@@ -226,8 +226,9 @@
                                                 bpm: @track.Bpm,
                                                 key: "@track.MusicalKey",
                                                 durationSeconds: @track.DurationSeconds,
-                                                isDemo: @(track.IsDemoOnlyForFree.ToString().ToLower()),
-                                                demoLimit: @track.DemoLimitSeconds,
+                                                categoryCode: "@track.CategoryCode",
+                                                isDemo: @((track.IsDemoOnlyForFree || track.TierRequiredToDownload == RequiredTier.Premium || track.CategoryCode.Contains("Slot")).ToString().ToLower()),
+                                                demoLimit: @(track.DemoLimitSeconds > 0 ? track.DemoLimitSeconds : 30),
                                                 quality: "@track.QualityAvailable",
                                                 tierRequired: "@track.TierRequiredToDownload"
                                             })'
@@ -375,6 +376,7 @@
                                             bpm: @track.Bpm,
                                             key: "@track.MusicalKey",
                                             durationSeconds: @track.DurationSeconds,
+                                            categoryCode: "@track.CategoryCode",
                                             isDemo: false,
                                             quality: "@track.QualityAvailable",
                                             tierRequired: "@track.TierRequiredToDownload"
@@ -452,8 +454,9 @@
                                             bpm: @track.Bpm,
                                             key: "@track.MusicalKey",
                                             durationSeconds: @track.DurationSeconds,
+                                            categoryCode: "@track.CategoryCode",
                                             isDemo: true,
-                                            demoLimit: @track.DemoLimitSeconds,
+                                            demoLimit: @(track.DemoLimitSeconds > 0 ? track.DemoLimitSeconds : 30),
                                             quality: "@track.QualityAvailable",
                                             tierRequired: "@track.TierRequiredToDownload"
                                         })'>

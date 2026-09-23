@@ -38,7 +38,7 @@ namespace TLongMusic.Controllers
 
             if (user == null || !SecurityHelper.VerifyPassword(model.Password, user.PasswordHash))
             {
-                return Unauthorized(new { success = false, message = "Tên đăng nhập hoặc mật khẩu không chính xác!" });
+                return Unauthorized(new { success = false, message = "Sai tài khoản hoặc mật khẩu" });
             }
 
             if (user.Status != "Active")
@@ -92,6 +92,10 @@ namespace TLongMusic.Controllers
                 Username = user.Username,
                 FullName = user.FullName ?? user.Username,
                 Email = user.Email,
+                PhoneNumber = user.PhoneNumber,
+                BankName = user.BankName,
+                BankAccountNumber = user.BankAccountNumber,
+                BankAccountHolder = user.BankAccountHolder,
                 AvatarUrl = user.AvatarUrl ?? "/images/logo.png",
                 Roles = roles,
                 PrimaryRole = primaryRole,
@@ -207,6 +211,10 @@ namespace TLongMusic.Controllers
                 Username = newUser.Username,
                 FullName = newUser.FullName,
                 Email = newUser.Email,
+                PhoneNumber = newUser.PhoneNumber,
+                BankName = newUser.BankName,
+                BankAccountNumber = newUser.BankAccountNumber,
+                BankAccountHolder = newUser.BankAccountHolder,
                 AvatarUrl = newUser.AvatarUrl,
                 Roles = new List<string> { "Member" },
                 PrimaryRole = "Member",
@@ -228,11 +236,16 @@ namespace TLongMusic.Controllers
         }
 
         [HttpPost("Logout")]
+        [HttpGet("Logout")]
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             HttpContext.Session.Clear();
-            return Ok(new { success = true, message = "Đã đăng xuất thành công." });
+            if (Request.Headers["Accept"].ToString().Contains("text/html"))
+            {
+                return Redirect("/");
+            }
+            return Ok(new { success = true, message = "Đã đăng xuất thành công khỏi phiên làm việc." });
         }
 
         [HttpGet("CurrentUser")]
@@ -276,6 +289,10 @@ namespace TLongMusic.Controllers
                 Username = user.Username,
                 FullName = user.FullName ?? user.Username,
                 Email = user.Email,
+                PhoneNumber = user.PhoneNumber,
+                BankName = user.BankName,
+                BankAccountNumber = user.BankAccountNumber,
+                BankAccountHolder = user.BankAccountHolder,
                 AvatarUrl = user.AvatarUrl ?? "/images/logo.png",
                 Roles = roles,
                 PrimaryRole = primaryRole,
@@ -291,6 +308,194 @@ namespace TLongMusic.Controllers
             return Ok(new
             {
                 isAuthenticated = true,
+                user = sessionData
+            });
+        }
+
+        [HttpPost("UpdateProfile")]
+        public async Task<IActionResult> UpdateProfile()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized(new { success = false, message = "Bạn chưa đăng nhập!" });
+            }
+
+            UpdateProfileDto model;
+            IFormFile? avatarFile = null;
+
+            if (Request.HasFormContentType)
+            {
+                var form = await Request.ReadFormAsync();
+                model = new UpdateProfileDto
+                {
+                    FullName = form["fullName"].ToString(),
+                    Email = form["email"].ToString(),
+                    PhoneNumber = form["phoneNumber"].ToString(),
+                    AvatarUrl = form["avatarUrl"].ToString(),
+                    BankName = form["bankName"].ToString(),
+                    BankAccountNumber = form["bankAccountNumber"].ToString(),
+                    BankAccountHolder = form["bankAccountHolder"].ToString(),
+                    OldPassword = form["oldPassword"].ToString(),
+                    NewPassword = form["newPassword"].ToString()
+                };
+                if (form.Files.Count > 0)
+                {
+                    avatarFile = form.Files["avatarFile"] ?? form.Files.FirstOrDefault();
+                }
+            }
+            else
+            {
+                model = await Request.ReadFromJsonAsync<UpdateProfileDto>() ?? new UpdateProfileDto();
+            }
+
+            if (string.IsNullOrWhiteSpace(model.FullName))
+            {
+                return BadRequest(new { success = false, message = "Vui lòng nhập họ và tên!" });
+            }
+
+            var user = await _context.Users
+                .Include(u => u.UserRoles)
+                    .ThenInclude(ur => ur.Role)
+                .Include(u => u.Subscriptions)
+                    .ThenInclude(s => s.Package)
+                .Include(u => u.ProducerProfile)
+                .FirstOrDefaultAsync(u => u.UserId == userId);
+
+            if (user == null || user.Status != "Active")
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new { success = false, message = "Tài khoản không tồn tại hoặc đã bị khóa!" });
+            }
+
+            // Check email uniqueness if changed
+            if (!string.IsNullOrWhiteSpace(model.Email) && !model.Email.Equals(user.Email, StringComparison.OrdinalIgnoreCase))
+            {
+                var emailExists = await _context.Users.AnyAsync(u => u.UserId != userId && u.Email == model.Email.Trim().ToLower());
+                if (emailExists)
+                {
+                    return BadRequest(new { success = false, message = "Email này đã được sử dụng bởi tài khoản khác!" });
+                }
+                user.Email = model.Email.Trim().ToLower();
+            }
+
+            // Change password if provided
+            if (!string.IsNullOrWhiteSpace(model.NewPassword))
+            {
+                if (string.IsNullOrWhiteSpace(model.OldPassword))
+                {
+                    return BadRequest(new { success = false, message = "Vui lòng nhập mật khẩu hiện tại để đổi mật khẩu mới!" });
+                }
+
+                if (!SecurityHelper.VerifyPassword(model.OldPassword, user.PasswordHash))
+                {
+                    return BadRequest(new { success = false, message = "Mật khẩu hiện tại không chính xác!" });
+                }
+
+                if (model.NewPassword.Length < 6)
+                {
+                    return BadRequest(new { success = false, message = "Mật khẩu mới phải có ít nhất 6 ký tự!" });
+                }
+
+                user.PasswordHash = SecurityHelper.HashPassword(model.NewPassword);
+            }
+
+            // Handle optional Avatar file upload
+            if (avatarFile != null && avatarFile.Length > 0)
+            {
+                var allowedExts = new[] { ".jpg", ".jpeg", ".png", ".webp", ".gif" };
+                var ext = Path.GetExtension(avatarFile.FileName).ToLowerInvariant();
+                if (!allowedExts.Contains(ext))
+                {
+                    return BadRequest(new { success = false, message = "Định dạng ảnh không hợp lệ! Vui lòng chọn file .jpg, .png, .webp hoặc .gif" });
+                }
+
+                if (avatarFile.Length > 10 * 1024 * 1024)
+                {
+                    return BadRequest(new { success = false, message = "Kích thước ảnh đại diện không được vượt quá 10MB!" });
+                }
+
+                var avatarFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "avatars");
+                if (!Directory.Exists(avatarFolder)) Directory.CreateDirectory(avatarFolder);
+
+                var avatarFileName = $"{Guid.NewGuid():N}{ext}";
+                var avatarFilePath = Path.Combine(avatarFolder, avatarFileName);
+
+                using (var stream = new FileStream(avatarFilePath, FileMode.Create))
+                {
+                    await avatarFile.CopyToAsync(stream);
+                }
+
+                user.AvatarUrl = $"/uploads/avatars/{avatarFileName}";
+            }
+            else if (!string.IsNullOrWhiteSpace(model.AvatarUrl))
+            {
+                user.AvatarUrl = model.AvatarUrl.Trim();
+            }
+
+            // Update basic info
+            user.FullName = model.FullName.Trim();
+            user.PhoneNumber = string.IsNullOrWhiteSpace(model.PhoneNumber) ? null : model.PhoneNumber.Trim();
+
+            // Update bank info
+            user.BankName = string.IsNullOrWhiteSpace(model.BankName) ? null : model.BankName.Trim();
+            user.BankAccountNumber = string.IsNullOrWhiteSpace(model.BankAccountNumber) ? null : model.BankAccountNumber.Trim();
+            user.BankAccountHolder = string.IsNullOrWhiteSpace(model.BankAccountHolder) ? null : model.BankAccountHolder.Trim().ToUpper();
+
+            user.UpdatedAt = DateTime.UtcNow;
+
+            // If user has Producer profile, sync bank and phone info
+            if (user.ProducerProfile != null)
+            {
+                user.ProducerProfile.BankName = user.BankName;
+                user.ProducerProfile.BankAccountNumber = user.BankAccountNumber;
+                user.ProducerProfile.BankAccountHolder = user.BankAccountHolder;
+                user.ProducerProfile.PhoneNumber = user.PhoneNumber;
+                user.ProducerProfile.UpdatedAt = DateTime.UtcNow;
+            }
+
+            await _context.SaveChangesAsync();
+
+            // Refresh Session Data
+            var roles = user.UserRoles.Select(ur => ur.RoleId).ToList();
+            var primaryRole = roles.Contains("Admin") ? "Admin" 
+                            : roles.Contains("Producer") ? "Producer" 
+                            : "Member";
+
+            var activeSub = user.Subscriptions
+                .Where(s => s.Status == "Active" && s.EndDate >= DateTime.UtcNow)
+                .OrderByDescending(s => s.Package != null ? s.Package.Price : (s.PackageId == "Premium" ? 199000 : s.PackageId == "Standard" ? 99000 : 0))
+                .ThenByDescending(s => s.EndDate)
+                .FirstOrDefault();
+
+            var tier = activeSub?.PackageId ?? "Free";
+            var pkg = activeSub?.Package ?? await _context.Packages.FindAsync("Free");
+
+            var sessionData = new UserSessionDto
+            {
+                UserId = user.UserId,
+                Username = user.Username,
+                FullName = user.FullName ?? user.Username,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber,
+                BankName = user.BankName,
+                BankAccountNumber = user.BankAccountNumber,
+                BankAccountHolder = user.BankAccountHolder,
+                AvatarUrl = user.AvatarUrl ?? "/images/logo.png",
+                Roles = roles,
+                PrimaryRole = primaryRole,
+                Tier = tier,
+                TierExpiresAt = activeSub?.EndDate,
+                IsVipActive = tier == "Standard" || tier == "Premium",
+                CanDownloadLot = pkg?.CanDownloadLot ?? true,
+                CanDownloadNhom = pkg?.CanDownloadNhom ?? false,
+                CanDownloadSlot = pkg?.CanDownloadSlot ?? false,
+                SlotDemoLimitSeconds = pkg?.SlotDemoLimitSeconds ?? 30
+            };
+
+            return Ok(new
+            {
+                success = true,
+                message = "Cập nhật thông tin cá nhân và tài khoản ngân hàng thành công!",
                 user = sessionData
             });
         }

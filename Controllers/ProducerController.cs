@@ -31,30 +31,16 @@ namespace TLongMusic.Controllers
                 return Unauthorized(new { success = false, message = "Vui lòng đăng nhập tài khoản Producer!" });
             }
 
+            // CHỈ PRODUCER MỚI CÓ QUYỀN ĐĂNG NHẠC - ADMIN KHÔNG ĐĂNG NHẠC
+            if (!User.IsInRole("Producer"))
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new { success = false, message = "Tài khoản Admin và Member không có quyền đăng nhạc! Quyền này chỉ dành riêng cho Producer." });
+            }
+
             var producer = await _context.Producers.FirstOrDefaultAsync(p => p.UserId == userId);
             if (producer == null)
             {
-                if (User.IsInRole("Admin"))
-                {
-                    // Admin uploading tracks gets dedicated Producer profile
-                    producer = new Producer
-                    {
-                        ProducerId = Guid.NewGuid(),
-                        UserId = userId,
-                        StageName = User.Identity?.Name ?? "Admin Official",
-                        BankName = "MB Bank",
-                        BankAccountNumber = "0000000000",
-                        BankAccountHolder = "ADMIN",
-                        IsVerified = true,
-                        CreatedAt = DateTime.UtcNow
-                    };
-                    _context.Producers.Add(producer);
-                    await _context.SaveChangesAsync();
-                }
-                else
-                {
-                    return StatusCode(StatusCodes.Status403Forbidden, new { success = false, message = "Bạn không có quyền Producer để upload nhạc!" });
-                }
+                return StatusCode(StatusCodes.Status403Forbidden, new { success = false, message = "Không tìm thấy hồ sơ Producer của bạn trong hệ thống!" });
             }
 
             UploadMusicFormDto formModel = new();

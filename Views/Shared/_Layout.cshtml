@@ -236,6 +236,10 @@
                         <!-- TAB ĐĂNG NHẬP -->
                         <div class="tab-pane fade show active" id="tab-login-content" role="tabpanel">
                             <form onsubmit="event.preventDefault(); handleLogin(document.getElementById('loginUsername').value, document.getElementById('loginPassword').value);">
+                                <!-- Báo lỗi đăng nhập sai -->
+                                <div id="loginErrorMessage" class="alert alert-danger py-2 px-3 small rounded-3 d-none mb-3 border-0" style="background: rgba(255, 19, 74, 0.2); color: #ff4d6d; border: 1px solid rgba(255, 19, 74, 0.4) !important;">
+                                    <i class="fas fa-circle-exclamation me-2"></i><span>Sai tài khoản hoặc mật khẩu</span>
+                                </div>
                                 <div class="mb-3">
                                     <label class="form-label text-dim small">Tên đăng nhập hoặc Email:</label>
                                     <div class="input-group">
@@ -336,7 +340,7 @@
             <div class="modal-content" style="background: rgba(18, 19, 32, 0.95); backdrop-filter: blur(25px); border: 1px solid rgba(255, 19, 74, 0.5); border-radius: 24px; box-shadow: 0 0 50px rgba(255, 19, 74, 0.4);">
                 <div class="modal-header border-0 pb-0">
                     <h5 class="modal-title text-white font-weight-bold"><i class="fas fa-gem text-danger me-2"></i> TLongMusic VIP Club</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" onclick="closeDemoLimitModal()"></button>
                 </div>
                 <div class="modal-body" id="vipModalBody">
                 </div>
@@ -391,7 +395,7 @@
                         <div class="tab-pane fade" id="admin-producers-pane" role="tabpanel">
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <h6 class="text-white fw-bold mb-0"><i class="fas fa-headphones text-info me-2"></i>Danh Sách Producer Đã Cấp Quyền</h6>
-                                <button class="btn btn-sm btn-shimmer-ruby" onclick="showAdminModal()">
+                                <button class="btn btn-sm btn-shimmer-ruby" onclick="openAdminCreateProducerModal()">
                                     <i class="fas fa-plus-circle me-1"></i> Cấp Tài Khoản Producer Mới
                                 </button>
                             </div>
@@ -648,6 +652,210 @@
                             <button type="button" class="btn btn-outline-secondary px-4 rounded-pill" data-bs-dismiss="modal">Hủy bỏ</button>
                             <button type="submit" id="producerUploadSubmitBtn" class="btn btn-shimmer-ruby px-5 py-2 rounded-pill fw-bold">
                                 <i class="fas fa-cloud-arrow-up me-2"></i> Đăng Tải Lên SQL Server
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         USER PROFILE & BANK ACCOUNT EDIT MODAL
+         ========================================== -->
+    <div class="modal fade" id="userProfileModal" tabindex="-1" aria-hidden="true" style="z-index: 1065;">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content" style="background: rgba(18, 19, 32, 0.98); backdrop-filter: blur(30px); border: 1px solid rgba(0, 200, 255, 0.6); border-radius: 24px; box-shadow: 0 0 60px rgba(0, 200, 255, 0.3);">
+                <div class="modal-header border-bottom border-secondary border-opacity-25 pb-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="badge p-2 fs-6 rounded-circle" style="background: #00c8ff; color: #000;"><i class="fas fa-id-card"></i></span>
+                        <div>
+                            <h5 class="modal-title text-white fw-bold mb-0">CHỈNH SỬA THÔNG TIN CÁ NHÂN & TÀI KHOẢN NGÂN HÀNG</h5>
+                            <small class="text-dim">Cập nhật hồ sơ tài khoản và thông tin nhận thanh toán / thù lao</small>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="userProfileForm" onsubmit="event.preventDefault(); submitUpdateProfile(this);">
+                        <!-- Basic Info Section -->
+                        <div class="p-3 mb-4 rounded-4 border border-secondary border-opacity-25" style="background: rgba(255, 255, 255, 0.03);">
+                            <h6 class="text-white fw-bold mb-3 d-flex align-items-center gap-2">
+                                <i class="fas fa-user text-info"></i> THÔNG TIN CƠ BẢN
+                            </h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label text-dim small">Tên đăng nhập (Cố định):</label>
+                                    <input type="text" id="profileUsername" class="form-control bg-dark text-dim border-secondary" readonly disabled />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label text-dim small">Họ và tên hiển thị: <span class="text-danger">*</span></label>
+                                    <input type="text" id="profileFullName" name="fullName" class="form-control bg-dark text-white border-secondary" required />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label text-dim small">Địa chỉ Email: <span class="text-danger">*</span></label>
+                                    <input type="email" id="profileEmail" name="email" class="form-control bg-dark text-white border-secondary" required />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label text-dim small">Số điện thoại / Zalo:</label>
+                                    <input type="text" id="profilePhone" name="phoneNumber" class="form-control bg-dark text-white border-secondary" placeholder="09xxxxxxxx" />
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label text-white small d-flex justify-content-between align-items-center">
+                                        <span><i class="fas fa-camera text-info me-1"></i> Thay đổi ảnh đại diện (Tải file từ máy tính/điện thoại):</span>
+                                        <span class="badge bg-secondary text-light fw-normal" style="font-size: 0.72rem;">Không bắt buộc</span>
+                                    </label>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <img id="profileAvatarPreview" src="/images/logo.png" alt="Avatar Preview" class="rounded-circle border border-info flex-shrink-0" style="width: 44px; height: 44px; object-fit: cover;" onerror="this.src='/images/logo.png'" />
+                                        <input type="file" id="profileAvatarFile" name="avatarFile" accept="image/*,.jpg,.jpeg,.png,.webp,.gif" class="form-control bg-dark text-white border-secondary" onchange="previewModalAvatarFile(this)" />
+                                    </div>
+                                    <small class="text-dim d-block mt-1" style="font-size: 0.75rem;">Hỗ trợ: JPG, PNG, WEBP, GIF. Bỏ trống nếu giữ nguyên ảnh hiện tại.</small>
+                                    <input type="hidden" id="profileAvatarUrl" name="avatarUrl" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bank Account Section -->
+                        <div class="p-3 mb-4 rounded-4 border border-warning border-opacity-50" style="background: rgba(255, 209, 102, 0.05);">
+                            <h6 class="text-warning fw-bold mb-3 d-flex align-items-center gap-2">
+                                <i class="fas fa-building-columns"></i> TÀI KHOẢN NGÂN HÀNG NHẬN TIỀN / THÙ LAO
+                            </h6>
+                            <p class="text-dim small mb-3">Thông tin số tài khoản của bạn để nhận thanh toán doanh thu hoặc thù lao phát hành nhạc.</p>
+                            <div class="row g-3">
+                                <div class="col-md-5">
+                                    <label class="form-label text-white small">Ngân hàng:</label>
+                                    <input list="vietnamBanks" type="text" id="profileBankName" name="bankName" class="form-control bg-dark text-white border-warning border-opacity-50" placeholder="Chọn hoặc nhập tên ngân hàng..." />
+                                    <datalist id="vietnamBanks">
+                                        <option value="MB Bank (Quân Đội)"></option>
+                                        <option value="Vietcombank"></option>
+                                        <option value="Techcombank"></option>
+                                        <option value="ACB (Á Châu)"></option>
+                                        <option value="VPBank (Việt Nam Thịnh Vượng)"></option>
+                                        <option value="TPBank (Tiên Phong)"></option>
+                                        <option value="BIDV"></option>
+                                        <option value="Agribank"></option>
+                                        <option value="VietinBank"></option>
+                                        <option value="Sacombank"></option>
+                                        <option value="HDBank"></option>
+                                        <option value="OCB"></option>
+                                        <option value="SHB"></option>
+                                        <option value="VIB"></option>
+                                        <option value="SeABank"></option>
+                                        <option value="MSB (Hàng Hải)"></option>
+                                    </datalist>
+                                </div>
+                                <div class="col-md-7">
+                                    <label class="form-label text-white small">Số tài khoản ngân hàng:</label>
+                                    <input type="text" id="profileBankAccountNumber" name="bankAccountNumber" class="form-control bg-dark text-warning fw-bold border-warning border-opacity-50 font-monospace" placeholder="Ví dụ: 0912345678" />
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label text-white small">Tên chủ tài khoản (In hoa không dấu):</label>
+                                    <input type="text" id="profileBankAccountHolder" name="bankAccountHolder" class="form-control bg-dark text-white fw-bold border-warning border-opacity-50 text-uppercase" placeholder="NGUYEN VAN A" oninput="this.value = this.value.toUpperCase()" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Change Password Section (Optional) -->
+                        <div class="p-3 mb-4 rounded-4 border border-secondary border-opacity-25" style="background: rgba(255, 255, 255, 0.02);">
+                            <h6 class="text-white fw-bold mb-3 d-flex align-items-center gap-2">
+                                <i class="fas fa-key text-secondary"></i> ĐỔI MẬT KHẨU (BỎ TRỐNG NẾU KHÔNG ĐỔI)
+                            </h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label text-dim small">Mật khẩu hiện tại:</label>
+                                    <input type="password" id="profileOldPassword" name="oldPassword" class="form-control bg-dark text-white border-secondary" placeholder="Nhập để xác nhận đổi..." autocomplete="current-password" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label text-dim small">Mật khẩu mới (tối thiểu 6 ký tự):</label>
+                                    <input type="password" id="profileNewPassword" name="newPassword" class="form-control bg-dark text-white border-secondary" placeholder="Nhập mật khẩu mới..." autocomplete="new-password" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center pt-2">
+                            <button type="button" class="btn btn-outline-secondary px-4 rounded-pill" data-bs-dismiss="modal">Đóng</button>
+                            <button type="submit" class="btn btn-primary px-5 py-2 rounded-pill fw-bold text-white shadow" style="background: linear-gradient(135deg, #00c8ff, #0070f3); border: none;">
+                                <i class="fas fa-floppy-disk me-2"></i> Lưu Tất Cả Thay Đổi
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         ADMIN CREATE PRODUCER MODAL
+         ========================================== -->
+    <div class="modal fade" id="adminCreateProducerModal" tabindex="-1" aria-hidden="true" style="z-index: 1070;">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content" style="background: rgba(18, 19, 32, 0.98); backdrop-filter: blur(30px); border: 1px solid rgba(255, 19, 74, 0.7); border-radius: 24px; box-shadow: 0 0 60px rgba(255, 19, 74, 0.4);">
+                <div class="modal-header border-bottom border-secondary border-opacity-25 pb-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="badge bg-danger p-2 fs-6 rounded-circle"><i class="fas fa-user-plus"></i></span>
+                        <div>
+                            <h5 class="modal-title text-white fw-bold mb-0">CẤP TÀI KHOẢN PRODUCER MỚI VÀO HỆ THỐNG</h5>
+                            <small class="text-dim">Tạo hồ sơ nghệ sĩ, cấp quyền Studio và lưu tài khoản ngân hàng vào SQL Server</small>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="adminCreateProducerForm" onsubmit="event.preventDefault(); submitAdminCreateProducerForm(this);">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label text-white small">Nghệ Danh Producer / DJ: <span class="text-danger">*</span></label>
+                                <input type="text" name="stageName" class="form-control bg-dark text-white border-secondary" placeholder="Ví dụ: DJ Hoàng Bass..." required />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-white small">Họ và tên thật: <span class="text-danger">*</span></label>
+                                <input type="text" name="fullName" class="form-control bg-dark text-white border-secondary" placeholder="Nguyễn Văn Hoàng..." required />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-white small">Tên đăng nhập (Username): <span class="text-danger">*</span></label>
+                                <input type="text" name="username" class="form-control bg-dark text-white border-secondary" placeholder="producer_hoangbass" required />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-white small">Địa chỉ Email: <span class="text-danger">*</span></label>
+                                <input type="email" name="email" class="form-control bg-dark text-white border-secondary" placeholder="hoangbass@producer.vn" required />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-white small">Mật khẩu khởi tạo:</label>
+                                <input type="text" name="password" class="form-control bg-dark text-white border-secondary" value="123456" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-white small">Số điện thoại / Zalo:</label>
+                                <input type="text" name="phoneNumber" class="form-control bg-dark text-white border-secondary" placeholder="09xxxxxxxx" />
+                            </div>
+
+                            <!-- Bank Info -->
+                            <div class="col-12 mt-3">
+                                <div class="p-3 rounded-3 border border-warning border-opacity-50" style="background: rgba(255, 209, 102, 0.05);">
+                                    <h6 class="text-warning fw-bold mb-2 small"><i class="fas fa-building-columns me-1"></i> TÀI KHOẢN NGÂN HÀNG NHẬN THÙ LAO PHÁT HÀNH</h6>
+                                    <div class="row g-2">
+                                        <div class="col-md-4">
+                                            <input list="vietnamBanks" type="text" name="bankName" class="form-control form-control-sm bg-dark text-white border-secondary" placeholder="Tên ngân hàng (MB, VCB...)" />
+                                        </div>
+                                        <div class="col-md-4">
+                                            <input type="text" name="bankAccountNumber" class="form-control form-control-sm bg-dark text-warning border-secondary font-monospace" placeholder="Số tài khoản..." />
+                                        </div>
+                                        <div class="col-md-4">
+                                            <input type="text" name="bankAccountHolder" class="form-control form-control-sm bg-dark text-white border-secondary text-uppercase" placeholder="Tên chủ tài khoản..." oninput="this.value = this.value.toUpperCase()" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label text-white small">Tiểu sử / Giới thiệu ngắn:</label>
+                                <textarea name="bio" rows="2" class="form-control bg-dark text-white border-secondary" placeholder="Phong cách âm nhạc, kinh nghiệm làm nhạc..."></textarea>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 pt-3 border-top border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
+                            <button type="button" class="btn btn-outline-secondary px-4 rounded-pill" data-bs-dismiss="modal">Hủy bỏ</button>
+                            <button type="submit" class="btn btn-shimmer-ruby px-5 py-2 rounded-pill fw-bold">
+                                <i class="fas fa-check-circle me-1"></i> Cấp Quyền & Lưu Vào SQL Server
                             </button>
                         </div>
                     </form>

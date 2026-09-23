@@ -1,0 +1,311 @@
+@{
+    ViewData["Title"] = "Trung Tâm Quản Trị Admin - TLongMusic";
+}
+
+<div class="container-fluid px-3 px-xl-5 py-4" style="max-width: 1720px;">
+    <!-- HEADER HERO QUẢN TRỊ ADMIN -->
+    <div class="p-4 p-md-5 rounded-4 mb-4 position-relative overflow-hidden border border-danger border-opacity-50"
+         style="background: linear-gradient(135deg, rgba(255, 19, 74, 0.15) 0%, rgba(15, 16, 28, 0.95) 100%); backdrop-filter: blur(25px); box-shadow: 0 0 50px rgba(255, 19, 74, 0.25);">
+        
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center gap-3 position-relative" style="z-index: 2;">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge bg-danger text-white px-3 py-1 rounded-pill fw-bold text-uppercase" style="letter-spacing: 1px; font-size: 0.75rem;">
+                        <i class="fas fa-shield-halved me-1"></i> KHU VỰC QUẢN TRỊ TỐI CAO - SYSTEM ADMIN
+                    </span>
+                    <span class="badge bg-dark border border-secondary text-dim small">
+                        <i class="fas fa-server text-success me-1"></i> SQL Server Online
+                    </span>
+                </div>
+                <h2 class="text-white fw-bold mb-1 display-6">TRUNG TÂM QUẢN TRỊ HỆ THỐNG</h2>
+                <p class="text-dim mb-0" style="max-width: 750px;">
+                    Trang điều khiển trung tâm dành riêng cho <strong>Quản Trị Viên (Admin)</strong>: Theo dõi doanh thu VietQR toàn sàn, quản lý phân quyền Producer (thêm/khóa/xóa) và kiểm duyệt kho âm nhạc.
+                </p>
+            </div>
+
+            <div class="d-flex flex-wrap align-items-center gap-2">
+                <button class="btn btn-outline-light rounded-pill px-3 py-2 fw-bold" onclick="refreshAdminData()">
+                    <i class="fas fa-rotate me-1"></i> Làm Mới Dữ Liệu
+                </button>
+                <a href="/Profile" class="btn btn-outline-warning rounded-pill px-3 py-2 fw-bold">
+                    <i class="fas fa-building-columns me-1"></i> Đổi STK Nhận Tiền VIP
+                </a>
+                <a href="/" class="btn btn-glass-crystal rounded-pill px-3 py-2 text-white">
+                    <i class="fas fa-arrow-left me-1"></i> Về Trang Chủ
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN TABS CONTAINER -->
+    <div class="p-3 p-md-4 rounded-4 border border-secondary border-opacity-25 mb-5"
+         style="background: rgba(15, 16, 28, 0.92); backdrop-filter: blur(25px); box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);">
+
+        <ul class="nav nav-pills mb-4 gap-2 flex-wrap" id="adminDedicatedTabs" role="tablist">
+            <li class="nav-item">
+                <button class="nav-link active rounded-pill fw-bold px-4 py-2" id="adm-stats-tab" data-bs-toggle="pill" data-bs-target="#adm-stats-pane" type="button" role="tab">
+                    <i class="fas fa-chart-pie me-2"></i> 1. Thống Kê & Doanh Thu
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link rounded-pill fw-bold px-4 py-2 text-white" id="adm-producers-tab" data-bs-toggle="pill" data-bs-target="#adm-producers-pane" type="button" role="tab" style="background: rgba(255, 255, 255, 0.08);" onclick="loadAdminProducers()">
+                    <i class="fas fa-users-gear me-2"></i> 2. Quản Lý Producers
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link rounded-pill fw-bold px-4 py-2 text-white" id="adm-musics-tab" data-bs-toggle="pill" data-bs-target="#adm-musics-pane" type="button" role="tab" style="background: rgba(255, 255, 255, 0.08);" onclick="loadAdminMusics()">
+                    <i class="fas fa-music me-2"></i> 3. Kiểm Duyệt Kho Nhạc
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link rounded-pill fw-bold px-4 py-2 text-white" id="adm-settings-tab" data-bs-toggle="pill" data-bs-target="#adm-settings-pane" type="button" role="tab" style="background: rgba(255, 255, 255, 0.08);">
+                    <i class="fas fa-gear me-2"></i> 4. Cài Đặt Gói VIP & STK Admin
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="adminDedicatedTabContent">
+            <!-- TAB 1: THỐNG KÊ & DOANH THU -->
+            <div class="tab-pane fade show active" id="adm-stats-pane" role="tabpanel">
+                <div class="row g-3" id="adminStatsGrid">
+                    <div class="col-12 text-center py-5 text-dim">
+                        <i class="fas fa-spinner fa-spin fa-2x mb-2 text-danger"></i>
+                        <br />Đang tổng hợp dữ liệu thống kê từ SQL Server...
+                    </div>
+                </div>
+
+                <div class="mt-4 p-4 rounded-4 border border-secondary border-opacity-25" style="background: rgba(255, 255, 255, 0.02);">
+                    <h5 class="text-white fw-bold mb-2"><i class="fas fa-circle-info text-info me-2"></i>Ghi Chú Vận Hành Hệ Thống</h5>
+                    <ul class="text-dim small mb-0 ps-3" style="line-height: 1.8;">
+                        <li>Doanh thu được tính tự động từ các giao dịch thanh toán VietQR gói <strong>Standard VIP (99.000đ)</strong> và <strong>Premium VIP (199.000đ)</strong> đã xác nhận thành công.</li>
+                        <li>Toàn bộ tiền đăng ký gói VIP của khách hàng sẽ được chuyển trực tiếp vào <strong>Số tài khoản ngân hàng của Admin</strong>.</li>
+                        <li>Quyền Admin có thể phân quyền hoặc thu hồi quyền Producer bất kỳ lúc nào tại Tab <strong>2. Quản Lý Producers</strong>.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- TAB 2: QUẢN LÝ PRODUCERS -->
+            <div class="tab-pane fade" id="adm-producers-pane" role="tabpanel">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                    <div>
+                        <h5 class="text-white fw-bold mb-1"><i class="fas fa-headphones text-warning me-2"></i>Danh Sách Nhà Sản Xuất Âm Nhạc (Producers)</h5>
+                        <p class="text-dim small mb-0">Producer được quyền đăng tải bản thu và quản lý kho nhạc riêng của mình.</p>
+                    </div>
+                    <button class="btn btn-shimmer-ruby px-3 py-2 fw-bold" onclick="openAdminCreateProducerModal()">
+                        <i class="fas fa-user-plus me-2"></i> + Cấp Tài Khoản Producer Mới
+                    </button>
+                </div>
+
+                <div class="table-responsive rounded-4 border border-secondary border-opacity-25" id="adminProducersTableContainer">
+                    <div class="p-5 text-center text-dim">Đang tải danh sách Producer...</div>
+                </div>
+            </div>
+
+            <!-- TAB 3: KIỂM DUYỆT TOÀN BỘ KHO NHẠC -->
+            <div class="tab-pane fade" id="adm-musics-pane" role="tabpanel">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                    <div>
+                        <h5 class="text-white fw-bold mb-1"><i class="fas fa-sliders text-danger me-2"></i>Kiểm Duyệt Kho Âm Nhạc Toàn Sàn</h5>
+                        <p class="text-dim small mb-0">Quản lý bài hát của tất cả Producers: Có thể ẩn bài hoặc xóa vĩnh viễn khỏi SQL Server.</p>
+                    </div>
+                    <span class="badge bg-secondary text-light px-3 py-2 rounded-pill">
+                        <i class="fas fa-database me-1"></i> Bảng dữ liệu SQL Musics
+                    </span>
+                </div>
+
+                <div class="table-responsive rounded-4 border border-secondary border-opacity-25" id="adminMusicsTableContainer">
+                    <div class="p-5 text-center text-dim">Đang tải toàn bộ kho bài hát...</div>
+                </div>
+            </div>
+
+            <!-- TAB 4: CÀI ĐẶT GÓI VIP & STK ADMIN -->
+            <div class="tab-pane fade" id="adm-settings-pane" role="tabpanel">
+                <div class="row g-4">
+                    <!-- THÔNG TIN TÀI KHOẢN NHẬN TIỀN ADMIN -->
+                    <div class="col-lg-6">
+                        <div class="p-4 rounded-4 border border-warning border-opacity-50 h-100" style="background: rgba(255, 209, 102, 0.04);">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="text-white fw-bold mb-0">
+                                    <i class="fas fa-building-columns text-warning me-2"></i>Tài Khoản Ngân Hàng Nhận Tiền VIP (Admin)
+                                </h5>
+                                <span class="badge bg-warning text-dark fw-bold">VIETQR RECEIVER</span>
+                            </div>
+                            <p class="text-dim small mb-4">
+                                Đây là tài khoản ngân hàng và mã QR hiển thị cho tất cả khách hàng khi họ bấm nâng cấp gói VIP trên website.
+                            </p>
+
+                            <div class="p-3 rounded-3 bg-dark border border-secondary mb-4 small font-monospace">
+                                <div class="d-flex justify-content-between py-2 border-bottom border-secondary border-opacity-25">
+                                    <span class="text-dim">Ngân hàng thụ hưởng:</span>
+                                    <strong class="text-white" id="adminDisplayBankName">Đang tải...</strong>
+                                </div>
+                                <div class="d-flex justify-content-between py-2 border-bottom border-secondary border-opacity-25">
+                                    <span class="text-dim">Số tài khoản:</span>
+                                    <strong class="text-warning fs-6" id="adminDisplayBankAccount">Đang tải...</strong>
+                                </div>
+                                <div class="d-flex justify-content-between py-2">
+                                    <span class="text-dim">Chủ tài khoản:</span>
+                                    <strong class="text-white text-uppercase" id="adminDisplayAccountHolder">Đang tải...</strong>
+                                </div>
+                            </div>
+
+                            <a href="/Profile" class="btn btn-outline-warning w-100 py-2 fw-bold">
+                                <i class="fas fa-pen-to-square me-2"></i> Cập Nhật / Đổi Số Tài Khoản Ngân Hàng Mới
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- THÔNG TIN CÁC GÓI CƯỚC VIP -->
+                    <div class="col-lg-6">
+                        <div class="p-4 rounded-4 border border-secondary border-opacity-50 h-100" style="background: rgba(255, 255, 255, 0.02);">
+                            <h5 class="text-white fw-bold mb-3">
+                                <i class="fas fa-gem text-danger me-2"></i>Cấu Hình Các Gói Hội Viên
+                            </h5>
+                            
+                            <div class="p-3 rounded-3 bg-dark border border-danger border-opacity-50 mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <strong class="text-danger"><i class="fas fa-certificate me-1"></i> STANDARD VIP</strong>
+                                    <span class="text-white font-monospace fw-bold">99.000 VNĐ / 30 ngày</span>
+                                </div>
+                                <small class="text-dim d-block">Quyền tải kho Track Nhóm & Nonstop Nhóm chuẩn MP3 320kbps. Demo 30s kho Track Slot.</small>
+                            </div>
+
+                            <div class="p-3 rounded-3 bg-dark border border-warning border-opacity-50">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <strong class="text-warning"><i class="fas fa-crown me-1"></i> PREMIUM VIP ĐỘC QUYỀN</strong>
+                                    <span class="text-white font-monospace fw-bold">199.000 VNĐ / 30 ngày</span>
+                                </div>
+                                <small class="text-dim d-block">Đặc quyền cao nhất: Tải Full WAV Master 24-Bit và FLAC Lossless toàn bộ kho Slot, Nhóm và Lọt.</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL CẤP TÀI KHOẢN PRODUCER MỚI -->
+<div class="modal fade" id="adminCreateProducerModal" tabindex="-1" aria-hidden="true" style="z-index: 1070;">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content" style="background: rgba(18, 19, 32, 0.98); backdrop-filter: blur(30px); border: 1px solid rgba(255, 19, 74, 0.7); border-radius: 24px; box-shadow: 0 0 60px rgba(255, 19, 74, 0.4);">
+            <div class="modal-header border-bottom border-secondary border-opacity-25 pb-3">
+                <div class="d-flex align-items-center gap-3">
+                    <span class="badge bg-danger p-2 fs-6 rounded-circle"><i class="fas fa-user-plus"></i></span>
+                    <div>
+                        <h5 class="modal-title text-white fw-bold mb-0">CẤP TÀI KHOẢN PRODUCER MỚI VÀO HỆ THỐNG</h5>
+                        <small class="text-dim">Tạo tài khoản đăng nhập và cấp quyền Nhà Sản Xuất Âm Nhạc chính thức</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="adminCreateProducerForm" onsubmit="event.preventDefault(); submitAdminCreateProducerForm(this);">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-white small">Tên đăng nhập (Username): <span class="text-danger">*</span></label>
+                            <input type="text" name="username" class="form-control bg-dark text-white border-secondary" placeholder="producer_ten" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-white small">Mật khẩu khởi tạo: <span class="text-danger">*</span></label>
+                            <input type="password" name="password" class="form-control bg-dark text-white border-secondary" placeholder="Tối thiểu 6 ký tự" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-white small">Nghệ danh DJ / Producer: <span class="text-danger">*</span></label>
+                            <input type="text" name="stageName" class="form-control bg-dark text-white border-secondary" placeholder="Ví dụ: DJ Nam Black" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-white small">Địa chỉ Email: <span class="text-danger">*</span></label>
+                            <input type="email" name="email" class="form-control bg-dark text-white border-secondary" placeholder="producer@gmail.com" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-white small">Họ và tên thật:</label>
+                            <input type="text" name="fullName" class="form-control bg-dark text-white border-secondary" placeholder="Nguyễn Văn A" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-white small">Số điện thoại / Zalo:</label>
+                            <input type="text" name="phoneNumber" class="form-control bg-dark text-white border-secondary" placeholder="09xxxxxxxx" />
+                        </div>
+
+                        <div class="col-12"><hr class="border-secondary border-opacity-50 my-1" /></div>
+
+                        <div class="col-md-4">
+                            <label class="form-label text-white small">Tên Ngân hàng nhận tiền:</label>
+                            <input type="text" name="bankName" class="form-control bg-dark text-white border-secondary" placeholder="MB Bank, Techcombank..." />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-white small">Số tài khoản ngân hàng:</label>
+                            <input type="text" name="bankAccountNumber" class="form-control bg-dark text-white border-secondary font-monospace" placeholder="0123456789" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label text-white small">Tên chủ tài khoản (In hoa):</label>
+                            <input type="text" name="bankAccountHolder" class="form-control bg-dark text-white border-secondary text-uppercase" placeholder="NGUYEN VAN A" />
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label text-white small">Tiểu sử / Giới thiệu ngắn:</label>
+                            <textarea name="bio" rows="2" class="form-control bg-dark text-white border-secondary" placeholder="Giới thiệu về phong cách âm nhạc của Producer..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-top border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
+                        <button type="button" class="btn btn-outline-secondary px-4 rounded-pill" data-bs-dismiss="modal">Hủy bỏ</button>
+                        <button type="submit" class="btn btn-shimmer-ruby px-5 py-2 rounded-pill fw-bold">
+                            <i class="fas fa-check-circle me-1"></i> Tạo Producer Ngay
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 1. Phân quyền chặt chẽ: Kiểm tra nếu không phải Admin thì chặn ngay
+        setTimeout(function() {
+            const user = window.TLongPlayer ? window.TLongPlayer.currentUser : null;
+            if (!user) {
+                // Kiểm tra từ server
+                fetch('/Auth/Me').then(r => r.json()).then(data => {
+                    if (!data.success || (data.user?.primaryRole !== 'Admin' && data.user?.role !== 'Admin')) {
+                        alert("⚠️ CẢNH BÁO BẢO MẬT:\nTrang này chỉ dành riêng cho Quản Trị Viên (Admin)!\nBạn sẽ được chuyển hướng về trang chủ.");
+                        window.location.href = '/';
+                    } else {
+                        initAdminPage(data.user);
+                    }
+                }).catch(() => {
+                    window.location.href = '/';
+                });
+            } else if (user.primaryRole !== 'Admin' && user.role !== 'Admin') {
+                alert("⚠️ CẢNH BÁO BẢO MẬT:\nTrang này chỉ dành riêng cho Quản Trị Viên (Admin)!\nBạn sẽ được chuyển hướng về trang chủ.");
+                window.location.href = '/';
+            } else {
+                initAdminPage(user);
+            }
+        }, 150);
+    });
+
+    function initAdminPage(adminUser) {
+        // Nạp thông tin ngân hàng hiển thị ở Tab 4
+        if (adminUser) {
+            document.getElementById('adminDisplayBankName').textContent = adminUser.bankName || 'MB Bank (Quân Đội)';
+            document.getElementById('adminDisplayBankAccount').textContent = adminUser.bankAccountNumber || '0988.888.888';
+            document.getElementById('adminDisplayAccountHolder').textContent = adminUser.bankAccountHolder || adminUser.fullName || 'NGUYEN THANH LONG';
+        }
+
+        // Tự động load dữ liệu
+        loadAdminStats();
+        loadAdminProducers();
+        loadAdminMusics();
+    }
+
+    function refreshAdminData() {
+        showToastNotification("🔄 Đang làm mới toàn bộ dữ liệu quản trị...");
+        loadAdminStats();
+        loadAdminProducers();
+        loadAdminMusics();
+    }
+</script>
+}

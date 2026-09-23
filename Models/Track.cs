@@ -22,6 +22,7 @@ namespace TLongMusic.Models
         public string Artist { get; set; } = string.Empty;
         public string Genre { get; set; } = "Vinahouse";
         public AudioType Type { get; set; }
+        public string CategoryCode { get; set; } = "TrackLot";
         public int Bpm { get; set; }
         public string MusicalKey { get; set; } = "8A"; // Camelot Key
         public int DurationSeconds { get; set; }

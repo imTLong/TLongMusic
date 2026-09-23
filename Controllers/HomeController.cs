@@ -105,6 +105,7 @@ public class HomeController : Controller
             Artist = m.Artist,
             Genre = m.Genre,
             Type = audioType,
+            CategoryCode = m.CategoryCode ?? "TrackLot",
             Bpm = m.Bpm,
             MusicalKey = m.MusicalKey,
             DurationSeconds = m.DurationSeconds,
@@ -163,6 +164,28 @@ public class HomeController : Controller
             new() { Name = "STANDARD VIP", TierCode = "standard", Price = 99000, BillingPeriod = "/ 30 ngày", BadgeText = "PHỔ BIẾN NHẤT", IsPopular = true, Features = new() { "Điểm nhấn ĐỎ Ruby", "Tải Track Nhóm MP3 320k", "Demo 30s Track Slot" }, ButtonText = "Nâng Cấp Standard" },
             new() { Name = "PREMIUM VIP ĐỘC QUYỀN", TierCode = "premium", Price = 199000, BillingPeriod = "/ 30 ngày", BadgeText = "DÀNH CHO PRO DJ", IsPopular = false, Features = new() { "👑 Điểm nhấn VÀNG Hoàng Gia", "Tải Full WAV 24-Bit Track Slot", "Toàn quyền kho Nhóm & Lọt" }, ButtonText = "Nâng Cấp Premium" }
         };
+    }
+
+    [HttpGet("/Profile")]
+    [HttpGet("/Account/Profile")]
+    public IActionResult Profile()
+    {
+        return View();
+    }
+
+    [HttpGet("/Admin")]
+    [HttpGet("/Admin/Index")]
+    public IActionResult AdminPortal()
+    {
+        return View("~/Views/Admin/Index.cshtml");
+    }
+
+    [HttpGet("/Producer/Upload")]
+    [HttpGet("/Upload")]
+    [HttpGet("/Producer/Index")]
+    public IActionResult ProducerUpload()
+    {
+        return View("~/Views/Producer/Upload.cshtml");
     }
 
     public IActionResult Privacy()
