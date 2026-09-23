@@ -1,56 +1,56 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "D:\\Code\\WEB NGHE NH\u1EA0C\\",
+  "WorkspaceRootPath": "C:\\Users\\Nguyen Thanh Long\\Documents\\GitHub\\TLongMusic\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{BB8D281E-9110-219B-1B18-C334E4B86C36}|TLongMusic.csproj|d:\\code\\web nghe nh\u1EA1c\\controllers\\producercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{BB8D281E-9110-219B-1B18-C334E4B86C36}|TLongMusic.csproj|c:\\users\\nguyen thanh long\\documents\\github\\tlongmusic\\controllers\\producercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{BB8D281E-9110-219B-1B18-C334E4B86C36}|TLongMusic.csproj|solutionrelative:controllers\\producercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BB8D281E-9110-219B-1B18-C334E4B86C36}|TLongMusic.csproj|d:\\code\\web nghe nh\u1EA1c\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "AbsoluteMoniker": "D:0:0:{BB8D281E-9110-219B-1B18-C334E4B86C36}|TLongMusic.csproj|c:\\users\\nguyen thanh long\\documents\\github\\tlongmusic\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
       "RelativeMoniker": "D:0:0:{BB8D281E-9110-219B-1B18-C334E4B86C36}|TLongMusic.csproj|solutionrelative:appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BB8D281E-9110-219B-1B18-C334E4B86C36}|TLongMusic.csproj|d:\\code\\web nghe nh\u1EA1c\\wwwroot\\css\\site.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
+      "AbsoluteMoniker": "D:0:0:{BB8D281E-9110-219B-1B18-C334E4B86C36}|TLongMusic.csproj|c:\\users\\nguyen thanh long\\documents\\github\\tlongmusic\\wwwroot\\css\\site.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
       "RelativeMoniker": "D:0:0:{BB8D281E-9110-219B-1B18-C334E4B86C36}|TLongMusic.csproj|solutionrelative:wwwroot\\css\\site.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BB8D281E-9110-219B-1B18-C334E4B86C36}|TLongMusic.csproj|d:\\code\\web nghe nh\u1EA1c\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "AbsoluteMoniker": "D:0:0:{BB8D281E-9110-219B-1B18-C334E4B86C36}|TLongMusic.csproj|c:\\users\\nguyen thanh long\\documents\\github\\tlongmusic\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{BB8D281E-9110-219B-1B18-C334E4B86C36}|TLongMusic.csproj|solutionrelative:views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BB8D281E-9110-219B-1B18-C334E4B86C36}|TLongMusic.csproj|d:\\code\\web nghe nh\u1EA1c\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "AbsoluteMoniker": "D:0:0:{BB8D281E-9110-219B-1B18-C334E4B86C36}|TLongMusic.csproj|c:\\users\\nguyen thanh long\\documents\\github\\tlongmusic\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{BB8D281E-9110-219B-1B18-C334E4B86C36}|TLongMusic.csproj|solutionrelative:views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BB8D281E-9110-219B-1B18-C334E4B86C36}|TLongMusic.csproj|d:\\code\\web nghe nh\u1EA1c\\models\\dto\\apidtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{BB8D281E-9110-219B-1B18-C334E4B86C36}|TLongMusic.csproj|c:\\users\\nguyen thanh long\\documents\\github\\tlongmusic\\models\\dto\\apidtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{BB8D281E-9110-219B-1B18-C334E4B86C36}|TLongMusic.csproj|solutionrelative:models\\dto\\apidtos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BB8D281E-9110-219B-1B18-C334E4B86C36}|TLongMusic.csproj|d:\\code\\web nghe nh\u1EA1c\\models\\track.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{BB8D281E-9110-219B-1B18-C334E4B86C36}|TLongMusic.csproj|c:\\users\\nguyen thanh long\\documents\\github\\tlongmusic\\models\\track.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{BB8D281E-9110-219B-1B18-C334E4B86C36}|TLongMusic.csproj|solutionrelative:models\\track.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BB8D281E-9110-219B-1B18-C334E4B86C36}|TLongMusic.csproj|d:\\code\\web nghe nh\u1EA1c\\models\\entities\\dbentities.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{BB8D281E-9110-219B-1B18-C334E4B86C36}|TLongMusic.csproj|c:\\users\\nguyen thanh long\\documents\\github\\tlongmusic\\models\\entities\\dbentities.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{BB8D281E-9110-219B-1B18-C334E4B86C36}|TLongMusic.csproj|solutionrelative:models\\entities\\dbentities.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BB8D281E-9110-219B-1B18-C334E4B86C36}|TLongMusic.csproj|d:\\code\\web nghe nh\u1EA1c\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{BB8D281E-9110-219B-1B18-C334E4B86C36}|TLongMusic.csproj|c:\\users\\nguyen thanh long\\documents\\github\\tlongmusic\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{BB8D281E-9110-219B-1B18-C334E4B86C36}|TLongMusic.csproj|solutionrelative:controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Nguyen Thanh Long\\AppData\\Local\\Temp\\CopilotBaseline\\Deleted\\-847143620\\SoundCloudDownloader.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BB8D281E-9110-219B-1B18-C334E4B86C36}|TLongMusic.csproj|d:\\code\\web nghe nh\u1EA1c\\wwwroot\\js\\player.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "AbsoluteMoniker": "D:0:0:{BB8D281E-9110-219B-1B18-C334E4B86C36}|TLongMusic.csproj|c:\\users\\nguyen thanh long\\documents\\github\\tlongmusic\\wwwroot\\js\\player.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
       "RelativeMoniker": "D:0:0:{BB8D281E-9110-219B-1B18-C334E4B86C36}|TLongMusic.csproj|solutionrelative:wwwroot\\js\\player.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BB8D281E-9110-219B-1B18-C334E4B86C36}|TLongMusic.csproj|d:\\code\\web nghe nh\u1EA1c\\controllers\\admincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{BB8D281E-9110-219B-1B18-C334E4B86C36}|TLongMusic.csproj|c:\\users\\nguyen thanh long\\documents\\github\\tlongmusic\\controllers\\admincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{BB8D281E-9110-219B-1B18-C334E4B86C36}|TLongMusic.csproj|solutionrelative:controllers\\admincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BB8D281E-9110-219B-1B18-C334E4B86C36}|TLongMusic.csproj|d:\\code\\web nghe nh\u1EA1c\\data\\tlongmusicdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{BB8D281E-9110-219B-1B18-C334E4B86C36}|TLongMusic.csproj|c:\\users\\nguyen thanh long\\documents\\github\\tlongmusic\\data\\tlongmusicdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{BB8D281E-9110-219B-1B18-C334E4B86C36}|TLongMusic.csproj|solutionrelative:data\\tlongmusicdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
@@ -71,61 +71,57 @@
               "$type": "Document",
               "DocumentIndex": 12,
               "Title": "TLongMusicDbContext.cs",
-              "DocumentMoniker": "D:\\Code\\WEB NGHE NH\u1EA0C\\Data\\TLongMusicDbContext.cs",
+              "DocumentMoniker": "C:\\Users\\Nguyen Thanh Long\\Documents\\GitHub\\TLongMusic\\Data\\TLongMusicDbContext.cs",
               "RelativeDocumentMoniker": "Data\\TLongMusicDbContext.cs",
-              "ToolTip": "D:\\Code\\WEB NGHE NH\u1EA0C\\Data\\TLongMusicDbContext.cs",
+              "ToolTip": "C:\\Users\\Nguyen Thanh Long\\Documents\\GitHub\\TLongMusic\\Data\\TLongMusicDbContext.cs",
               "RelativeToolTip": "Data\\TLongMusicDbContext.cs",
               "ViewState": "AgIAAB0AAAAAAAAAAAAxwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-09-23T18:17:50.042Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-09-23T18:17:50.042Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 7,
               "Title": "DbEntities.cs",
-              "DocumentMoniker": "D:\\Code\\WEB NGHE NH\u1EA0C\\Models\\Entities\\DbEntities.cs",
+              "DocumentMoniker": "C:\\Users\\Nguyen Thanh Long\\Documents\\GitHub\\TLongMusic\\Models\\Entities\\DbEntities.cs",
               "RelativeDocumentMoniker": "Models\\Entities\\DbEntities.cs",
-              "ToolTip": "D:\\Code\\WEB NGHE NH\u1EA0C\\Models\\Entities\\DbEntities.cs",
+              "ToolTip": "C:\\Users\\Nguyen Thanh Long\\Documents\\GitHub\\TLongMusic\\Models\\Entities\\DbEntities.cs",
               "RelativeToolTip": "Models\\Entities\\DbEntities.cs",
               "ViewState": "AgIAAHIAAAAAAAAAAIBJwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-09-23T17:51:17.897Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-09-23T17:51:17.897Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 6,
               "Title": "Track.cs",
-              "DocumentMoniker": "D:\\Code\\WEB NGHE NH\u1EA0C\\Models\\Track.cs",
+              "DocumentMoniker": "C:\\Users\\Nguyen Thanh Long\\Documents\\GitHub\\TLongMusic\\Models\\Track.cs",
               "RelativeDocumentMoniker": "Models\\Track.cs",
-              "ToolTip": "D:\\Code\\WEB NGHE NH\u1EA0C\\Models\\Track.cs",
+              "ToolTip": "C:\\Users\\Nguyen Thanh Long\\Documents\\GitHub\\TLongMusic\\Models\\Track.cs",
               "RelativeToolTip": "Models\\Track.cs",
               "ViewState": "AgIAABwAAAAAAAAAAABYwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-09-23T17:51:06.793Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-09-23T17:51:06.793Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 5,
               "Title": "ApiDtos.cs",
-              "DocumentMoniker": "D:\\Code\\WEB NGHE NH\u1EA0C\\Models\\Dto\\ApiDtos.cs",
+              "DocumentMoniker": "C:\\Users\\Nguyen Thanh Long\\Documents\\GitHub\\TLongMusic\\Models\\Dto\\ApiDtos.cs",
               "RelativeDocumentMoniker": "Models\\Dto\\ApiDtos.cs",
-              "ToolTip": "D:\\Code\\WEB NGHE NH\u1EA0C\\Models\\Dto\\ApiDtos.cs",
+              "ToolTip": "C:\\Users\\Nguyen Thanh Long\\Documents\\GitHub\\TLongMusic\\Models\\Dto\\ApiDtos.cs",
               "RelativeToolTip": "Models\\Dto\\ApiDtos.cs",
               "ViewState": "AgIAAGQAAAAAAAAAAABQwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-09-23T17:51:02.428Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-09-23T17:51:02.428Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "ProducerController.cs",
-              "DocumentMoniker": "D:\\Code\\WEB NGHE NH\u1EA0C\\Controllers\\ProducerController.cs",
+              "DocumentMoniker": "C:\\Users\\Nguyen Thanh Long\\Documents\\GitHub\\TLongMusic\\Controllers\\ProducerController.cs",
               "RelativeDocumentMoniker": "Controllers\\ProducerController.cs",
-              "ToolTip": "D:\\Code\\WEB NGHE NH\u1EA0C\\Controllers\\ProducerController.cs",
+              "ToolTip": "C:\\Users\\Nguyen Thanh Long\\Documents\\GitHub\\TLongMusic\\Controllers\\ProducerController.cs",
               "RelativeToolTip": "Controllers\\ProducerController.cs",
               "ViewState": "AgIAAB4BAAAAAAAAAAAowIMBAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -136,72 +132,69 @@
               "$type": "Document",
               "DocumentIndex": 11,
               "Title": "AdminController.cs",
-              "DocumentMoniker": "D:\\Code\\WEB NGHE NH\u1EA0C\\Controllers\\AdminController.cs",
+              "DocumentMoniker": "C:\\Users\\Nguyen Thanh Long\\Documents\\GitHub\\TLongMusic\\Controllers\\AdminController.cs",
               "RelativeDocumentMoniker": "Controllers\\AdminController.cs",
-              "ToolTip": "D:\\Code\\WEB NGHE NH\u1EA0C\\Controllers\\AdminController.cs",
+              "ToolTip": "C:\\Users\\Nguyen Thanh Long\\Documents\\GitHub\\TLongMusic\\Controllers\\AdminController.cs",
               "RelativeToolTip": "Controllers\\AdminController.cs",
               "ViewState": "AgIAAKEAAAAAAAAAAAAxwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-09-23T18:09:10.877Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-09-23T18:09:10.877Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 10,
               "Title": "player.js",
-              "DocumentMoniker": "D:\\Code\\WEB NGHE NH\u1EA0C\\wwwroot\\js\\player.js",
+              "DocumentMoniker": "C:\\Users\\Nguyen Thanh Long\\Documents\\GitHub\\TLongMusic\\wwwroot\\js\\player.js",
               "RelativeDocumentMoniker": "wwwroot\\js\\player.js",
-              "ToolTip": "D:\\Code\\WEB NGHE NH\u1EA0C\\wwwroot\\js\\player.js",
+              "ToolTip": "C:\\Users\\Nguyen Thanh Long\\Documents\\GitHub\\TLongMusic\\wwwroot\\js\\player.js",
               "RelativeToolTip": "wwwroot\\js\\player.js",
               "ViewState": "AgIAACIAAAAAAAAAAIBZwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2026-09-23T17:59:13.543Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-09-23T17:59:13.543Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 8,
               "Title": "HomeController.cs",
-              "DocumentMoniker": "D:\\Code\\WEB NGHE NH\u1EA0C\\Controllers\\HomeController.cs",
+              "DocumentMoniker": "C:\\Users\\Nguyen Thanh Long\\Documents\\GitHub\\TLongMusic\\Controllers\\HomeController.cs",
               "RelativeDocumentMoniker": "Controllers\\HomeController.cs",
-              "ToolTip": "D:\\Code\\WEB NGHE NH\u1EA0C\\Controllers\\HomeController.cs",
+              "ToolTip": "C:\\Users\\Nguyen Thanh Long\\Documents\\GitHub\\TLongMusic\\Controllers\\HomeController.cs",
               "RelativeToolTip": "Controllers\\HomeController.cs",
               "ViewState": "AgIAAHEAAAAAAAAAAIBJwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-09-23T17:51:24.533Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-09-23T17:51:24.533Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 9,
               "Title": "SoundCloudDownloader.cs",
               "DocumentMoniker": "C:\\Users\\Nguyen Thanh Long\\AppData\\Local\\Temp\\CopilotBaseline\\Deleted\\-847143620\\SoundCloudDownloader.cs",
+              "RelativeDocumentMoniker": "..\\..\\..\\AppData\\Local\\Temp\\CopilotBaseline\\Deleted\\-847143620\\SoundCloudDownloader.cs",
               "ToolTip": "C:\\Users\\Nguyen Thanh Long\\AppData\\Local\\Temp\\CopilotBaseline\\Deleted\\-847143620\\SoundCloudDownloader.cs",
+              "RelativeToolTip": "..\\..\\..\\AppData\\Local\\Temp\\CopilotBaseline\\Deleted\\-847143620\\SoundCloudDownloader.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-09-23T17:52:20.153Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-09-23T17:52:20.153Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
               "Title": "appsettings.json",
-              "DocumentMoniker": "D:\\Code\\WEB NGHE NH\u1EA0C\\appsettings.json",
+              "DocumentMoniker": "C:\\Users\\Nguyen Thanh Long\\Documents\\GitHub\\TLongMusic\\appsettings.json",
               "RelativeDocumentMoniker": "appsettings.json",
-              "ToolTip": "D:\\Code\\WEB NGHE NH\u1EA0C\\appsettings.json",
+              "ToolTip": "C:\\Users\\Nguyen Thanh Long\\Documents\\GitHub\\TLongMusic\\appsettings.json",
               "RelativeToolTip": "appsettings.json",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAACFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2026-09-23T10:50:05.032Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-09-23T10:50:05.032Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 2,
               "Title": "site.css",
-              "DocumentMoniker": "D:\\Code\\WEB NGHE NH\u1EA0C\\wwwroot\\css\\site.css",
+              "DocumentMoniker": "C:\\Users\\Nguyen Thanh Long\\Documents\\GitHub\\TLongMusic\\wwwroot\\css\\site.css",
               "RelativeDocumentMoniker": "wwwroot\\css\\site.css",
-              "ToolTip": "D:\\Code\\WEB NGHE NH\u1EA0C\\wwwroot\\css\\site.css",
+              "ToolTip": "C:\\Users\\Nguyen Thanh Long\\Documents\\GitHub\\TLongMusic\\wwwroot\\css\\site.css",
               "RelativeToolTip": "wwwroot\\css\\site.css",
               "ViewState": "AgIAAEAAAAAAAAAAAAAuwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
@@ -211,9 +204,9 @@
               "$type": "Document",
               "DocumentIndex": 3,
               "Title": "Index.cshtml",
-              "DocumentMoniker": "D:\\Code\\WEB NGHE NH\u1EA0C\\Views\\Home\\Index.cshtml",
+              "DocumentMoniker": "C:\\Users\\Nguyen Thanh Long\\Documents\\GitHub\\TLongMusic\\Views\\Home\\Index.cshtml",
               "RelativeDocumentMoniker": "Views\\Home\\Index.cshtml",
-              "ToolTip": "D:\\Code\\WEB NGHE NH\u1EA0C\\Views\\Home\\Index.cshtml",
+              "ToolTip": "C:\\Users\\Nguyen Thanh Long\\Documents\\GitHub\\TLongMusic\\Views\\Home\\Index.cshtml",
               "RelativeToolTip": "Views\\Home\\Index.cshtml",
               "ViewState": "AgIAAAEAAAAAAAAAAAAAAMoBAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
@@ -223,14 +216,13 @@
               "$type": "Document",
               "DocumentIndex": 4,
               "Title": "_Layout.cshtml",
-              "DocumentMoniker": "D:\\Code\\WEB NGHE NH\u1EA0C\\Views\\Shared\\_Layout.cshtml",
+              "DocumentMoniker": "C:\\Users\\Nguyen Thanh Long\\Documents\\GitHub\\TLongMusic\\Views\\Shared\\_Layout.cshtml",
               "RelativeDocumentMoniker": "Views\\Shared\\_Layout.cshtml",
-              "ToolTip": "D:\\Code\\WEB NGHE NH\u1EA0C\\Views\\Shared\\_Layout.cshtml",
+              "ToolTip": "C:\\Users\\Nguyen Thanh Long\\Documents\\GitHub\\TLongMusic\\Views\\Shared\\_Layout.cshtml",
               "RelativeToolTip": "Views\\Shared\\_Layout.cshtml",
               "ViewState": "AgIAAI0BAAAAAAAAAIBZwKkCAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2026-09-23T10:10:42.892Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-09-23T10:10:42.892Z"
             }
           ]
         }
