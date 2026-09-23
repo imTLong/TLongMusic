@@ -1,0 +1,1007 @@
+/* ==========================================================================
+   TLongMusic - Ruby Crystal Glass & Shimmering Aurora Theme (PRO POLISHED)
+   ========================================================================== */
+
+:root {
+    --bg-deep: #07070b;
+    --bg-surface: rgba(14, 15, 24, 0.75);
+    --bg-card: rgba(20, 22, 34, 0.65);
+    --bg-card-hover: rgba(30, 32, 48, 0.85);
+    
+    --border-crystal: rgba(255, 255, 255, 0.12);
+    --border-crystal-hover: rgba(255, 30, 80, 0.6);
+    --border-ruby: rgba(255, 19, 74, 0.45);
+    
+    --ruby-primary: #ff134a;
+    --ruby-glow: rgba(255, 19, 74, 0.5);
+    --ruby-deep: #b30029;
+    
+    --gold-crystal: #ffd166;
+    --gold-glow: rgba(255, 209, 102, 0.45);
+    --amethyst: #a855f7;
+    --cyan-crystal: #06b6d4;
+    
+    --text-pure: #ffffff;
+    --text-silver: #cbd5e1;
+    --text-dim: #94a3b8;
+    
+    --font-heading: 'Plus Jakarta Sans', -apple-system, sans-serif;
+    --font-mono: 'Space Mono', monospace;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg-deep);
+    color: var(--text-pure);
+    font-family: var(--font-heading);
+    overflow-x: hidden;
+    padding-bottom: 72px;
+    min-height: 100vh;
+    position: relative;
+}
+
+/* Modal Stacking & Backdrop Fix (Chống cứng đơ màn hình) */
+.modal {
+    z-index: 1060 !important;
+}
+.modal-backdrop {
+    z-index: 1050 !important;
+}
+body:not(.modal-open) .modal-backdrop {
+    display: none !important;
+}
+
+/* ==========================================
+   MẶT SAU: CỰC QUANG (AURORA) & TINH THỂ SAO
+   ========================================== */
+.shimmer-bg-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+    background: radial-gradient(circle at 50% 0%, #180914 0%, #07070b 65%);
+}
+
+.aurora-glow {
+    position: absolute;
+    filter: blur(95px);
+    opacity: 0.38;
+    pointer-events: none;
+    border-radius: 50%;
+    animation: floatAurora 16s infinite ease-in-out alternate;
+}
+
+.aurora-1 {
+    width: 700px;
+    height: 700px;
+    background: radial-gradient(circle, rgba(255, 19, 74, 0.65) 0%, rgba(168, 85, 247, 0.45) 50%, transparent 70%);
+    top: -150px;
+    left: -120px;
+    animation-duration: 14s;
+}
+
+.aurora-2 {
+    width: 650px;
+    height: 650px;
+    background: radial-gradient(circle, rgba(255, 209, 102, 0.45) 0%, rgba(255, 19, 74, 0.55) 45%, transparent 70%);
+    bottom: -100px;
+    right: -100px;
+    animation-duration: 18s;
+}
+
+.aurora-3 {
+    width: 550px;
+    height: 550px;
+    background: radial-gradient(circle, rgba(6, 182, 212, 0.4) 0%, rgba(168, 85, 247, 0.45) 50%, transparent 70%);
+    top: 40%;
+    left: 35%;
+    animation-duration: 20s;
+}
+
+@keyframes floatAurora {
+    0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+    50% { transform: translate(80px, 60px) scale(1.15) rotate(15deg); }
+    100% { transform: translate(-60px, 90px) scale(0.95) rotate(-10deg); }
+}
+
+#stardustCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+/* ==========================================
+   NAVIGATION: KÍNH PHA LÊ TRONG SUỐT (CRYSTAL GLASS)
+   ========================================== */
+.tlong-navbar {
+    background: rgba(10, 11, 18, 0.85);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.6), 0 1px 15px rgba(255, 19, 74, 0.15);
+    padding: 10px 0;
+    position: relative;
+    z-index: 100;
+}
+
+.tlong-logo-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    white-space: nowrap !important;
+    flex-shrink: 0;
+}
+
+.tlong-logo-container {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.tlong-logo-container::before {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, #ff134a, #ffd166, #a855f7, #06b6d4, #ff134a);
+    animation: rotateGlowRing 4s linear infinite;
+    filter: blur(3px);
+    opacity: 0.9;
+}
+
+@keyframes rotateGlowRing {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.tlong-logo-img {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    position: relative;
+    z-index: 2;
+    object-fit: cover;
+    border: 2px solid rgba(255, 255, 255, 0.85);
+    box-shadow: 0 0 14px rgba(255, 19, 74, 0.7);
+    flex-shrink: 0;
+}
+
+.tlong-brand-title {
+    font-weight: 800;
+    font-size: 1.35rem;
+    letter-spacing: 1.2px;
+    color: #fff;
+    margin: 0;
+    white-space: nowrap !important;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.tlong-brand-title span {
+    background: linear-gradient(135deg, #ff134a 0%, #ffd166 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 12px rgba(255, 19, 74, 0.6));
+}
+
+.tlong-nav-link {
+    color: var(--text-silver) !important;
+    font-weight: 600;
+    font-size: 0.88rem;
+    padding: 6px 11px !important;
+    border-radius: 20px;
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid transparent;
+    white-space: nowrap !important;
+    flex-shrink: 0;
+    line-height: 1.4;
+}
+
+.tlong-nav-link:hover, .tlong-nav-link.active {
+    color: #fff !important;
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 15px rgba(255, 19, 74, 0.25);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+@media (min-width: 1200px) {
+    .tlong-brand-title {
+        font-size: 1.45rem;
+    }
+    .tlong-nav-link {
+        font-size: 0.92rem;
+        padding: 7px 14px !important;
+        gap: 8px;
+    }
+}
+
+@media (min-width: 992px) {
+    .tlong-navbar .navbar-collapse {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .tlong-navbar .navbar-nav {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        align-items: center;
+    }
+}
+
+/* ==========================================
+   BUTTONS: ÁNH NGỌC LUNG LINH (SHIMMER BUTTONS)
+   ========================================== */
+.btn-shimmer-ruby {
+    background: linear-gradient(135deg, #ff134a 0%, #d80032 50%, #990022 100%);
+    color: #fff;
+    font-weight: 700;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 30px;
+    padding: 10px 24px;
+    box-shadow: 0 4px 20px var(--ruby-glow), inset 0 1px 2px rgba(255, 255, 255, 0.4);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+    letter-spacing: 0.5px;
+}
+
+.btn-shimmer-ruby::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -60%;
+    width: 40%;
+    height: 200%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+    transform: rotate(25deg);
+    animation: buttonShineSweep 3.5s infinite;
+}
+
+@keyframes buttonShineSweep {
+    0% { left: -60%; }
+    30% { left: 140%; }
+    100% { left: 140%; }
+}
+
+.btn-shimmer-ruby:hover {
+    color: #fff;
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 8px 30px rgba(255, 19, 74, 0.8), 0 0 20px rgba(255, 209, 102, 0.4);
+}
+
+.btn-shimmer-gold {
+    background: linear-gradient(135deg, #ffd166 0%, #ff9f1c 50%, #d97706 100%);
+    color: #111 !important;
+    font-weight: 800;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 30px;
+    padding: 10px 24px;
+    box-shadow: 0 4px 20px var(--gold-glow), inset 0 1px 2px rgba(255, 255, 255, 0.7);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+    letter-spacing: 0.5px;
+}
+
+.btn-shimmer-gold::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -60%;
+    width: 40%;
+    height: 200%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+    transform: rotate(25deg);
+    animation: buttonShineSweep 3.5s infinite;
+}
+
+.btn-shimmer-gold:hover {
+    color: #000 !important;
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 8px 30px rgba(255, 209, 102, 0.9), 0 0 25px rgba(255, 255, 255, 0.6);
+}
+
+.btn-glass-crystal {
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(12px);
+    color: #fff;
+    font-weight: 600;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 30px;
+    padding: 9px 20px;
+    transition: all 0.25s ease;
+}
+
+.btn-glass-crystal:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 19, 74, 0.5);
+    color: #fff;
+    box-shadow: 0 0 18px rgba(255, 19, 74, 0.3);
+    transform: translateY(-2px);
+}
+
+.badge-shimmer-ruby {
+    background: linear-gradient(135deg, rgba(255, 19, 74, 0.95), rgba(180, 0, 40, 0.95));
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.72rem;
+    padding: 4px 10px;
+    border-radius: 20px;
+    box-shadow: 0 0 12px var(--ruby-glow);
+}
+
+.badge-shimmer-gold {
+    background: linear-gradient(135deg, #ffd166 0%, #ff9f1c 50%, #d97706 100%);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    color: #0b0c10 !important;
+    font-weight: 800;
+    font-size: 0.72rem;
+    padding: 4px 10px;
+    border-radius: 20px;
+    box-shadow: 0 0 16px var(--gold-glow);
+}
+
+.badge-shimmer-cyan {
+    background: rgba(6, 182, 212, 0.15);
+    border: 1px solid rgba(6, 182, 212, 0.4);
+    color: #38bdf8;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 6px;
+}
+
+/* ==========================================
+   TIER HIERARCHY ACCENTS:
+   STANDARD VIP (MÀU ĐỎ) & PREMIUM VIP (MÀU VÀNG)
+   ========================================== */
+
+/* --- STANDARD VIP ACCENTS (MÀU ĐỎ - RUBY) --- */
+.text-accent-standard {
+    color: #ff2d55 !important;
+    text-shadow: 0 0 12px rgba(255, 19, 74, 0.6);
+}
+
+.badge-standard-red {
+    background: linear-gradient(135deg, #ff134a 0%, #c4002b 100%);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    color: #fff !important;
+    font-weight: 700;
+    font-size: 0.72rem;
+    padding: 4px 10px;
+    border-radius: 20px;
+    box-shadow: 0 0 12px rgba(255, 19, 74, 0.6);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-download-standard {
+    background: rgba(255, 19, 74, 0.12);
+    border: 1px solid rgba(255, 19, 74, 0.45);
+    color: #ff6b8b;
+    font-weight: 600;
+    border-radius: 20px;
+    transition: all 0.25s ease;
+}
+
+.btn-download-standard:hover {
+    background: linear-gradient(135deg, #ff134a, #c4002b);
+    border-color: #fff;
+    color: #fff !important;
+    box-shadow: 0 0 20px rgba(255, 19, 74, 0.8);
+    transform: translateY(-2px);
+}
+
+.crystal-pricing-card.card-tier-standard {
+    border: 1.5px solid rgba(255, 19, 74, 0.65);
+    background: radial-gradient(circle at 50% 0%, rgba(255, 19, 74, 0.22) 0%, rgba(20, 22, 34, 0.9) 70%);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 35px rgba(255, 19, 74, 0.35);
+    transform: scale(1.02);
+}
+
+.crystal-pricing-card.card-tier-standard:hover {
+    transform: translateY(-8px) scale(1.04);
+    border-color: rgba(255, 19, 74, 0.95);
+    box-shadow: 0 25px 65px rgba(0, 0, 0, 0.9), 0 0 45px rgba(255, 19, 74, 0.65);
+}
+
+.crystal-pricing-card.card-tier-standard .crystal-price {
+    color: #fff;
+    text-shadow: 0 0 15px rgba(255, 19, 74, 0.6);
+}
+
+.crystal-pricing-card.card-tier-standard .crystal-features-list li i {
+    color: #ff134a !important;
+    filter: drop-shadow(0 0 6px rgba(255, 19, 74, 0.8));
+}
+
+/* --- PREMIUM VIP ACCENTS (MÀU VÀNG - ROYAL GOLD) --- */
+.text-accent-premium {
+    background: linear-gradient(135deg, #fff3b0 0%, #ffd166 40%, #ff9f1c 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 12px rgba(255, 209, 102, 0.6));
+}
+
+.badge-premium-gold {
+    background: linear-gradient(135deg, #ffd166 0%, #ff9f1c 50%, #d97706 100%);
+    border: 1px solid rgba(255, 255, 255, 0.65);
+    color: #0c0d14 !important;
+    font-weight: 800;
+    font-size: 0.72rem;
+    padding: 4px 10px;
+    border-radius: 20px;
+    box-shadow: 0 0 16px rgba(255, 209, 102, 0.7);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-download-premium {
+    background: rgba(255, 209, 102, 0.14);
+    border: 1px solid rgba(255, 209, 102, 0.55);
+    color: #ffd166;
+    font-weight: 700;
+    border-radius: 20px;
+    transition: all 0.25s ease;
+}
+
+.btn-download-premium:hover {
+    background: linear-gradient(135deg, #ffd166, #ff9f1c);
+    border-color: #fff;
+    color: #000 !important;
+    box-shadow: 0 0 25px rgba(255, 209, 102, 0.9);
+    transform: translateY(-2px);
+}
+
+.crystal-pricing-card.card-tier-premium {
+    border: 1.5px solid rgba(255, 209, 102, 0.75);
+    background: radial-gradient(circle at 50% 0%, rgba(255, 209, 102, 0.22) 0%, rgba(26, 23, 20, 0.92) 70%);
+    box-shadow: 0 22px 55px rgba(0, 0, 0, 0.85), 0 0 40px rgba(255, 209, 102, 0.35);
+    transform: scale(1.02);
+}
+
+.crystal-pricing-card.card-tier-premium:hover {
+    transform: translateY(-8px) scale(1.04);
+    border-color: #ffd166;
+    box-shadow: 0 25px 65px rgba(0, 0, 0, 0.9), 0 0 50px rgba(255, 209, 102, 0.7);
+}
+
+.crystal-pricing-card.card-tier-premium .crystal-price {
+    background: linear-gradient(135deg, #ffffff 20%, #ffd166 80%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 15px rgba(255, 209, 102, 0.7));
+}
+
+.crystal-pricing-card.card-tier-premium .crystal-features-list li i {
+    color: #ffd166 !important;
+    filter: drop-shadow(0 0 6px rgba(255, 209, 102, 0.8));
+}
+
+/* ==========================================
+   DYNAMIC BODY THEME PER LOGGED-IN TIER
+   ========================================== */
+body.tier-active-standard .tlong-player-bar {
+    border-top: 1px solid rgba(255, 19, 74, 0.5);
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.85), 0 -1px 25px rgba(255, 19, 74, 0.35);
+}
+
+body.tier-active-premium .tlong-player-bar {
+    border-top: 1px solid rgba(255, 209, 102, 0.6);
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.85), 0 -1px 30px rgba(255, 209, 102, 0.4);
+}
+
+body.tier-active-premium .player-btn-main {
+    background: linear-gradient(135deg, #ffd166 0%, #ff9f1c 100%) !important;
+    color: #0b0c10 !important;
+    box-shadow: 0 0 25px rgba(255, 209, 102, 0.8) !important;
+}
+
+body.tier-active-premium .seek-slider::-webkit-slider-thumb {
+    background: #ffd166 !important;
+    box-shadow: 0 0 12px rgba(255, 209, 102, 0.9) !important;
+}
+
+/* ==========================================
+   HERO BANNER: PHA LÊ CỰC QUANG (CRYSTAL STAGE)
+   ========================================== */
+.crystal-hero-stage {
+    position: relative;
+    background: rgba(18, 19, 32, 0.55);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 28px;
+    padding: 60px 45px;
+    margin-top: 25px;
+    margin-bottom: 50px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.25);
+    overflow: hidden;
+    z-index: 2;
+}
+
+.crystal-hero-stage::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 20%;
+    right: 20%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #ff134a, #ffd166, #06b6d4, transparent);
+    filter: blur(1px);
+}
+
+.hero-pill-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 18px;
+    border-radius: 30px;
+    background: rgba(255, 19, 74, 0.12);
+    border: 1px solid rgba(255, 19, 74, 0.35);
+    box-shadow: 0 0 15px rgba(255, 19, 74, 0.2);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #ff94ab;
+}
+
+.crystal-hero-title {
+    font-size: 3rem;
+    font-weight: 900;
+    line-height: 1.15;
+    letter-spacing: -0.5px;
+    margin-top: 16px;
+    margin-bottom: 18px;
+}
+
+.text-gradient-shimmer {
+    background: linear-gradient(135deg, #ffffff 20%, #ff134a 60%, #ffd166 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 2px 15px rgba(255, 19, 74, 0.4));
+}
+
+.crystal-hero-desc {
+    color: var(--text-silver);
+    font-size: 1.05rem;
+    line-height: 1.65;
+    max-width: 620px;
+    margin-bottom: 32px;
+}
+
+.glass-stat-pill {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 14px 20px;
+    backdrop-filter: blur(10px);
+}
+
+/* ==========================================
+   GLASS CARDS (MẶT KÍNH PHA LÊ CHIẾU SÁNG)
+   ========================================== */
+.crystal-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid var(--border-crystal);
+    border-radius: 18px;
+    overflow: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.crystal-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    border-color: var(--border-crystal-hover);
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.7), 0 0 30px rgba(255, 19, 74, 0.3);
+    background: var(--bg-card-hover);
+}
+
+.crystal-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -150%;
+    width: 80%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.18), transparent);
+    transform: skewX(-25deg);
+    transition: 0.6s ease;
+    pointer-events: none;
+}
+
+.crystal-card:hover::after {
+    left: 150%;
+}
+
+.crystal-card-img-wrapper {
+    position: relative;
+    padding-top: 56.25%;
+    overflow: hidden;
+    background: #000;
+}
+
+.crystal-card-img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.crystal-card:hover .crystal-card-img {
+    transform: scale(1.08);
+}
+
+.crystal-play-btn {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.7);
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff134a 0%, #b30029 100%);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 0 25px var(--ruby-glow);
+    cursor: pointer;
+    border: 2px solid rgba(255, 255, 255, 0.6);
+}
+
+.crystal-card:hover .crystal-play-btn {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.crystal-card-body {
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.crystal-card-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 6px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.4;
+}
+
+.crystal-card-artist {
+    font-size: 0.84rem;
+    color: var(--text-dim);
+    margin-bottom: 14px;
+}
+
+/* ==========================================
+   KHO TRACK DJ: BẢNG KÍNH THỦY TINH SANG TRỌNG
+   ========================================== */
+.crystal-table-wrapper {
+    background: var(--bg-card);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-crystal);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.crystal-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0;
+}
+
+.crystal-table th {
+    background: rgba(14, 15, 26, 0.9);
+    color: var(--text-dim);
+    font-size: 0.76rem;
+    text-transform: uppercase;
+    font-weight: 800;
+    letter-spacing: 1px;
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.crystal-table td {
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    vertical-align: middle;
+    font-size: 0.92rem;
+    transition: all 0.2s ease;
+}
+
+.crystal-table-row:hover td {
+    background: rgba(255, 19, 74, 0.06);
+}
+
+.crystal-table-row.active-track td {
+    background: rgba(255, 19, 74, 0.14);
+    border-left: 4px solid var(--ruby-primary);
+}
+
+/* Mini Equalizer Bar inside active row */
+.table-mini-wave {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 14px;
+    margin-left: 6px;
+    vertical-align: middle;
+}
+.table-mini-wave span {
+    width: 2px;
+    background: var(--ruby-primary);
+    border-radius: 1px;
+    animation: miniWaveBounce 0.8s infinite ease-in-out alternate;
+}
+.table-mini-wave span:nth-child(1) { height: 40%; animation-delay: 0.1s; }
+.table-mini-wave span:nth-child(2) { height: 100%; animation-delay: 0.25s; }
+.table-mini-wave span:nth-child(3) { height: 70%; animation-delay: 0.05s; }
+
+@keyframes miniWaveBounce {
+    0% { height: 20%; }
+    100% { height: 100%; }
+}
+
+.track-play-inline-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.track-play-inline-btn:hover, .crystal-table-row.active-track .track-play-inline-btn {
+    background: var(--ruby-primary);
+    border-color: #fff;
+    box-shadow: 0 0 18px var(--ruby-glow);
+    color: #fff;
+    transform: scale(1.1);
+}
+
+/* ==========================================
+   BẢNG GÓI HỘI VIÊN: BLACK DIAMOND & RUBY CARDS
+   ========================================== */
+.crystal-pricing-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-crystal);
+    border-radius: 24px;
+    padding: 38px 28px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    transition: all 0.35s ease;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.crystal-pricing-card.featured {
+    border-color: rgba(255, 19, 74, 0.6);
+    background: radial-gradient(circle at 50% 0%, rgba(255, 19, 74, 0.25) 0%, rgba(20, 21, 33, 0.9) 70%);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 35px rgba(255, 19, 74, 0.3);
+    transform: scale(1.03);
+}
+
+.crystal-pricing-card:hover {
+    transform: translateY(-10px) scale(1.02);
+    border-color: rgba(255, 19, 74, 0.7);
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 35px var(--ruby-glow);
+}
+
+.crystal-price {
+    font-size: 2.3rem;
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: -0.5px;
+}
+
+.crystal-features-list {
+    list-style: none;
+    padding: 0;
+    margin: 24px 0;
+    flex-grow: 1;
+}
+
+.crystal-features-list li {
+    padding: 10px 0;
+    color: var(--text-silver);
+    font-size: 0.9rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.crystal-features-list li i {
+    color: var(--ruby-primary);
+    filter: drop-shadow(0 0 6px var(--ruby-glow));
+}
+
+/* ==========================================
+   STICKY BOTTOM PLAYER: VIÊN NGỌC RUBY PHA LÊ
+   ========================================== */
+.tlong-player-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1050;
+    background: rgba(10, 11, 18, 0.94);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 -6px 25px rgba(0, 0, 0, 0.7), 0 -1px 12px rgba(255, 19, 74, 0.18);
+    padding: 5px 14px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+}
+
+@media (max-width: 767.98px) {
+    .tlong-player-bar {
+        height: auto;
+        min-height: 62px;
+        padding: 6px 12px;
+    }
+    body {
+        padding-bottom: 82px !important;
+    }
+}
+
+.player-track-cover {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    flex-shrink: 0;
+}
+
+.player-btn-main {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff134a 0%, #c4002b 100%);
+    color: #fff;
+    border: 1.5px solid rgba(255, 255, 255, 0.4);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.82rem;
+    box-shadow: 0 0 15px var(--ruby-glow);
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.player-btn-main:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 22px rgba(255, 19, 74, 0.9);
+}
+
+.player-btn-ctrl {
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    font-size: 0.82rem;
+    padding: 3px 6px;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.player-btn-ctrl:hover {
+    color: #fff;
+}
+
+.seek-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.18);
+    border-radius: 4px;
+    outline: none;
+    cursor: pointer;
+    transition: height 0.15s ease, background 0.15s ease;
+    padding: 0;
+    margin: 0;
+}
+
+.seek-slider:hover {
+    height: 8px;
+    background: rgba(255, 255, 255, 0.28);
+}
+
+.seek-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: #ff134a;
+    border: 2px solid #fff;
+    box-shadow: 0 0 12px var(--ruby-glow);
+    cursor: pointer;
+    transition: transform 0.12s ease;
+}
+
+.seek-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.3);
+}
+
+.seek-slider::-moz-range-thumb {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: #ff134a;
+    border: 2px solid #fff;
+    box-shadow: 0 0 12px var(--ruby-glow);
+    cursor: pointer;
+}
+
+#audioWaveCanvas {
+    height: 24px;
+    width: 100%;
+    border-radius: 4px;
+    filter: drop-shadow(0 0 8px rgba(255, 19, 74, 0.5));
+}
+
+/* ==========================================
+   VIETQR CHECKOUT MODAL STYLING
+   ========================================== */
+.vietqr-box {
+    background: #fff;
+    border-radius: 16px;
+    padding: 16px;
+    display: inline-block;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+}

@@ -1,0 +1,59 @@
+﻿@{
+    ViewData["Title"] = "Home";
+}
+
+<section class="hero py-5 text-light bg-primary rounded-3 mb-4">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-7">
+                <h1 class="display-5 fw-bold">Welcome to MyApp</h1>
+                <p class="lead">A clean, responsive starting point for your ASP.NET Core app. Easy to customize and extend.</p>
+                <p class="mt-4">
+                    <a class="btn btn-light btn-lg me-2" href="#features">Explore features</a>
+                    <a class="btn btn-outline-light btn-lg" href="#contact">Contact us</a>
+                </p>
+            </div>
+            <div class="col-md-5 d-none d-md-block">
+                <img src="~/images/hero-placeholder.png" class="img-fluid rounded" alt="Hero image" />
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="features" class="mb-5">
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Responsive layout</h5>
+                    <p class="card-text">Built with Bootstrap so it works well across devices.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Razor views</h5>
+                    <p class="card-text">Server-rendered pages that are fast and SEO-friendly.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Extendable</h5>
+                    <p class="card-text">Easily integrate JS frameworks or APIs when needed.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="contact" class="mb-5">
+    <h3>Contact</h3>
+    <p>If you need help customizing the frontend, describe what you want and I can update the views/CSS.</p>
+</section>
+
+@section Scripts {
+    <!-- Page-specific scripts if needed -->
+}

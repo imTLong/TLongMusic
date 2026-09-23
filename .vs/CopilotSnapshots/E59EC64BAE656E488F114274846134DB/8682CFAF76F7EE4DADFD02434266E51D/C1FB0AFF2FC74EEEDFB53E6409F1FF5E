@@ -1,0 +1,283 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - TLongMusic | Record Pool & Kho Nhạc DJ Số 1</title>
+    
+    <!-- Favicon using User Logo -->
+    <link rel="icon" type="image/png" href="~/images/logo.png" />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap 5 & FontAwesome Icons -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+    <!-- Custom TLong Dark & Red Styles (Lòe loẹt & Quẩy Mode) -->
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <!-- Club Laser Beams Scanning Across Background -->
+    <div class="club-laser-container">
+        <div class="laser-beam laser-beam-1"></div>
+        <div class="laser-beam laser-beam-2"></div>
+        <div class="laser-beam laser-beam-3"></div>
+    </div>
+
+    <!-- Floating Party Particles Canvas (Notes & Sparks) -->
+    <canvas id="partyParticlesCanvas"></canvas>
+
+    <!-- Top Navigation Bar -->
+    <header class="sticky-top">
+        <nav class="navbar navbar-expand-lg tlong-navbar">
+            <div class="container-fluid px-lg-4">
+                <!-- Brand Logo & Name -->
+                <a class="tlong-logo-wrapper" asp-controller="Home" asp-action="Index">
+                    <img src="~/images/logo.png" alt="TLongMusic Logo" class="tlong-logo-img" />
+                    <h1 class="tlong-brand-title">TLONG<span>MUSIC</span></h1>
+                </a>
+
+                <button class="navbar-toggler border-0 text-white" type="button" data-bs-toggle="collapse" data-bs-target="#tlongNavCollapse">
+                    <i class="fas fa-bars fa-lg text-danger"></i>
+                </button>
+
+                <div class="collapse navbar-collapse" id="tlongNavCollapse">
+                    <!-- Main Navigation Links -->
+                    <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-1">
+                        <li class="nav-item">
+                            <a class="nav-link tlong-nav-link active" asp-controller="Home" asp-action="Index">
+                                <i class="fas fa-home"></i> Trang Chủ
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link tlong-nav-link" href="#nonstopLotSection">
+                                <i class="fas fa-fire text-danger"></i> Nonstop Lọt
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link tlong-nav-link" href="#nonstopDatSection">
+                                <i class="fas fa-crown text-warning"></i> Nonstop Đặt VIP
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link tlong-nav-link" href="#trackPoolSection">
+                                <i class="fas fa-compact-disc"></i> Kho Track DJ
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link tlong-nav-link" href="#pricingSection">
+                                <i class="fas fa-gem text-info"></i> Bảng Giá VIP
+                            </a>
+                        </li>
+                    </ul>
+
+                    <!-- Action buttons & Flashy Party Mode Trigger -->
+                    <div class="d-flex align-items-center gap-3">
+                        <!-- NÚT BẬT CHẾ ĐỘ QUẨY TUNG NÓC -->
+                        <button id="partyModeBtn" class="btn-party-toggle d-flex align-items-center gap-2" onclick="togglePartyMode()">
+                            <i class="fas fa-fire"></i> CHẾ ĐỘ QUẨY
+                        </button>
+
+                        <!-- Role Simulator for demo testing -->
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-dark border-secondary dropdown-toggle d-flex align-items-center gap-2 py-2 px-3" type="button" data-bs-toggle="dropdown">
+                                <span class="text-muted small">Cấp độ test:</span>
+                                <span id="navUserTierBadge" class="badge bg-secondary">Free Member</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow">
+                                <li><h6 class="dropdown-header text-muted">CHỌN TÀI KHOẢN ĐỂ TEST:</h6></li>
+                                <li>
+                                    <button class="dropdown-item py-2" onclick="switchUserTier('free')">
+                                        <i class="fas fa-user text-secondary me-2"></i> Free (Chỉ nghe demo / Nonstop lọt)
+                                    </button>
+                                </li>
+                                <li>
+                                    <button class="dropdown-item py-2" onclick="switchUserTier('standard')">
+                                        <i class="fas fa-check-circle text-danger me-2"></i> Standard (Tải 20 track 320k)
+                                    </button>
+                                </li>
+                                <li>
+                                    <button class="dropdown-item py-2" onclick="switchUserTier('premium')">
+                                        <i class="fas fa-crown text-warning me-2"></i> Premium (Full Track Đặt + WAV)
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- CTA VIP Button -->
+                        <a href="#pricingSection" class="btn btn-tlong-red d-none d-sm-inline-flex align-items-center gap-2">
+                            <i class="fas fa-bolt"></i> Nâng Cấp VIP
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Page Content -->
+    <main role="main" style="position: relative; z-index: 3;">
+        @RenderBody()
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-5 py-5 border-top" style="background: #08080d; border-color: rgba(255, 23, 68, 0.3) !important; position: relative; z-index: 3;">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <img src="~/images/logo.png" alt="Logo" class="tlong-logo-img" style="width: 48px; height: 48px;" />
+                        <h4 class="tlong-brand-title mb-0">TLONG<span>MUSIC</span></h4>
+                    </div>
+                    <p class="text-secondary small">
+                        Hệ thống cung cấp kho nhạc Vinahouse, EDM, Nonstop độc quyền và Record Pool số 1 dành cho anh em DJ / Producer và người yêu nhạc điện tử tại Việt Nam.
+                    </p>
+                    <div class="d-flex gap-3 text-secondary mt-3">
+                        <a href="#" class="btn btn-outline-danger btn-sm rounded-circle" style="width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center;"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="btn btn-outline-danger btn-sm rounded-circle" style="width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center;"><i class="fab fa-telegram-plane"></i></a>
+                        <a href="#" class="btn btn-outline-danger btn-sm rounded-circle" style="width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center;"><i class="fab fa-youtube"></i></a>
+                        <a href="#" class="btn btn-outline-danger btn-sm rounded-circle" style="width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center;"><i class="fab fa-tiktok"></i></a>
+                    </div>
+                </div>
+
+                <div class="col-lg-2 col-md-6">
+                    <h6 class="text-white font-weight-bold text-uppercase mb-3" style="font-family: var(--font-heading); font-size: 0.9rem;">Danh Mục</h6>
+                    <ul class="list-unstyled text-secondary small d-flex flex-column gap-2">
+                        <li><a href="#nonstopLotSection" class="text-decoration-none text-secondary">Nonstop Lọt Hot</a></li>
+                        <li><a href="#nonstopDatSection" class="text-decoration-none text-secondary">Nonstop Đặt Phòng Thu</a></li>
+                        <li><a href="#trackPoolSection" class="text-decoration-none text-secondary">Kho Track Vinahouse</a></li>
+                        <li><a href="#trackPoolSection" class="text-decoration-none text-secondary">Dubplate Độc Quyền</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="text-white font-weight-bold text-uppercase mb-3" style="font-family: var(--font-heading); font-size: 0.9rem;">Hội Viên & Quyền Lợi</h6>
+                    <ul class="list-unstyled text-secondary small d-flex flex-column gap-2">
+                        <li><a href="#pricingSection" class="text-decoration-none text-secondary">Gói Standard VIP (99k/tháng)</a></li>
+                        <li><a href="#pricingSection" class="text-decoration-none text-secondary">Gói Premium Độc Quyền (199k/tháng)</a></li>
+                        <li><a href="#" class="text-decoration-none text-secondary">Hướng Dẫn Quét VietQR Nạp Tự Động</a></li>
+                        <li><a href="#" class="text-decoration-none text-secondary">Chính Sách Chống Share Tài Khoản</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="text-white font-weight-bold text-uppercase mb-3" style="font-family: var(--font-heading); font-size: 0.9rem;">Hỗ Trợ DJ / Đặt Nhạc</h6>
+                    <p class="text-secondary small mb-2"><i class="fas fa-phone-alt text-danger me-2"></i> Hotline / Zalo: <strong>09xx.xxx.xxx</strong></p>
+                    <p class="text-secondary small mb-2"><i class="fas fa-envelope text-danger me-2"></i> Email: <strong>contact@tlongmusic.vn</strong></p>
+                    <p class="text-secondary small"><i class="fas fa-map-marker-alt text-danger me-2"></i> Hà Nội - TP. Hồ Chí Minh</p>
+                </div>
+            </div>
+
+            <hr class="my-4" style="border-color: rgba(255, 255, 255, 0.08);" />
+
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center text-muted small">
+                <div>&copy; 2026 <strong>TLongMusic</strong>. Toàn quyền bảo lưu bản quyền kho nhạc.</div>
+                <div class="mt-2 mt-md-0">
+                    Phát triển trên nền tảng <strong>C# (.NET 8) & SQL Server Architecture</strong>.
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ==========================================
+         STICKY BOTTOM DJ MUSIC PLAYER
+         ========================================== -->
+    <div class="tlong-player-bar">
+        <div class="container-fluid px-lg-4">
+            <div class="row align-items-center">
+                <!-- Left: Track Metadata -->
+                <div class="col-12 col-md-3 d-flex align-items-center gap-3 mb-2 mb-md-0">
+                    <img id="playerTrackCover" src="~/images/logo.png" alt="Cover" class="player-track-cover" />
+                    <div style="min-width: 0; flex-grow: 1;">
+                        <div class="d-flex align-items-center gap-2">
+                            <h6 id="playerTrackTitle" class="text-white mb-0 text-truncate font-weight-bold" style="font-size: 0.92rem;">
+                                Chọn một bài nhạc để phát
+                            </h6>
+                            <span id="playerDemoBadge" class="badge badge-vip-red d-none">DEMO 45S</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2 mt-1">
+                            <span id="playerTrackArtist" class="text-muted small text-truncate" style="max-width: 140px;">TLongMusic Team</span>
+                            <span id="playerTrackBpm" class="badge-bpm">-- BPM</span>
+                            <span id="playerTrackKey" class="badge-camelot">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Center: Controls, Multi-color Waveform, Timeline -->
+                <div class="col-12 col-md-6 text-center">
+                    <div class="d-flex justify-content-center align-items-center gap-3 mb-1">
+                        <button class="player-btn-ctrl" onclick="playPrevTrack()" title="Bài trước"><i class="fas fa-step-backward"></i></button>
+                        <button id="playerPlayPauseBtn" class="player-btn-main" onclick="togglePlayPause()" title="Phát / Dừng">
+                            <i class="fas fa-play" style="margin-left: 3px;"></i>
+                        </button>
+                        <button class="player-btn-ctrl" onclick="playNextTrack()" title="Bài tiếp"><i class="fas fa-step-forward"></i></button>
+                    </div>
+
+                    <!-- Dynamic Multi-Color Waveform Canvas -->
+                    <div class="px-2">
+                        <canvas id="audioWaveCanvas" width="450" height="24" class="mb-1"></canvas>
+                        <div class="d-flex align-items-center gap-2">
+                            <span id="playerCurrentTime" class="text-muted small" style="min-width: 35px; font-size: 0.75rem;">0:00</span>
+                            <input type="range" id="playerSeekSlider" class="seek-slider" min="0" max="100" value="0" />
+                            <span id="playerDuration" class="text-muted small" style="min-width: 35px; font-size: 0.75rem;">0:00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Quality tag, Volume & Download Action -->
+                <div class="col-12 col-md-3 d-flex justify-content-end align-items-center gap-3 mt-2 mt-md-0">
+                    <span id="playerTrackQuality" class="badge-quality d-none d-lg-inline-block">320kbps MP3</span>
+
+                    <div class="d-flex align-items-center gap-2">
+                        <i id="volumeIcon" class="fas fa-volume-up text-muted small"></i>
+                        <input type="range" id="playerVolumeSlider" class="seek-slider" min="0" max="100" value="85" style="width: 75px;" />
+                    </div>
+
+                    <button class="btn btn-sm btn-tlong-red px-3 d-flex align-items-center gap-2" onclick="if(window.TLongPlayer.currentTrack) handleDownload(window.TLongPlayer.currentTrack.id, window.TLongPlayer.currentTrack.title, window.TLongPlayer.currentTrack.tierRequired); else showToastNotification('Vui lòng chọn bài để tải!');">
+                        <i class="fas fa-download"></i> <span class="d-none d-xl-inline">Tải Về</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIP Upgrade Modal -->
+    <div class="modal fade" id="vipUpgradeModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background: #12131c; border: 2px solid var(--red-primary); border-radius: 18px; box-shadow: 0 0 45px var(--red-glow-strong);">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title font-weight-bold text-white"><i class="fas fa-gem text-danger me-2"></i> TLongMusic VIP Club</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="vipModalBody">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Element -->
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 2100; margin-top: 70px;">
+        <div id="liveToast" class="toast toast-vip-notify" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header bg-dark text-white border-bottom border-danger">
+                <img src="~/images/logo.png" class="rounded me-2" alt="TL" style="width: 20px; height: 20px;" />
+                <strong class="me-auto text-danger">TLongMusic DJ Alert</strong>
+                <small class="text-muted">Vừa xong</small>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" id="liveToastBody">
+                Chào mừng bạn đến với TLongMusic!
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/player.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

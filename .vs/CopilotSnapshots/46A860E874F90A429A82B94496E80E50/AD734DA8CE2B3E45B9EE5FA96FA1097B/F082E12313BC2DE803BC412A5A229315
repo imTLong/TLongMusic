@@ -1,0 +1,149 @@
+﻿using Microsoft.EntityFrameworkCore;
+using TLongMusic.Models.Entities;
+
+namespace TLongMusic.Data
+{
+    public class TLongMusicDbContext : DbContext
+    {
+        public TLongMusicDbContext(DbContextOptions<TLongMusicDbContext> options) : base(options)
+        {
+        }
+
+        // 16 DbSets as per SRS_TlongMusic.docx
+        public DbSet<Role> Roles => Set<Role>();
+        public DbSet<User> Users => Set<User>();
+        public DbSet<UserRole> UserRoles => Set<UserRole>();
+        public DbSet<Producer> Producers => Set<Producer>();
+        public DbSet<Package> Packages => Set<Package>();
+        public DbSet<Subscription> Subscriptions => Set<Subscription>();
+        public DbSet<Payment> Payments => Set<Payment>();
+        public DbSet<TrackCategory> TrackCategories => Set<TrackCategory>();
+        public DbSet<Music> Musics => Set<Music>();
+        public DbSet<Favorite> Favorites => Set<Favorite>();
+        public DbSet<Playlist> Playlists => Set<Playlist>();
+        public DbSet<PlaylistTrack> PlaylistTracks => Set<PlaylistTrack>();
+        public DbSet<ListeningHistory> ListeningHistories => Set<ListeningHistory>();
+        public DbSet<DownloadHistory> DownloadHistories => Set<DownloadHistory>();
+        public DbSet<Report> Reports => Set<Report>();
+        public DbSet<Notification> Notifications => Set<Notification>();
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            // 1. UserRole Composite Key
+            modelBuilder.Entity<UserRole>()
+                .HasKey(ur => new { ur.UserId, ur.RoleId });
+
+            modelBuilder.Entity<UserRole>()
+                .HasOne(ur => ur.User)
+                .WithMany(u => u.UserRoles)
+                .HasForeignKey(ur => ur.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<UserRole>()
+                .HasOne(ur => ur.Role)
+                .WithMany(r => r.UserRoles)
+                .HasForeignKey(ur => ur.RoleId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // 2. Producer - User 1:1
+            modelBuilder.Entity<Producer>()
+                .HasOne(p => p.User)
+                .WithOne(u => u.ProducerProfile)
+                .HasForeignKey<Producer>(p => p.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // 3. Favorite Composite Key
+            modelBuilder.Entity<Favorite>()
+                .HasKey(f => new { f.UserId, f.MusicId });
+
+            modelBuilder.Entity<Favorite>()
+                .HasOne(f => f.User)
+                .WithMany(u => u.Favorites)
+                .HasForeignKey(f => f.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Favorite>()
+                .HasOne(f => f.Music)
+                .WithMany(m => m.Favorites)
+                .HasForeignKey(f => f.MusicId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // 4. PlaylistTrack Composite Key
+            modelBuilder.Entity<PlaylistTrack>()
+                .HasKey(pt => new { pt.PlaylistId, pt.MusicId });
+
+            modelBuilder.Entity<PlaylistTrack>()
+                .HasOne(pt => pt.Playlist)
+                .WithMany(p => p.PlaylistTracks)
+                .HasForeignKey(pt => pt.PlaylistId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<PlaylistTrack>()
+                .HasOne(pt => pt.Music)
+                .WithMany(m => m.PlaylistTracks)
+                .HasForeignKey(pt => pt.MusicId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // 5. ListeningHistory
+            modelBuilder.Entity<ListeningHistory>()
+                .HasOne(lh => lh.User)
+                .WithMany(u => u.ListeningHistories)
+                .HasForeignKey(lh => lh.UserId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<ListeningHistory>()
+                .HasOne(lh => lh.Music)
+                .WithMany(m => m.ListeningHistories)
+                .HasForeignKey(lh => lh.MusicId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // 6. DownloadHistory
+            modelBuilder.Entity<DownloadHistory>()
+                .HasOne(dh => dh.User)
+                .WithMany(u => u.DownloadHistories)
+                .HasForeignKey(dh => dh.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<DownloadHistory>()
+                .HasOne(dh => dh.Music)
+                .WithMany(m => m.DownloadHistories)
+                .HasForeignKey(dh => dh.MusicId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // 7. Report
+            modelBuilder.Entity<Report>()
+                .HasOne(r => r.User)
+                .WithMany(u => u.Reports)
+                .HasForeignKey(r => r.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Report>()
+                .HasOne(r => r.Music)
+                .WithMany(m => m.Reports)
+                .HasForeignKey(r => r.MusicId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // 8. Payment
+            modelBuilder.Entity<Payment>()
+                .HasOne(p => p.Package)
+                .WithMany(pkg => pkg.Payments)
+                .HasForeignKey(p => p.PackageId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Payment>()
+                .HasOne(p => p.Subscription)
+                .WithMany(s => s.Payments)
+                .HasForeignKey(p => p.SubscriptionId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // 9. Subscription
+            modelBuilder.Entity<Subscription>()
+                .HasOne(s => s.Package)
+                .WithMany(pkg => pkg.Subscriptions)
+                .HasForeignKey(s => s.PackageId)
+                .OnDelete(DeleteBehavior.Cascade);
+        }
+    }
+}

@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - TLongMusic | Ruby Crystal & Shimmering Music Pool</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="~/images/logo.png" />
+
+    <!-- Google Fonts: Plus Jakarta Sans & Space Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap 5 & FontAwesome Icons -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+    <!-- Ruby Crystal Shimmer Styles -->
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <!-- LỚP NỀN LUNG LINH: CỰC QUANG (AURORA) & TINH THỂ SAO -->
+    <div class="shimmer-bg-backdrop">
+        <div class="aurora-glow aurora-1"></div>
+        <div class="aurora-glow aurora-2"></div>
+        <div class="aurora-glow aurora-3"></div>
+        <canvas id="stardustCanvas"></canvas>
+    </div>
+
+    <!-- Crystal Glass Navigation Bar -->
+    <header class="sticky-top">
+        <nav class="navbar navbar-expand-lg tlong-navbar">
+            <div class="container-fluid px-3 px-xl-4 px-xxl-5" style="max-width: 1720px;">
+                <!-- Brand Logo With Prismatic Glowing Ring -->
+                <a class="tlong-logo-wrapper flex-shrink-0 text-nowrap me-3" asp-controller="Home" asp-action="Index">
+                    <div class="tlong-logo-container">
+                        <img src="~/images/logo.png" alt="TLongMusic Logo" class="tlong-logo-img" />
+                    </div>
+                    <h1 class="tlong-brand-title text-nowrap">TLONG<span>MUSIC</span></h1>
+                </a>
+
+                <button class="navbar-toggler border-0 text-white" type="button" data-bs-toggle="collapse" data-bs-target="#tlongNavCollapse">
+                    <i class="fas fa-bars-staggered fa-lg text-danger"></i>
+                </button>
+
+                <div class="collapse navbar-collapse flex-nowrap" id="tlongNavCollapse">
+                    <!-- Nav Links -->
+                    <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-1 gap-xl-2 flex-nowrap">
+                        <li class="nav-item">
+                            <a class="nav-link tlong-nav-link text-nowrap active" asp-controller="Home" asp-action="Index" onclick="switchMusicSectionView('all')">
+                                <i class="fas fa-sparkles text-danger"></i> Khám Phá
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link tlong-nav-link text-nowrap" href="#masterTrackContainer" onclick="switchMusicSectionView('track')">
+                                <i class="fas fa-compact-disc text-info"></i> 🎵 Kho Track DJ
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link tlong-nav-link text-nowrap" href="#masterNonstopContainer" onclick="switchMusicSectionView('nonstop')">
+                                <i class="fas fa-fire-flame-curved text-warning"></i> 🔥 Kho Nonstop
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link tlong-nav-link text-nowrap" href="#pricingSection">
+                                <i class="fas fa-gem text-danger"></i> Gói Hội Viên
+                            </a>
+                        </li>
+                    </ul>
+
+                    <!-- Auth Section & Actions -->
+                    <div class="d-flex align-items-center gap-2 flex-nowrap flex-shrink-0 ms-lg-2">
+                        <!-- ROLE-SPECIFIC PROMINENT MANAGEMENT BUTTONS (ADMIN / PRODUCER) -->
+                        <div id="roleActionButtons" class="d-flex align-items-center gap-2 flex-nowrap flex-shrink-0"></div>
+
+                        <!-- NÚT ĐĂNG NHẬP / PROFILE NGƯỜI DÙNG -->
+                        <div id="navbarAuthSection" class="flex-shrink-0 text-nowrap">
+                            <!-- Populated dynamically via JS -->
+                            <button class="btn btn-glass-crystal d-flex align-items-center gap-2 py-2 px-3 rounded-pill text-nowrap" data-bs-toggle="modal" data-bs-target="#loginModal">
+                                <i class="fas fa-arrow-right-to-bracket text-danger"></i>
+                                <span class="text-nowrap">Đăng Nhập</span>
+                            </button>
+                        </div>
+
+                        <!-- CTA VIP Button -->
+                        <a id="navUpgradeVipBtn" href="#pricingSection" class="btn btn-shimmer-ruby d-none d-sm-inline-flex align-items-center gap-2 flex-shrink-0 text-nowrap">
+                            <i class="fas fa-sparkles"></i> Nâng Cấp VIP
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main role="main" style="position: relative; z-index: 2;">
+        @RenderBody()
+    </main>
+
+    <!-- Crystal Footer -->
+    <footer class="mt-5 py-5 border-top" style="background: rgba(8, 9, 15, 0.85); backdrop-filter: blur(20px); border-color: rgba(255, 255, 255, 0.1) !important; position: relative; z-index: 2;">
+        <div class="container px-lg-4">
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="tlong-logo-container" style="width: 40px; height: 40px;">
+                            <img src="~/images/logo.png" alt="Logo" class="tlong-logo-img" style="width: 38px; height: 38px;" />
+                        </div>
+                        <h4 class="tlong-brand-title mb-0">TLONG<span>MUSIC</span></h4>
+                    </div>
+                    <p class="text-dim small" style="line-height: 1.7;">
+                        Nền tảng âm nhạc trực tuyến và Record Pool thế hệ mới dành cho DJ và người yêu âm nhạc điện tử Việt Nam. Trải nghiệm chất lượng âm thanh Master 24-Bit và tải nhạc phòng thu đỉnh cao.
+                    </p>
+                </div>
+
+                <div class="col-lg-2 col-md-6">
+                    <h6 class="text-white font-weight-bold mb-3" style="font-size: 0.95rem;">Kho Âm Nhạc</h6>
+                    <ul class="list-unstyled text-dim small d-flex flex-column gap-2">
+                        <li><a href="#nonstopLotSection" class="text-decoration-none text-dim">Nonstop Lọt Hot</a></li>
+                        <li><a href="#nonstopDatSection" class="text-decoration-none text-dim">Nonstop Đặt VIP</a></li>
+                        <li><a href="#trackPoolSection" class="text-decoration-none text-dim">Kho Track DJ Pool</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="text-white font-weight-bold mb-3" style="font-size: 0.95rem;">Hạng Hội Viên</h6>
+                    <ul class="list-unstyled text-dim small d-flex flex-column gap-2">
+                        <li><a href="#pricingSection" class="text-decoration-none text-dim">Gói Standard VIP (99.000đ)</a></li>
+                        <li><a href="#pricingSection" class="text-decoration-none text-dim">Gói Premium Master (199.000đ)</a></li>
+                        <li><a href="#" class="text-decoration-none text-dim">Bảo Vệ Âm Thanh & Voice Tag</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="text-white font-weight-bold mb-3" style="font-size: 0.95rem;">Hỗ Trợ & Đặt Nhạc</h6>
+                    <p class="text-dim small mb-2"><i class="fas fa-phone-alt text-danger me-2"></i> Zalo / Hotline: <strong>09xx.xxx.xxx</strong></p>
+                    <p class="text-dim small mb-2"><i class="fas fa-envelope text-danger me-2"></i> Email: <strong>support@tlongmusic.vn</strong></p>
+                    <p class="text-dim small"><i class="fas fa-shield-halved text-danger me-2"></i> Máy chủ tốc độ cao Cloudflare R2</p>
+                </div>
+            </div>
+
+            <hr class="my-4" style="border-color: rgba(255, 255, 255, 0.08);" />
+
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center text-dim small">
+                <div>&copy; 2026 <strong>TLongMusic Crystal</strong>. Bản quyền thuộc về TLongMusic Studio.</div>
+                <div class="mt-2 mt-md-0 font-monospace" style="font-size: 0.78rem;">
+                    Engineered with C# (.NET 8) & SQL Server Architecture
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ==========================================
+         STICKY BOTTOM PLAYER: ULTRA-COMPACT SLEEK CRYSTAL BAR
+         ========================================== -->
+    <div class="tlong-player-bar">
+        <div class="container-fluid px-3 px-xl-4" style="max-width: 1720px;">
+            <div class="row align-items-center g-2 g-md-3">
+                <!-- Left: Track Metadata (Compact) -->
+                <div class="col-6 col-md-3 d-flex align-items-center gap-2">
+                    <img id="playerTrackCover" src="~/images/logo.png" alt="Cover" class="player-track-cover" />
+                    <div style="min-width: 0; flex-grow: 1;">
+                        <div class="d-flex align-items-center gap-1">
+                            <h6 id="playerTrackTitle" class="text-white mb-0 text-truncate" style="font-size: 0.84rem; font-weight: 700; line-height: 1.2;">
+                                Chọn bài để phát
+                            </h6>
+                            <span id="playerDemoBadge" class="badge-shimmer-ruby d-none" style="font-size: 0.6rem; padding: 1px 4px;">DEMO 30S</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-1 mt-0">
+                            <span id="playerTrackArtist" class="text-dim text-truncate" style="max-width: 110px; font-size: 0.7rem;">TLong Studio</span>
+                            <span id="playerTrackBpm" class="badge-shimmer-ruby" style="font-size: 0.6rem; padding: 1px 5px;">-- BPM</span>
+                            <span id="playerTrackKey" class="badge-shimmer-cyan" style="font-size: 0.6rem; padding: 1px 5px;">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Center: Controls & Compact Progress Bar -->
+                <div class="col-12 col-md-6 order-3 order-md-2 text-center py-0">
+                    <div class="d-flex justify-content-center align-items-center gap-2 mb-0">
+                        <button class="player-btn-ctrl" onclick="playPrevTrack()" title="Bài trước"><i class="fas fa-backward-step"></i></button>
+                        <button id="playerPlayPauseBtn" class="player-btn-main" onclick="togglePlayPause()" title="Phát / Dừng">
+                            <i class="fas fa-play" style="margin-left: 2px;"></i>
+                        </button>
+                        <button class="player-btn-ctrl" onclick="playNextTrack()" title="Bài tiếp"><i class="fas fa-forward-step"></i></button>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2 px-1 w-100" style="margin-top: -2px;">
+                        <span id="playerCurrentTime" class="text-dim font-monospace" style="min-width: 34px; font-size: 0.72rem;">0:00</span>
+                        <input type="range" id="playerSeekSlider" class="seek-slider" min="0" max="100" value="0" />
+                        <span id="playerDuration" class="text-dim font-monospace" style="min-width: 34px; font-size: 0.72rem;">0:00</span>
+                    </div>
+                </div>
+
+                <!-- Right: Quality & Download Action (Compact) -->
+                <div class="col-6 col-md-3 order-2 order-md-3 d-flex justify-content-end align-items-center gap-2">
+                    <span id="playerTrackQuality" class="badge-shimmer-gold d-none d-lg-inline-block" style="font-size: 0.65rem; padding: 2px 7px;">320kbps MP3</span>
+
+                    <div class="d-none d-sm-flex align-items-center gap-1">
+                        <i id="volumeIcon" class="fas fa-volume-up text-dim" style="font-size: 0.72rem;"></i>
+                        <input type="range" id="playerVolumeSlider" class="seek-slider" min="0" max="100" value="85" style="width: 55px;" />
+                    </div>
+
+                    <button class="btn btn-sm btn-shimmer-ruby py-1 px-2.5 d-flex align-items-center gap-1" style="font-size: 0.76rem;" onclick="if(window.TLongPlayer.currentTrack) handleDownload(window.TLongPlayer.currentTrack.id, window.TLongPlayer.currentTrack.title, window.TLongPlayer.currentTrack.tierRequired); else showToastNotification('Vui lòng chọn bài để tải!');">
+                        <i class="fas fa-download"></i> <span class="d-none d-xl-inline">Tải Về</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         MODAL ĐĂNG NHẬP KÍNH PHA LÊ (LOGIN MODAL)
+         ========================================== -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background: rgba(18, 19, 32, 0.95); backdrop-filter: blur(25px); border: 1px solid rgba(255, 19, 74, 0.5); border-radius: 24px; box-shadow: 0 0 50px rgba(255, 19, 74, 0.4);">
+                <div class="modal-header border-0 pb-0">
+                    <ul class="nav nav-pills w-100" id="authTabs" role="tablist">
+                        <li class="nav-item flex-fill text-center" role="presentation">
+                            <button class="nav-link active w-100 fw-bold py-2 rounded-pill" id="tab-login-btn" data-bs-toggle="pill" data-bs-target="#tab-login-content" type="button" role="tab">
+                                <i class="fas fa-arrow-right-to-bracket me-1"></i> Đăng Nhập
+                            </button>
+                        </li>
+                        <li class="nav-item flex-fill text-center ms-2" role="presentation">
+                            <button class="nav-link w-100 fw-bold py-2 rounded-pill text-white" id="tab-register-btn" data-bs-toggle="pill" data-bs-target="#tab-register-content" type="button" role="tab" style="background: rgba(255, 255, 255, 0.08);">
+                                <i class="fas fa-user-plus me-1"></i> Đăng Ký
+                            </button>
+                        </li>
+                    </ul>
+                    <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="tab-content" id="authTabContent">
+                        <!-- TAB ĐĂNG NHẬP -->
+                        <div class="tab-pane fade show active" id="tab-login-content" role="tabpanel">
+                            <form onsubmit="event.preventDefault(); handleLogin(document.getElementById('loginUsername').value, document.getElementById('loginPassword').value);">
+                                <div class="mb-3">
+                                    <label class="form-label text-dim small">Tên đăng nhập hoặc Email:</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-dark border-secondary text-dim"><i class="fas fa-user"></i></span>
+                                        <input type="text" id="loginUsername" class="form-control bg-dark text-white border-secondary" placeholder="Nhập username..." required />
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label text-dim small">Mật khẩu:</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-dark border-secondary text-dim"><i class="fas fa-lock"></i></span>
+                                        <input type="password" id="loginPassword" class="form-control bg-dark text-white border-secondary" placeholder="Nhập mật khẩu..." value="123456" required />
+                                    </div>
+                                    <small class="text-warning d-block mt-1" style="font-size: 0.76rem;">
+                                        <i class="fas fa-key me-1"></i> Mật khẩu mặc định: <strong class="text-white font-monospace">123456</strong>
+                                    </small>
+                                </div>
+                                <button type="submit" class="btn btn-shimmer-ruby w-100 py-2 font-weight-bold mb-3">
+                                    <i class="fas fa-arrow-right-to-bracket me-2"></i> Đăng Nhập
+                                </button>
+                            </form>
+
+                            <!-- Đăng nhập nhanh 1-Click cho 5 Actor mẫu -->
+                            <div class="pt-3 border-top border-secondary border-opacity-25 text-center">
+                                <small class="text-dim d-block mb-2 font-weight-bold text-uppercase" style="letter-spacing: 0.5px;">HOẶC ĐĂNG NHẬP NHANH 1-CLICK:</small>
+                                <div class="d-flex flex-wrap gap-2 justify-content-center">
+                                    <button class="btn btn-sm btn-outline-danger" onclick="handleLogin('admin', '123456')">
+                                        <i class="fas fa-shield-halved me-1"></i> Admin
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-info" onclick="handleLogin('producer_tlong', '123456')">
+                                        <i class="fas fa-headphones me-1"></i> Producer DJ TLong
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger fw-bold" onclick="handleLogin('user_standard', '123456')" style="border-color: #ff134a; color: #ff6b8b; box-shadow: 0 0 10px rgba(255, 19, 74, 0.3);">
+                                        <i class="fas fa-certificate text-danger me-1"></i> Standard VIP (Đỏ)
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-warning fw-bold" onclick="handleLogin('user_premium', '123456')" style="border-color: #ffd166; color: #ffd166; box-shadow: 0 0 10px rgba(255, 209, 102, 0.3);">
+                                        <i class="fas fa-crown text-warning me-1"></i> Premium Master (Vàng)
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-secondary" onclick="handleLogin('user_free', '123456')">
+                                        <i class="fas fa-user me-1"></i> Free Member
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TAB ĐĂNG KÝ -->
+                        <div class="tab-pane fade" id="tab-register-content" role="tabpanel">
+                            <form onsubmit="event.preventDefault(); submitRegister(this);">
+                                <div class="mb-3">
+                                    <label class="form-label text-dim small">Họ và tên:</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-dark border-secondary text-dim"><i class="fas fa-id-card"></i></span>
+                                        <input type="text" name="fullName" class="form-control bg-dark text-white border-secondary" placeholder="Ví dụ: Nguyễn Văn A..." required />
+                                    </div>
+                                </div>
+                                <div class="row g-2 mb-3">
+                                    <div class="col-6">
+                                        <label class="form-label text-dim small">Tên đăng nhập:</label>
+                                        <input type="text" name="username" class="form-control bg-dark text-white border-secondary" placeholder="Tên tài khoản..." required />
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label text-dim small">Số điện thoại:</label>
+                                        <input type="text" name="phoneNumber" class="form-control bg-dark text-white border-secondary" placeholder="09xxxxxxxx" />
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label text-dim small">Email:</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-dark border-secondary text-dim"><i class="fas fa-envelope"></i></span>
+                                        <input type="email" name="email" class="form-control bg-dark text-white border-secondary" placeholder="name@example.com" required />
+                                    </div>
+                                </div>
+                                <div class="row g-2 mb-3">
+                                    <div class="col-6">
+                                        <label class="form-label text-dim small">Mật khẩu:</label>
+                                        <input type="password" name="password" class="form-control bg-dark text-white border-secondary" placeholder="Tối thiểu 6 ký tự" required minlength="6" />
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label text-dim small">Nhập lại mật khẩu:</label>
+                                        <input type="password" name="confirmPassword" class="form-control bg-dark text-white border-secondary" placeholder="Khớp mật khẩu" required minlength="6" />
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-shimmer-ruby w-100 py-2 font-weight-bold">
+                                    <i class="fas fa-user-plus me-2"></i> Tạo Tài Khoản Miễn Phí
+                                </button>
+                                <p class="text-dim small text-center mt-2 mb-0">Đăng ký thành công bạn sẽ nhận ngay quyền <strong>Free Member</strong> tải nhạc Lọt không giới hạn!</p>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIP Upgrade Modal -->
+    <div class="modal fade" id="vipUpgradeModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background: rgba(18, 19, 32, 0.95); backdrop-filter: blur(25px); border: 1px solid rgba(255, 19, 74, 0.5); border-radius: 24px; box-shadow: 0 0 50px rgba(255, 19, 74, 0.4);">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title text-white font-weight-bold"><i class="fas fa-gem text-danger me-2"></i> TLongMusic VIP Club</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="vipModalBody">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         ADMIN MANAGEMENT PORTAL MODAL (TOÀN DIỆN)
+         ========================================== -->
+    <div class="modal fade" id="adminPortalModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content" style="background: rgba(15, 16, 28, 0.96); backdrop-filter: blur(30px); border: 1px solid rgba(255, 19, 74, 0.6); border-radius: 24px; box-shadow: 0 0 60px rgba(255, 19, 74, 0.5);">
+                <div class="modal-header border-bottom border-secondary border-opacity-25 pb-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="badge bg-danger p-2 fs-6 rounded-circle"><i class="fas fa-shield-halved"></i></span>
+                        <div>
+                            <h5 class="modal-title text-white fw-bold mb-0">TRUNG TÂM QUẢN TRỊ ADMIN - TLONGMUSIC</h5>
+                            <small class="text-dim">Quản lý tổng thể: Thống kê, Quản lý Producer & Kiểm duyệt kho âm nhạc</small>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <ul class="nav nav-pills mb-4 gap-2" id="adminTabs" role="tablist">
+                        <li class="nav-item">
+                            <button class="nav-link active rounded-pill fw-bold px-4 py-2" id="admin-stats-tab" data-bs-toggle="pill" data-bs-target="#admin-stats-pane" type="button" role="tab">
+                                <i class="fas fa-chart-line me-2"></i> 1. Thống Kê & Doanh Thu
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link rounded-pill fw-bold px-4 py-2 text-white" id="admin-producers-tab" data-bs-toggle="pill" data-bs-target="#admin-producers-pane" type="button" role="tab" style="background: rgba(255, 255, 255, 0.08);" onclick="loadAdminProducers()">
+                                <i class="fas fa-users-gear me-2"></i> 2. Quản Lý Producer
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link rounded-pill fw-bold px-4 py-2 text-white" id="admin-musics-tab" data-bs-toggle="pill" data-bs-target="#admin-musics-pane" type="button" role="tab" style="background: rgba(255, 255, 255, 0.08);" onclick="loadAdminMusics()">
+                                <i class="fas fa-music me-2"></i> 3. Kiểm Duyệt Kho Nhạc
+                            </button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content" id="adminTabContent">
+                        <!-- TAB 1: THỐNG KÊ -->
+                        <div class="tab-pane fade show active" id="admin-stats-pane" role="tabpanel">
+                            <div class="row g-3" id="adminStatsGrid">
+                                <div class="col-12 text-center py-4 text-dim"><i class="fas fa-spinner fa-spin fa-2x"></i><br />Đang tải dữ liệu từ SQL Server...</div>
+                            </div>
+                        </div>
+
+                        <!-- TAB 2: QUẢN LÝ PRODUCER -->
+                        <div class="tab-pane fade" id="admin-producers-pane" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="text-white fw-bold mb-0"><i class="fas fa-headphones text-info me-2"></i>Danh Sách Producer Đã Cấp Quyền</h6>
+                                <button class="btn btn-sm btn-shimmer-ruby" onclick="showAdminModal()">
+                                    <i class="fas fa-plus-circle me-1"></i> Cấp Tài Khoản Producer Mới
+                                </button>
+                            </div>
+                            <div class="table-responsive rounded-3 border border-secondary border-opacity-25" id="adminProducersTableContainer">
+                                <div class="p-4 text-center text-dim">Đang tải danh sách Producer...</div>
+                            </div>
+                        </div>
+
+                        <!-- TAB 3: KIỂM DUYỆT NHẠC -->
+                        <div class="tab-pane fade" id="admin-musics-pane" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="text-white fw-bold mb-0"><i class="fas fa-sliders text-warning me-2"></i>Kiểm Duyệt Toàn Bộ Kho Nhạc SQL Server</h6>
+                                <span class="text-dim small">Nhấn Ẩn/Hiện để bật tắt bài hát trên trang chủ</span>
+                            </div>
+                            <div class="table-responsive rounded-3 border border-secondary border-opacity-25" id="adminMusicsTableContainer">
+                                <div class="p-4 text-center text-dim">Đang tải danh sách bài hát...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         PRODUCER STUDIO PORTAL MODAL (QUẢN LÝ NHẠC)
+         ========================================== -->
+    <div class="modal fade" id="producerPortalModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content" style="background: rgba(15, 16, 28, 0.96); backdrop-filter: blur(30px); border: 1px solid rgba(255, 209, 102, 0.6); border-radius: 24px; box-shadow: 0 0 60px rgba(255, 209, 102, 0.4);">
+                <div class="modal-header border-bottom border-secondary border-opacity-25 pb-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="badge p-2 fs-6 rounded-circle" style="background: #ffd166; color: #000;"><i class="fas fa-headphones-simple"></i></span>
+                        <div>
+                            <h5 class="modal-title text-white fw-bold mb-0">STUDIO PRODUCER - QUẢN LÝ KHO NHẠC CÁ NHÂN</h5>
+                            <small class="text-accent-premium" id="producerProfileSnippet">Producer DJ TLong • Nghệ sĩ chính thức</small>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <button class="btn btn-sm btn-shimmer-ruby" onclick="showProducerUploadModal()">
+                            <i class="fas fa-cloud-arrow-up me-1"></i> Upload Bài Nhạc Mới
+                        </button>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                </div>
+                <div class="modal-body p-4">
+                    <!-- Producer Bank Info Banner -->
+                    <div class="p-3 rounded-3 border border-secondary border-opacity-25 mb-4 d-flex flex-wrap justify-content-between align-items-center gap-3" 
+                         style="background: rgba(255, 209, 102, 0.05);">
+                        <div>
+                            <span class="badge badge-premium-gold mb-1"><i class="fas fa-building-columns me-1"></i> THÔNG TIN NHẬN THÙ LAO PHÁT HÀNH NHẠC</span>
+                            <div class="text-white small" id="producerBankDetails">
+                                Ngân hàng: <strong>MB Bank</strong> • STK: <strong class="text-warning font-monospace">09xxxxxxxx</strong> • Chủ TK: <strong>DJ TLONG</strong>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <span class="text-dim small d-block">Quy tắc tải nhạc:</span>
+                            <span class="text-white small">Nhạc bạn đăng tải phân theo 3 cấp độ: <strong>Lọt, Nhóm, Slot VIP</strong></span>
+                        </div>
+                    </div>
+
+                    <!-- My Tracks Table -->
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="text-white fw-bold mb-0"><i class="fas fa-compact-disc text-info me-2"></i>Kho Nhạc Bạn Đã Đăng Tải (SQL Server)</h6>
+                        <span class="badge bg-secondary" id="producerTracksCountBadge">0 bài hát</span>
+                    </div>
+                    <div class="table-responsive rounded-3 border border-secondary border-opacity-25" id="producerTracksTableContainer">
+                        <div class="p-4 text-center text-dim">Đang tải danh sách bài hát cá nhân...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         PRODUCER UPLOAD MODAL (FILE UPLOAD PHÒNG THU)
+         ========================================== -->
+    <div class="modal fade" id="producerUploadModal" tabindex="-1" aria-hidden="true" style="z-index: 1065;">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content" style="background: rgba(18, 19, 32, 0.98); backdrop-filter: blur(30px); border: 1px solid rgba(255, 209, 102, 0.7); border-radius: 24px; box-shadow: 0 0 60px rgba(255, 209, 102, 0.4);">
+                <div class="modal-header border-bottom border-secondary border-opacity-25 pb-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="badge p-2 fs-6 rounded-circle" style="background: #ffd166; color: #000;"><i class="fas fa-cloud-arrow-up"></i></span>
+                        <div>
+                            <h5 class="modal-title text-white fw-bold mb-0">STUDIO PRODUCER: ĐĂNG TẢI BẢN THU MỚI</h5>
+                    <!-- DIRECT FILE UPLOAD ZONE (100% PHÒNG THU GỐC) -->
+                    <form id="producerUploadForm" method="post" enctype="multipart/form-data" onsubmit="event.preventDefault(); submitProducerUploadForm(this);">
+                        <input type="hidden" name="sourceType" id="uploadSourceType" value="DirectFile" />
+                        <input type="hidden" name="durationSeconds" id="uploadDurationInput" value="240" />
+
+                        <div class="mb-4">
+                            <div class="drop-zone p-4 text-center rounded-4 border border-secondary border-opacity-50" 
+                                 id="audioDropZone"
+                                 style="background: rgba(255, 209, 102, 0.03); cursor: pointer; transition: all 0.3s ease;"
+                                 onclick="document.getElementById('audioFileInput').click()">
+                                <input type="file" id="audioFileInput" name="audioFile" accept="audio/*,.mp3,.wav,.flac,.m4a,.ogg" class="d-none" onchange="handleAudioFileSelect(this)" />
+                                <div id="dropZonePrompt">
+                                    <i class="fas fa-cloud-arrow-up text-warning fa-3x mb-3" style="filter: drop-shadow(0 0 10px rgba(255, 209, 102, 0.5));"></i>
+                                    <h6 class="text-white fw-bold mb-1">Bấm để chọn file âm thanh hoặc kéo thả vào đây</h6>
+                                    <small class="text-dim d-block mb-2">Hỗ trợ các định dạng: <strong>MP3 (320kbps), WAV (24-bit Lossless), FLAC, M4A</strong></small>
+                                    <span class="btn btn-sm btn-outline-warning rounded-pill px-3">
+                                        <i class="fas fa-folder-open me-1"></i> Chọn File Từ Máy Tính
+                                    </span>
+                                </div>
+                                <div id="fileSelectedInfo" class="d-none">
+                                    <div class="d-flex align-items-center justify-content-center gap-3">
+                                        <i class="fas fa-file-circle-check text-success fa-2x"></i>
+                                        <div class="text-start">
+                                            <div class="text-white fw-bold" id="selectedFileName">filename.mp3</div>
+                                            <small class="text-dim" id="selectedFileSize">0 MB</small>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-danger ms-3" onclick="event.stopPropagation(); clearSelectedAudioFile();">
+                                            <i class="fas fa-times me-1"></i> Đổi file khác
+                                        </button>
+                                    </div>
+                                    <audio id="audioPreviewElement" controls class="w-100 mt-3 d-none" style="border-radius: 12px;"></audio>
+
+                                    <!-- AI BPM & Tone Key Detection Card -->
+                                    <div id="audioAnalysisStatus" class="mt-3 p-3 rounded-3 border border-secondary border-opacity-50 text-start d-none" 
+                                         style="background: rgba(18, 19, 32, 0.9); box-shadow: 0 0 20px rgba(255, 209, 102, 0.2);">
+                                        <div class="d-flex align-items-center justify-content-between mb-2">
+                                            <span class="text-white small fw-bold">
+                                                <i class="fas fa-microchip text-warning me-2"></i>TRỢ LÝ TỰ ĐỘNG PHÂN TÍCH NHẠC
+                                            </span>
+                                            <span id="analysisBadge" class="badge badge-shimmer-gold">
+                                                <i class="fas fa-spinner fa-spin me-1"></i> Đang đọc BPM & Key...
+                                            </span>
+                                        </div>
+                                        <div class="d-flex flex-wrap align-items-center gap-2" id="analysisResultBadges">
+                                            <span class="badge badge-shimmer-ruby py-2 px-3" id="detectedBpmBadge" style="font-size: 0.95rem;">-- BPM</span>
+                                            <span class="badge badge-shimmer-cyan py-2 px-3" id="detectedKeyBadge" style="font-size: 0.95rem;">Key --</span>
+                                            <span class="badge bg-dark border border-secondary py-2 px-3 text-white font-monospace" id="detectedDurationBadge">Thời lượng: --:--</span>
+                                        </div>
+                                        <small class="text-dim d-block mt-2" style="font-size: 0.75rem;">
+                                            <i class="fas fa-wand-magic-sparkles text-info me-1"></i> Thông số BPM và Tone Key Camelot đã được điền tự động vào bảng bên dưới!
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- PRODUCT TYPE SELECTION (PHÂN BIỆT TRACK ĐƠN VS BẢN NONSTOP) -->
+                        <div class="p-3 mb-3 rounded-4 border border-secondary border-opacity-50" style="background: rgba(255, 255, 255, 0.04);">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <label class="form-label text-white fw-bold mb-0 d-flex align-items-center gap-2">
+                                    <i class="fas fa-layer-group text-warning"></i> PHÂN LOẠI SẢN PHẨM: <span class="text-danger">*</span>
+                                </label>
+                                <span class="badge bg-secondary" id="productTypeBadge">Đang chọn: Track Đơn</span>
+                            </div>
+                            <div class="d-flex gap-4">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="productTypeRadio" id="radioTypeTrack" value="Track" checked onchange="onUploadProductTypeChanged('Track')" />
+                                    <label class="form-check-label text-white fw-bold" for="radioTypeTrack" style="cursor: pointer;">
+                                        <i class="fas fa-compact-disc text-info me-1"></i> 🎵 Bản Track DJ (Đơn 3 - 6 phút)
+                                    </label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="productTypeRadio" id="radioTypeNonstop" value="Nonstop" onchange="onUploadProductTypeChanged('Nonstop')" />
+                                    <label class="form-check-label text-white fw-bold" for="radioTypeNonstop" style="cursor: pointer;">
+                                        <i class="fas fa-fire-flame-curved text-warning me-1"></i> 🔥 Bản Nonstop (Mix dài 30 - 90 phút)
+                                    </label>
+                                </div>
+                            </div>
+                            <input type="hidden" name="type" id="uploadProductTypeInput" value="Track" />
+                        </div>
+
+                        <!-- METADATA FIELDS -->
+                        <div class="row g-3">
+                            <div class="col-12 col-md-7">
+                                <label class="form-label text-dim small">Tiêu Đề Bản Thu / Tên Bài Hát: <span class="text-danger">*</span></label>
+                                <input type="text" name="title" id="uploadTitleInput" class="form-control bg-dark text-white border-secondary" placeholder="Ví dụ: Bay Phòng Cực Căng (TLong Remix)..." required />
+                            </div>
+                            <div class="col-12 col-md-5">
+                                <label class="form-label text-dim small">Nghệ Sĩ / Remixer: <span class="text-danger">*</span></label>
+                                <input type="text" name="artist" id="uploadArtistInput" class="form-control bg-dark text-white border-secondary" value="DJ TLong" required />
+                            </div>
+
+                            <div class="col-6 col-md-4">
+                                <label class="form-label text-dim small">Thể Loại Âm Nhạc:</label>
+                                <select name="genre" class="form-select bg-dark text-white border-secondary">
+                                    <option value="Vinahouse" selected>Vinahouse</option>
+                                    <option value="Electro House">Electro House</option>
+                                    <option value="Melbourne Bounce">Melbourne Bounce</option>
+                                    <option value="Progressive House">Progressive House</option>
+                                    <option value="Dubplate / VIP">Dubplate / VIP</option>
+                                    <option value="Trance">Trance</option>
+                                </select>
+                            </div>
+
+                            <div class="col-6 col-md-4">
+                                <label class="form-label text-dim small">BPM (Nhịp đập):</label>
+                                <input type="number" name="bpm" id="uploadBpmInput" class="form-control bg-dark text-white border-secondary" value="140" min="60" max="220" />
+                            </div>
+
+                            <div class="col-12 col-md-4">
+                                <label class="form-label text-dim small">Tone Key Camelot:</label>
+                                <input type="text" name="musicalKey" id="uploadMusicalKeyInput" list="camelotKeyList" class="form-control bg-dark text-white border-secondary" value="8A" placeholder="VD: 8A, 11B, 1A..." />
+                                <datalist id="camelotKeyList">
+                                    <option value="1A">1A (G#m)</option>
+                                    <option value="2A">2A (D#m)</option>
+                                    <option value="3A">3A (A#m)</option>
+                                    <option value="4A">4A (Fm)</option>
+                                    <option value="5A">5A (Cm)</option>
+                                    <option value="6A">6A (Gm)</option>
+                                    <option value="7A">7A (Dm)</option>
+                                    <option value="8A">8A (Am)</option>
+                                    <option value="9A">9A (Em)</option>
+                                    <option value="10A">10A (Bm)</option>
+                                    <option value="11A">11A (F#m)</option>
+                                    <option value="12A">12A (C#m)</option>
+                                    <option value="1B">1B (B)</option>
+                                    <option value="2B">2B (F#)</option>
+                                    <option value="3B">3B (C#)</option>
+                                    <option value="4B">4B (G#)</option>
+                                    <option value="5B">5B (D#)</option>
+                                    <option value="6B">6B (A#)</option>
+                                    <option value="7B">7B (F)</option>
+                                    <option value="8B">8B (C)</option>
+                                    <option value="9B">9B (G)</option>
+                                    <option value="10B">10B (D)</option>
+                                    <option value="11B">11B (A)</option>
+                                    <option value="12B">12B (E)</option>
+                                </datalist>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label class="form-label text-dim small" id="uploadCategoryLabel">Phân Cấp Track (Theo Chuẩn SRS): <span class="text-danger">*</span></label>
+                                <select name="categoryCode" id="uploadCategorySelect" class="form-select bg-dark text-white border-secondary" required onchange="handleCategoryChange(this.value)">
+                                    <option value="TrackLot">Track Lọt (Khách nghe full, Free tải được)</option>
+                                    <option value="TrackNhom" selected>Track Nhóm (Standard & Premium tải được)</option>
+                                    <option value="TrackSlot">Track Slot VIP (Chỉ Premium tải, Demo 30s)</option>
+                                </select>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label class="form-label text-dim small">Chất Lượng Âm Thanh Công Bố:</label>
+                                <select name="qualityAvailable" id="uploadQualitySelect" class="form-select bg-dark text-white border-secondary">
+                                    <option value="MP3 320kbps">MP3 320kbps (Chuẩn phòng thu)</option>
+                                    <option value="WAV Lossless 24-Bit">WAV Lossless 24-Bit (Master Club)</option>
+                                    <option value="FLAC 24-Bit Lossless">FLAC 24-Bit Lossless</option>
+                                </select>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label text-dim small">Ảnh Bìa Track (Cover Art - Tùy chọn):</label>
+                                <div class="input-group">
+                                    <input type="file" name="coverFile" accept="image/*" class="form-control bg-dark text-white border-secondary" />
+                                    <input type="url" name="coverUrl" class="form-control bg-dark text-white border-secondary" placeholder="Hoặc dán URL ảnh https://..." />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 pt-3 border-top border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
+                            <button type="button" class="btn btn-outline-secondary px-4 rounded-pill" data-bs-dismiss="modal">Hủy bỏ</button>
+                            <button type="submit" id="producerUploadSubmitBtn" class="btn btn-shimmer-ruby px-5 py-2 rounded-pill fw-bold">
+                                <i class="fas fa-cloud-arrow-up me-2"></i> Đăng Tải Lên SQL Server
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 2100; margin-top: 65px;">
+        <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true"
+             style="background: rgba(18, 19, 32, 0.95); backdrop-filter: blur(20px); border: 1px solid rgba(255, 19, 74, 0.5); border-radius: 14px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(255, 19, 74, 0.3);">
+            <div class="toast-header bg-dark text-white border-bottom" style="border-color: rgba(255, 255, 255, 0.1) !important;">
+                <img src="~/images/logo.png" class="rounded me-2" alt="TL" style="width: 18px; height: 18px;" />
+                <strong class="me-auto text-danger" style="font-size: 0.85rem;">TLongMusic Crystal</strong>
+                <small class="text-muted">Thông báo</small>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body text-white" id="liveToastBody" style="font-size: 0.88rem;">
+                Chào mừng bạn đến với TLongMusic!
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/player.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

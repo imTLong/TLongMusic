@@ -1,0 +1,588 @@
+﻿/* ==========================================================================
+   TLongMusic - Ultimate Dark & Neon Crimson Red DJ Theme (LÒE LOẸT & QUẨY MODE)
+   ========================================================================== */
+
+:root {
+    --bg-main: #060608;
+    --bg-surface: #0b0c12;
+    --bg-card: #12131c;
+    --bg-card-hover: #1b1c2b;
+    --border-subtle: #252638;
+    
+    --red-primary: #ff1744;
+    --red-neon: #ff0055;
+    --red-glow: rgba(255, 23, 68, 0.45);
+    --red-glow-strong: rgba(255, 23, 68, 0.85);
+    --gold-vip: #ffd700;
+    --gold-glow: rgba(255, 215, 0, 0.5);
+    --cyan-neon: #00f0ff;
+    
+    --font-heading: 'Orbitron', 'Montserrat', sans-serif;
+    --font-body: 'Plus Jakarta Sans', sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg-main);
+    color: #f8fafc;
+    font-family: var(--font-body);
+    overflow-x: hidden;
+    padding-bottom: 130px;
+    min-height: 100vh;
+    position: relative;
+}
+
+/* ==========================================
+   LASER BEAMS & STROBE LIGHT EFFECT (ĐÈN QUÉT CLUB)
+   ========================================== */
+.club-laser-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 1;
+    overflow: hidden;
+}
+
+.laser-beam {
+    position: absolute;
+    width: 4px;
+    height: 150vh;
+    top: -20vh;
+    opacity: 0.25;
+    filter: blur(4px);
+    transform-origin: top center;
+}
+
+.laser-beam-1 {
+    left: 20%;
+    background: linear-gradient(180deg, rgba(255, 23, 68, 0.9), transparent);
+    box-shadow: 0 0 25px #ff1744, 0 0 50px #ff0055;
+    animation: sweepLaser1 4s infinite ease-in-out alternate;
+}
+
+.laser-beam-2 {
+    right: 25%;
+    background: linear-gradient(180deg, rgba(255, 0, 128, 0.9), transparent);
+    box-shadow: 0 0 25px #ff0080, 0 0 50px #ff1744;
+    animation: sweepLaser2 5s infinite ease-in-out alternate;
+}
+
+.laser-beam-3 {
+    left: 50%;
+    background: linear-gradient(180deg, rgba(255, 215, 0, 0.8), transparent);
+    box-shadow: 0 0 20px #ffd700, 0 0 40px #ff5252;
+    animation: sweepLaser3 3.5s infinite ease-in-out alternate;
+}
+
+@keyframes sweepLaser1 {
+    0% { transform: rotate(-35deg); opacity: 0.15; }
+    50% { opacity: 0.45; filter: blur(2px); }
+    100% { transform: rotate(35deg); opacity: 0.2; }
+}
+
+@keyframes sweepLaser2 {
+    0% { transform: rotate(40deg); opacity: 0.2; }
+    50% { opacity: 0.5; filter: blur(3px); }
+    100% { transform: rotate(-30deg); opacity: 0.15; }
+}
+
+@keyframes sweepLaser3 {
+    0% { transform: rotate(-20deg); opacity: 0.1; }
+    100% { transform: rotate(25deg); opacity: 0.35; }
+}
+
+/* Canvas Particles Floating in Background */
+#partyParticlesCanvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 2;
+}
+
+/* ==========================================
+   PARTY MODE (CHẾ ĐỘ QUẨY TUNG NÓC)
+   ========================================== */
+body.party-mode-active {
+    animation: clubStrobeGlow 1.2s infinite ease-in-out alternate;
+}
+
+@keyframes clubStrobeGlow {
+    0% { background-color: #060608; }
+    50% { background-color: #120408; }
+    100% { background-color: #080612; }
+}
+
+body.party-mode-active .tlong-card {
+    animation: cardPulseBeat 0.86s infinite cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes cardPulseBeat {
+    0%, 100% { transform: scale(1); }
+    15% { transform: scale(1.025); box-shadow: 0 0 25px var(--red-glow-strong); }
+}
+
+/* ==========================================
+   NAVIGATION BAR & LOGO VINYL EFFECT
+   ========================================== */
+.tlong-navbar {
+    background: rgba(8, 8, 12, 0.88);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border-bottom: 2px solid rgba(255, 23, 68, 0.4);
+    box-shadow: 0 4px 25px rgba(255, 23, 68, 0.2);
+    padding: 12px 0;
+    z-index: 1000;
+}
+
+.tlong-logo-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    position: relative;
+}
+
+/* Logo with neon groove vinyl effect */
+.tlong-logo-img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 2px solid var(--red-primary);
+    box-shadow: 0 0 16px var(--red-glow-strong), inset 0 0 10px rgba(255, 23, 68, 0.8);
+    transition: transform 0.6s ease;
+    object-fit: cover;
+}
+
+/* Khi nhạc đang phát: Logo quay tít mù như đĩa than */
+.spinning-vinyl {
+    animation: spinVinyl 3.5s linear infinite !important;
+}
+
+@keyframes spinVinyl {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.tlong-brand-title {
+    font-family: var(--font-heading);
+    font-weight: 900;
+    font-size: 1.5rem;
+    letter-spacing: 2px;
+    color: #ffffff;
+    margin: 0;
+    text-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
+}
+
+.tlong-brand-title span {
+    color: var(--red-primary);
+    text-shadow: 0 0 15px var(--red-glow-strong), 0 0 30px #ff0055;
+    animation: neonBlink 2.5s infinite alternate;
+}
+
+@keyframes neonBlink {
+    0%, 100% { opacity: 1; filter: drop-shadow(0 0 12px #ff1744); }
+    40% { opacity: 0.85; }
+    80% { opacity: 1; filter: drop-shadow(0 0 25px #ff0055); }
+}
+
+.tlong-nav-link {
+    color: #94a3b8 !important;
+    font-weight: 700;
+    font-size: 0.95rem;
+    padding: 8px 16px !important;
+    border-radius: 8px;
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tlong-nav-link:hover, .tlong-nav-link.active {
+    color: #ffffff !important;
+    background: rgba(255, 23, 68, 0.18);
+    box-shadow: 0 0 15px var(--red-glow);
+    transform: translateY(-2px);
+}
+
+/* Nút BẬT CHẾ ĐỘ QUẨY nhảy tưng bừng */
+.btn-party-toggle {
+    background: linear-gradient(135deg, #ff0055 0%, #ff5500 50%, #ff0055 100%);
+    background-size: 200% 200%;
+    color: #ffffff !important;
+    font-weight: 800;
+    font-family: var(--font-heading);
+    font-size: 0.82rem;
+    letter-spacing: 1px;
+    border: none;
+    border-radius: 20px;
+    padding: 7px 18px;
+    box-shadow: 0 0 20px rgba(255, 0, 85, 0.7);
+    animation: gradientShift 2s infinite linear, partyShake 3s infinite;
+    cursor: pointer;
+}
+
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@keyframes partyShake {
+    0%, 80%, 100% { transform: scale(1) rotate(0deg); }
+    82% { transform: scale(1.08) rotate(-3deg); }
+    86% { transform: scale(1.08) rotate(3deg); }
+    90% { transform: scale(1.08) rotate(-3deg); }
+    94% { transform: scale(1.05) rotate(0deg); }
+}
+
+/* ==========================================
+   HERO BANNER SIÊU CHÁY
+   ========================================== */
+.hero-dj-section {
+    position: relative;
+    background: radial-gradient(circle at 75% 25%, rgba(255, 23, 68, 0.35) 0%, rgba(18, 19, 28, 0.95) 60%),
+                linear-gradient(180deg, #10111a 0%, #060608 100%);
+    border-radius: 24px;
+    border: 2px solid rgba(255, 23, 68, 0.45);
+    padding: 65px 45px;
+    margin-top: 25px;
+    margin-bottom: 45px;
+    overflow: hidden;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.9), 0 0 40px rgba(255, 23, 68, 0.3);
+}
+
+.hero-dj-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #ff1744, #ff0055, #ffd700, transparent);
+    animation: scanTopBorder 3s infinite linear;
+}
+
+@keyframes scanTopBorder {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.hero-title {
+    font-family: var(--font-heading);
+    font-size: 3rem;
+    font-weight: 900;
+    line-height: 1.15;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+
+.text-gradient-red {
+    background: linear-gradient(90deg, #ffffff 0%, #ff1744 40%, #ff0055 70%, #ffd700 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradientShift 3s linear infinite;
+}
+
+/* Sóng Equalizer nhảy tưng bừng */
+.equalizer-wave {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 4px;
+    height: 24px;
+}
+
+.equalizer-wave .bar {
+    width: 4px;
+    border-radius: 3px;
+    background: linear-gradient(180deg, #ffd700, #ff1744);
+    animation: bounceEqualizer 0.7s infinite ease-in-out alternate;
+    box-shadow: 0 0 8px rgba(255, 23, 68, 0.8);
+}
+
+.equalizer-wave .bar:nth-child(1) { height: 45%; animation-delay: 0.1s; }
+.equalizer-wave .bar:nth-child(2) { height: 90%; animation-delay: 0.28s; }
+.equalizer-wave .bar:nth-child(3) { height: 100%; animation-delay: 0.05s; }
+.equalizer-wave .bar:nth-child(4) { height: 75%; animation-delay: 0.4s; }
+.equalizer-wave .bar:nth-child(5) { height: 50%; animation-delay: 0.18s; }
+.equalizer-wave .bar:nth-child(6) { height: 85%; animation-delay: 0.32s; }
+
+@keyframes bounceEqualizer {
+    0% { height: 15%; filter: hue-rotate(0deg); }
+    100% { height: 100%; filter: hue-rotate(45deg); }
+}
+
+/* ==========================================
+   BUTTONS & VIỀN LED NEON CHẠY QUANH
+   ========================================== */
+.btn-tlong-red {
+    background: linear-gradient(135deg, #ff1744 0%, #b30710 100%);
+    color: #ffffff;
+    font-weight: 800;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 26px;
+    box-shadow: 0 4px 20px var(--red-glow-strong);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-tlong-red:hover {
+    background: linear-gradient(135deg, #ff335c 0%, #e50914 100%);
+    box-shadow: 0 8px 30px rgba(255, 23, 68, 0.9), 0 0 40px #ff0055;
+    color: #ffffff;
+    transform: translateY(-3px) scale(1.04);
+}
+
+.btn-tlong-outline {
+    background: rgba(20, 21, 30, 0.7);
+    color: #ffffff;
+    font-weight: 700;
+    border: 2px solid rgba(255, 23, 68, 0.4);
+    border-radius: 10px;
+    padding: 12px 24px;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.btn-tlong-outline:hover {
+    border-color: var(--red-primary);
+    color: #fff;
+    box-shadow: 0 0 20px var(--red-glow-strong);
+    transform: translateY(-3px);
+}
+
+/* ==========================================
+   CARDS & GRIDS (HIỆU ỨNG ĐÈN CHỚP & BASS DROP)
+   ========================================== */
+.tlong-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.tlong-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    border-color: var(--red-primary);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.9), 0 0 25px var(--red-glow-strong);
+    background: var(--bg-card-hover);
+}
+
+.tlong-card-img-wrapper {
+    position: relative;
+    padding-top: 56.25%;
+    overflow: hidden;
+    background: #000;
+}
+
+.tlong-card-img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.tlong-card:hover .tlong-card-img {
+    transform: scale(1.12);
+}
+
+.play-hover-btn {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.6);
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--red-primary);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 0 25px var(--red-glow-strong);
+    cursor: pointer;
+    border: none;
+}
+
+.tlong-card:hover .play-hover-btn {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+    animation: playBtnPulse 1.2s infinite alternate;
+}
+
+@keyframes playBtnPulse {
+    0% { box-shadow: 0 0 15px var(--red-glow-strong); }
+    100% { box-shadow: 0 0 35px #ff0055, 0 0 50px #ff1744; }
+}
+
+/* ==========================================
+   DJ TRACK TABLE POOL
+   ========================================== */
+.dj-table-wrapper {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+}
+
+.dj-table th {
+    background: #0d0e16;
+    color: #64748b;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    font-weight: 800;
+    letter-spacing: 1px;
+    padding: 16px 20px;
+    border-bottom: 2px solid rgba(255, 23, 68, 0.3);
+}
+
+.dj-table td {
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    vertical-align: middle;
+    transition: all 0.25s ease;
+}
+
+.dj-table-row:hover td {
+    background: rgba(255, 23, 68, 0.1);
+}
+
+.dj-table-row.active-track td {
+    background: rgba(255, 23, 68, 0.18);
+    border-left: 4px solid var(--red-primary);
+    box-shadow: inset 0 0 15px rgba(255, 23, 68, 0.2);
+}
+
+.track-play-inline-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #1b1c28;
+    border: 1px solid var(--border-subtle);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.track-play-inline-btn:hover, .dj-table-row.active-track .track-play-inline-btn {
+    background: var(--red-primary);
+    border-color: var(--red-primary);
+    box-shadow: 0 0 18px var(--red-glow-strong);
+    color: #fff;
+    transform: scale(1.15);
+}
+
+/* ==========================================
+   PRICING TIER CARDS
+   ========================================== */
+.pricing-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 20px;
+    padding: 40px 28px;
+    position: relative;
+    transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.pricing-card.popular {
+    border-color: var(--red-primary);
+    background: radial-gradient(circle at 50% 0%, rgba(255, 23, 68, 0.22) 0%, var(--bg-card) 75%);
+    box-shadow: 0 0 35px rgba(255, 23, 68, 0.35);
+    transform: scale(1.04);
+}
+
+.pricing-card:hover {
+    transform: translateY(-10px) scale(1.03);
+    border-color: var(--red-primary);
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.9), 0 0 35px var(--red-glow-strong);
+}
+
+/* ==========================================
+   STICKY BOTTOM MUSIC PLAYER (SIÊU CHÁY)
+   ========================================== */
+.tlong-player-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1050;
+    background: rgba(10, 11, 16, 0.96);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-top: 2px solid rgba(255, 23, 68, 0.5);
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.95), 0 -2px 25px rgba(255, 23, 68, 0.3);
+    padding: 12px 24px;
+}
+
+.player-btn-main {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff1744 0%, #b30710 100%);
+    color: #fff;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    box-shadow: 0 0 22px var(--red-glow-strong);
+    transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.player-btn-main:hover {
+    transform: scale(1.15);
+    box-shadow: 0 0 35px #ff0055;
+}
+
+/* Sóng nhạc Canvas rực rỡ */
+#audioWaveCanvas {
+    height: 32px;
+    width: 100%;
+    border-radius: 6px;
+    filter: drop-shadow(0 0 8px rgba(255, 23, 68, 0.6));
+}
+
+/* Mouse Spark Particle */
+.neon-sparkle {
+    position: fixed;
+    pointer-events: none;
+    border-radius: 50%;
+    z-index: 9999;
+    animation: sparkDisappear 0.6s ease-out forwards;
+}
+
+@keyframes sparkDisappear {
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(0.2) translate(var(--tx), var(--ty)); opacity: 0; }
+}

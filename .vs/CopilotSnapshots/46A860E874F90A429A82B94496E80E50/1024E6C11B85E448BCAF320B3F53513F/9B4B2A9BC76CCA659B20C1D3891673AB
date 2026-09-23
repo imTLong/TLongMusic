@@ -1,0 +1,275 @@
+﻿using System.Text.Json;
+using System.Text.RegularExpressions;
+
+namespace TLongMusic.Services
+{
+    public class SoundCloudTrackInfo
+    {
+        public string Title { get; set; } = string.Empty;
+        public string Artist { get; set; } = string.Empty;
+        public int DurationSeconds { get; set; } = 240;
+        public string CoverUrl { get; set; } = string.Empty;
+        public string AudioUrl { get; set; } = string.Empty;
+        public string FileName { get; set; } = string.Empty;
+        public double FileSizeMb { get; set; }
+        public bool IsNonstop { get; set; }
+    }
+
+    public static class SoundCloudDownloader
+    {
+        private static string _cachedClientId = "Pb72ranhoyt6gw7hM7TkzUItXlMWSNSo";
+        private static DateTime _lastClientIdRefresh = DateTime.MinValue;
+        private static readonly HttpClient _httpClient = new HttpClient(new HttpClientHandler
+        {
+            AutomaticDecompression = System.Net.DecompressionMethods.GZip | System.Net.DecompressionMethods.Deflate
+        })
+        {
+            Timeout = TimeSpan.FromMinutes(10)
+        };
+
+        static SoundCloudDownloader()
+        {
+            _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36");
+        }
+
+        public static async Task<string> GetClientIdAsync()
+        {
+            if (!string.IsNullOrEmpty(_cachedClientId) && (DateTime.UtcNow - _lastClientIdRefresh).TotalHours < 12)
+            {
+                return _cachedClientId;
+            }
+
+            try
+            {
+                var html = await _httpClient.GetStringAsync("https://soundcloud.com");
+                var matches = Regex.Matches(html, @"src=""(https://[a-zA-Z0-9.\-/_]+\.js)""");
+                foreach (Match m in matches)
+                {
+                    try
+                    {
+                        var js = await _httpClient.GetStringAsync(m.Groups[1].Value);
+                        var cidMatch = Regex.Match(js, @"client_id[:=]""([a-zA-Z0-9]{32})""");
+                        if (cidMatch.Success)
+                        {
+                            _cachedClientId = cidMatch.Groups[1].Value;
+                            _lastClientIdRefresh = DateTime.UtcNow;
+                            return _cachedClientId;
+                        }
+                    }
+                    catch { }
+                }
+            }
+            catch { }
+
+            return _cachedClientId;
+        }
+
+        public static async Task<SoundCloudTrackInfo?> DownloadTrackAsync(string soundCloudUrl, string outputFilePath)
+        {
+            if (string.IsNullOrWhiteSpace(soundCloudUrl) || !soundCloudUrl.Contains("soundcloud.com"))
+                return null;
+
+            var clientId = await GetClientIdAsync();
+            var resolveUrl = $"https://api-v2.soundcloud.com/resolve?url={Uri.EscapeDataString(soundCloudUrl.Trim())}&client_id={clientId}";
+
+            using var resolveResp = await _httpClient.GetAsync(resolveUrl);
+            string jsonContent = "";
+            if (!resolveResp.IsSuccessStatusCode)
+            {
+                _lastClientIdRefresh = DateTime.MinValue;
+                clientId = await GetClientIdAsync();
+                resolveUrl = $"https://api-v2.soundcloud.com/resolve?url={Uri.EscapeDataString(soundCloudUrl.Trim())}&client_id={clientId}";
+                using var retryResp = await _httpClient.GetAsync(resolveUrl);
+                if (!retryResp.IsSuccessStatusCode)
+                    return null;
+                jsonContent = await retryResp.Content.ReadAsStringAsync();
+            }
+            else
+            {
+                jsonContent = await resolveResp.Content.ReadAsStringAsync();
+            }
+
+            using var doc = JsonDocument.Parse(jsonContent);
+            var root = doc.RootElement;
+
+            var title = root.TryGetProperty("title", out var tProp) ? tProp.GetString() ?? "SoundCloud Track" : "SoundCloud Track";
+            var artist = "SoundCloud Producer";
+            if (root.TryGetProperty("user", out var uProp) && uProp.TryGetProperty("username", out var unProp))
+            {
+                artist = unProp.GetString() ?? artist;
+            }
+
+            int durationMs = root.TryGetProperty("duration", out var durProp) ? durProp.GetInt32() : 240000;
+            int durationSeconds = durationMs / 1000;
+            bool isNonstop = durationSeconds >= 1200 || title.ToLower().Contains("nonstop") || title.ToLower().Contains("vietmix");
+
+            var artwork = "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=600&auto=format&fit=crop&q=80";
+            if (root.TryGetProperty("artwork_url", out var artProp) && !string.IsNullOrEmpty(artProp.GetString()))
+            {
+                artwork = artProp.GetString()!.Replace("-large", "-t500x500");
+            }
+
+            // 0. Check if author provided direct original master download on SoundCloud
+            bool downloadedOriginal = false;
+            if (root.TryGetProperty("downloadable", out var dlAble) && dlAble.GetBoolean() &&
+                root.TryGetProperty("download_url", out var dlUrlProp) && !string.IsNullOrEmpty(dlUrlProp.GetString()))
+            {
+                try
+                {
+                    var rawDlUrl = dlUrlProp.GetString();
+                    var apiDlUrl = $"{rawDlUrl}?client_id={clientId}";
+                    using var dlResp = await _httpClient.GetAsync(apiDlUrl);
+                    if (dlResp.IsSuccessStatusCode)
+                    {
+                        var dlJson = await dlResp.Content.ReadAsStringAsync();
+                        using var dlDoc = JsonDocument.Parse(dlJson);
+                        if (dlDoc.RootElement.TryGetProperty("redirectUri", out var rUriProp))
+                        {
+                            var originalDownloadUrl = rUriProp.GetString();
+                            if (!string.IsNullOrEmpty(originalDownloadUrl))
+                            {
+                                using var origResp = await _httpClient.GetAsync(originalDownloadUrl, HttpCompletionOption.ResponseHeadersRead);
+                                if (origResp.IsSuccessStatusCode)
+                                {
+                                    var dir = Path.GetDirectoryName(outputFilePath);
+                                    if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+                                        Directory.CreateDirectory(dir);
+
+                                    await using (var fileStream = new FileStream(outputFilePath, FileMode.Create, FileAccess.Write, FileShare.None, 81920, true))
+                                    {
+                                        await origResp.Content.CopyToAsync(fileStream);
+                                    }
+
+                                    var fInfo = new FileInfo(outputFilePath);
+                                    if (fInfo.Exists && fInfo.Length > 1000)
+                                    {
+                                        downloadedOriginal = true;
+                                        Console.WriteLine($"[SoundCloudDownloader] Successfully fetched original master file! Size: {fInfo.Length} bytes");
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                catch (Exception exDl)
+                {
+                    Console.WriteLine($"[SoundCloudDownloader] Original download note: {exDl.Message}");
+                }
+            }
+
+            if (!downloadedOriginal)
+            {
+                // Find progressive mp3 stream or fallback to first stream
+                string? streamUrl = null;
+                if (root.TryGetProperty("media", out var mediaProp) && mediaProp.TryGetProperty("transcodings", out var tcProp))
+                {
+                    // 1. Prioritize progressive audio/mpeg
+                    foreach (var tc in tcProp.EnumerateArray())
+                    {
+                        var protocol = tc.TryGetProperty("format", out var f) && f.TryGetProperty("protocol", out var p) ? p.GetString() : "";
+                        var mime = f.TryGetProperty("mime_type", out var m) ? m.GetString() : "";
+                        if (protocol == "progressive" && (mime?.Contains("audio/mpeg") == true || mime?.Contains("mp3") == true))
+                        {
+                            var url = tc.GetProperty("url").GetString();
+                            if (!string.IsNullOrEmpty(url))
+                            {
+                                streamUrl = $"{url}?client_id={clientId}";
+                                break;
+                            }
+                        }
+                    }
+
+                    // 2. If no progressive mp3, try any progressive
+                    if (streamUrl == null)
+                    {
+                        foreach (var tc in tcProp.EnumerateArray())
+                        {
+                            var protocol = tc.TryGetProperty("format", out var f) && f.TryGetProperty("protocol", out var p) ? p.GetString() : "";
+                            if (protocol == "progressive")
+                            {
+                                var url = tc.GetProperty("url").GetString();
+                                if (!string.IsNullOrEmpty(url))
+                                {
+                                    streamUrl = $"{url}?client_id={clientId}";
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (string.IsNullOrEmpty(streamUrl))
+                    return null;
+
+                // Fetch actual CDN URL
+                using var streamResp = await _httpClient.GetAsync(streamUrl);
+                if (!streamResp.IsSuccessStatusCode)
+                    return null;
+
+                var streamJson = await streamResp.Content.ReadAsStringAsync();
+                using var streamDoc = JsonDocument.Parse(streamJson);
+                if (!streamDoc.RootElement.TryGetProperty("url", out var cdnUrlProp))
+                    return null;
+
+                var cdnUrl = cdnUrlProp.GetString();
+                if (string.IsNullOrEmpty(cdnUrl))
+                    return null;
+
+                // Download raw stream to a temporary file
+                var rawTempPath = outputFilePath + ".raw";
+                using var cdnResp = await _httpClient.GetAsync(cdnUrl, HttpCompletionOption.ResponseHeadersRead);
+                if (!cdnResp.IsSuccessStatusCode)
+                    return null;
+
+                var directory = Path.GetDirectoryName(outputFilePath);
+                if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+                    Directory.CreateDirectory(directory);
+
+                await using (var fileStream = new FileStream(rawTempPath, FileMode.Create, FileAccess.Write, FileShare.None, 81920, true))
+                {
+                    await cdnResp.Content.CopyToAsync(fileStream);
+                }
+
+                // Transcode raw stream into authentic 320kbps MP3
+                if (File.Exists(rawTempPath) && new FileInfo(rawTempPath).Length > 1000)
+                {
+                    bool encoded = AudioProcessingService.ConvertTo320kbpsMp3(rawTempPath, outputFilePath);
+                    if (!encoded || !File.Exists(outputFilePath) || new FileInfo(outputFilePath).Length < 1000)
+                    {
+                        File.Copy(rawTempPath, outputFilePath, true);
+                    }
+
+                    try { File.Delete(rawTempPath); } catch { }
+                }
+            }
+
+            // Also prepare companion Master WAV (PCM lossless)
+            try
+            {
+                var dir = Path.GetDirectoryName(outputFilePath) ?? "";
+                var baseName = Path.GetFileNameWithoutExtension(outputFilePath);
+                var wavPath = Path.Combine(dir, $"{baseName}_master.wav");
+                if (!File.Exists(wavPath) || new FileInfo(wavPath).Length < 1000)
+                {
+                    _ = Task.Run(() => AudioProcessingService.ConvertToMasterWav(outputFilePath, wavPath));
+                }
+            }
+            catch { }
+
+            var fileInfo = new FileInfo(outputFilePath);
+            if (!fileInfo.Exists || fileInfo.Length < 1000)
+                return null;
+
+            return new SoundCloudTrackInfo
+            {
+                Title = title,
+                Artist = artist,
+                DurationSeconds = durationSeconds,
+                CoverUrl = artwork,
+                FileName = $"{title}.mp3",
+                FileSizeMb = Math.Round((double)fileInfo.Length / (1024 * 1024), 2),
+                IsNonstop = isNonstop
+            };
+        }
+    }
+}
