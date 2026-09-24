@@ -177,6 +177,25 @@ async function handleLogout() {
     window.location.href = '/';
 }
 
+function togglePasswordVisibility(inputId, btn) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    const isPass = input.type === 'password';
+    input.type = isPass ? 'text' : 'password';
+    const icon = btn ? btn.querySelector('i') : null;
+    if (icon) {
+        icon.className = isPass ? 'fas fa-eye-slash text-warning' : 'fas fa-eye';
+    }
+}
+
+function quickFillAndLogin(username, password) {
+    const uInput = document.getElementById('loginUsername');
+    const pInput = document.getElementById('loginPassword');
+    if (uInput) uInput.value = username;
+    if (pInput) pInput.value = password;
+    handleLogin(username, password);
+}
+
 function updateAuthUI() {
     const authContainer = document.getElementById('navbarAuthSection');
     const roleActionBtnContainer = document.getElementById('roleActionButtons');
@@ -210,14 +229,22 @@ function updateAuthUI() {
         }
     }
 
-    // Loại bỏ chữ/nút Nâng Cấp VIP ở tài khoản Admin và Producer trên thanh Header
+    // Loại bỏ chữ/nút Nâng Cấp VIP ở tài khoản Admin và Producer trên toàn website
+    const isStaff = user && (user.role === 'Admin' || user.primaryRole === 'Admin' || user.role === 'Producer' || user.primaryRole === 'Producer' || (user.roles && (user.roles.includes('Admin') || user.roles.includes('Producer'))));
     const navUpgradeVipBtn = document.getElementById('navUpgradeVipBtn');
+    const heroUpgradeVipBtn = document.getElementById('heroUpgradeVipBtn');
     if (navUpgradeVipBtn) {
-        const isStaff = user && (user.role === 'Admin' || user.primaryRole === 'Admin' || user.role === 'Producer' || user.primaryRole === 'Producer');
         if (isStaff) {
             navUpgradeVipBtn.style.setProperty('display', 'none', 'important');
         } else {
             navUpgradeVipBtn.style.removeProperty('display');
+        }
+    }
+    if (heroUpgradeVipBtn) {
+        if (isStaff) {
+            heroUpgradeVipBtn.style.setProperty('display', 'none', 'important');
+        } else {
+            heroUpgradeVipBtn.style.removeProperty('display');
         }
     }
 
@@ -249,12 +276,12 @@ function updateAuthUI() {
             roleBadgeText = '<i class="fas fa-headphones me-1"></i> PRODUCER';
             avatarBorder = '2px solid #ffd166';
             avatarShadow = '0 0 12px rgba(255, 209, 102, 0.7)';
-        } else if (user.tier.toLowerCase() === 'premium') {
+        } else if (user.tier && user.tier.toLowerCase() === 'premium') {
             roleBadgeClass = 'badge badge-premium-gold';
             roleBadgeText = '<i class="fas fa-crown me-1"></i> PREMIUM VIP';
             avatarBorder = '2px solid #ffd166';
             avatarShadow = '0 0 14px rgba(255, 209, 102, 0.8)';
-        } else if (user.tier.toLowerCase() === 'standard') {
+        } else if (user.tier && user.tier.toLowerCase() === 'standard') {
             roleBadgeClass = 'badge badge-standard-red';
             roleBadgeText = '<i class="fas fa-certificate me-1"></i> STANDARD VIP';
             avatarBorder = '2px solid #ff134a';
@@ -266,10 +293,68 @@ function updateAuthUI() {
             avatarShadow = 'none';
         }
 
-        // Admin và Producer không hiển thị hạn VIP
-        const tierExpiryText = (primaryRole !== 'Admin' && primaryRole !== 'Producer' && user.tierExpiresAt && (user.tier.toLowerCase() === 'standard' || user.tier.toLowerCase() === 'premium'))
-            ? `<small class="text-warning d-block mt-1 font-monospace" style="font-size: 0.75rem;"><i class="far fa-calendar-check me-1"></i> Hạn VIP: ${new Date(user.tierExpiresAt).toLocaleDateString('vi-VN')}</small>`
-            : '';
+        // Hiển thị thông tin Hạn Dùng VIP và Nâng Cấp (Chỉ dành cho Member, Admin & Producer tuyệt đối không hiển thị)
+        let tierExpiryText = '';
+        if (!isStaff) {
+            const userTier = (user.tier || 'free').toLowerCase();
+            const isPremium = userTier === 'premium';
+            const isStandard = userTier === 'standard';
+            const isVip = isPremium || isStandard;
+
+            if (isVip && user.tierExpiresAt) {
+                const expDate = new Date(user.tierExpiresAt);
+                const now = new Date();
+                const diffDays = Math.ceil((expDate - now) / (1000 * 60 * 60 * 24));
+                const statusBadge = diffDays > 0
+                    ? `<span class="text-success fw-bold"><i class="fas fa-clock me-1"></i>Còn ${diffDays} ngày</span> <span class="text-dim" style="font-size: 0.72rem;">(đến ${expDate.toLocaleDateString('vi-VN')})</span>`
+                    : `<span class="text-danger fw-bold"><i class="fas fa-circle-exclamation me-1"></i>Đã hết hạn ngày ${expDate.toLocaleDateString('vi-VN')}</span>`;
+
+                let upgradeCta = '';
+                if (isStandard) {
+                    upgradeCta = `
+                        <a href="/Payment/Checkout?package=Premium" class="btn btn-sm btn-shimmer-gold w-100 mt-2 py-1 fw-bold text-dark text-nowrap d-block text-center" style="font-size: 0.72rem;">
+                            <i class="fas fa-crown me-1"></i> Nâng Cấp Lên Premium VIP
+                        </a>
+                    `;
+                } else {
+                    upgradeCta = `
+                        <a href="/Payment/Checkout?package=Premium" class="btn btn-sm btn-outline-warning w-100 mt-2 py-1 fw-bold text-nowrap d-block text-center" style="font-size: 0.72rem;">
+                            <i class="fas fa-rotate-right me-1"></i> Gia Hạn Thêm Premium VIP
+                        </a>
+                    `;
+                }
+
+                tierExpiryText = `
+                    <div class="mt-2 pt-2 border-top border-secondary border-opacity-25 small font-monospace">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="text-dim">Gói cước:</span>
+                            <strong class="${isPremium ? 'text-warning' : 'text-danger'}">${isPremium ? '👑 PREMIUM VIP' : '💎 STANDARD VIP'}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="text-dim">Hạn dùng:</span>
+                            <span>${statusBadge}</span>
+                        </div>
+                        ${upgradeCta}
+                    </div>
+                `;
+            } else {
+                tierExpiryText = `
+                    <div class="mt-2 pt-2 border-top border-secondary border-opacity-25 small">
+                        <div class="d-flex justify-content-between align-items-center mb-1 font-monospace">
+                            <span class="text-dim">Gói cước:</span>
+                            <span class="badge bg-secondary">Free Member</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-1 font-monospace text-dim" style="font-size: 0.72rem;">
+                            <span>Hạn dùng:</span>
+                            <span>Chưa kích hoạt VIP</span>
+                        </div>
+                        <a href="/Payment/Checkout?package=Standard" class="btn btn-sm btn-shimmer-ruby w-100 mt-1 py-1 fw-bold text-white text-nowrap d-block text-center" style="font-size: 0.72rem;">
+                            <i class="fas fa-sparkles me-1"></i> Nâng Cấp VIP Ngay
+                        </a>
+                    </div>
+                `;
+            }
+        }
 
         authContainer.innerHTML = `
             <div class="dropdown flex-shrink-0 text-nowrap">
@@ -280,7 +365,7 @@ function updateAuthUI() {
                     <span class="${roleBadgeClass} text-nowrap" style="font-size: 0.65rem; white-space: nowrap;">${roleBadgeText}</span>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow" 
-                    style="background: rgba(18, 19, 32, 0.95); border: 1px solid rgba(255, 255, 255, 0.15); backdrop-filter: blur(20px); border-radius: 14px; min-width: 240px;">
+                    style="background: rgba(18, 19, 32, 0.95); border: 1px solid rgba(255, 255, 255, 0.15); backdrop-filter: blur(20px); border-radius: 14px; min-width: 260px;">
                     <li class="px-3 py-2 border-bottom border-secondary border-opacity-25">
                         <small class="text-muted d-block">Tài khoản: <strong class="text-white">${user.username}</strong></small>
                         ${tierExpiryText}
@@ -307,9 +392,9 @@ function updateAuthUI() {
                             <i class="fas fa-heart text-danger me-2"></i> Bài Hát Yêu Thích
                         </button>
                     </li>
-                    ${(primaryRole !== 'Admin' && primaryRole !== 'Producer') ? `
+                    ${!isStaff ? `
                     <li>
-                        <a href="#pricingSection" class="dropdown-item py-2 text-white">
+                        <a href="/Payment/Checkout?package=Standard" class="dropdown-item py-2 text-white">
                             <i class="fas fa-gem text-danger me-2"></i> Nâng Cấp Gói VIP
                         </a>
                     </li>` : ''}
@@ -324,6 +409,75 @@ function updateAuthUI() {
         `;
     }
 
+    // Cập nhật text nút Track Slot & Nonstop Slot và ẩn thông báo Demo cho tài khoản Premium
+    const isPremiumUser = user && (
+        user.role === 'Admin' || user.primaryRole === 'Admin' ||
+        user.role === 'Producer' || user.primaryRole === 'Producer' ||
+        (user.roles && (user.roles.includes('Admin') || user.roles.includes('Producer'))) ||
+        (user.tier && user.tier.toLowerCase() === 'premium')
+    );
+
+    const isVipUser = isPremiumUser || (user && user.tier && user.tier.toLowerCase() === 'standard');
+
+    // Nút Track Nhóm & Nonstop Nhóm: Tài khoản Free hiển thị "Demo track Nhóm"
+    const pillTextTrackNhom = document.getElementById('pillTextTrackNhom');
+    if (pillTextTrackNhom) {
+        pillTextTrackNhom.textContent = isVipUser ? 'Track Nhóm' : 'Demo track Nhóm';
+    }
+    const homeTabTrackNhomText = document.getElementById('homeTabTrackNhomText');
+    if (homeTabTrackNhomText) {
+        homeTabTrackNhomText.textContent = isVipUser ? 'Track Nhóm' : 'Demo track Nhóm';
+    }
+    const pillTextNonstopNhom = document.getElementById('pillTextNonstopNhom');
+    if (pillTextNonstopNhom) {
+        pillTextNonstopNhom.textContent = isVipUser ? 'Nonstop Nhóm' : 'Demo Nonstop Nhóm';
+    }
+
+    const badgeNhomNotice = document.getElementById('badgeNhomNotice');
+    if (badgeNhomNotice) {
+        badgeNhomNotice.innerHTML = `<i class="fas fa-certificate me-1"></i> ${isVipUser ? 'Đang hiển thị kho Track Nhóm Standard VIP' : 'Đang hiển thị Demo kho Track Nhóm (Cần VIP để tải)'}`;
+    }
+    const badgeNonstopNhomNotice = document.getElementById('badgeNonstopNhomNotice');
+    if (badgeNonstopNhomNotice) {
+        badgeNonstopNhomNotice.innerHTML = `<i class="fas fa-certificate me-1"></i> ${isVipUser ? 'Đang hiển thị kho Nonstop Nhóm Standard VIP' : 'Đang hiển thị Demo kho Nonstop Nhóm (Cần VIP để tải)'}`;
+    }
+
+    // Nút Track Slot & Nonstop Slot: Tài khoản Premium hiển thị "Track Slot", còn lại hiển thị "Demo track Slot"
+    const pillTextTrackSlot = document.getElementById('pillTextTrackSlot');
+    if (pillTextTrackSlot) {
+        pillTextTrackSlot.textContent = isPremiumUser ? 'Track Slot' : 'Demo track Slot';
+    }
+    const homeTabTrackSlotText = document.getElementById('homeTabTrackSlotText');
+    if (homeTabTrackSlotText) {
+        homeTabTrackSlotText.textContent = isPremiumUser ? 'Track Slot' : 'Demo track Slot';
+    }
+    const pillTextNonstopSlot = document.getElementById('pillTextNonstopSlot');
+    if (pillTextNonstopSlot) {
+        pillTextNonstopSlot.textContent = isPremiumUser ? 'Nonstop Slot' : 'Demo Nonstop Slot';
+    }
+
+    const badgeDemoSlotNotice = document.getElementById('badgeDemoSlotNotice');
+    if (badgeDemoSlotNotice) {
+        if (isPremiumUser) {
+            badgeDemoSlotNotice.classList.add('d-none');
+            badgeDemoSlotNotice.style.display = 'none';
+        } else {
+            badgeDemoSlotNotice.classList.remove('d-none');
+            badgeDemoSlotNotice.style.display = '';
+        }
+    }
+
+    const badgeDemoNonstopSlotNotice = document.getElementById('badgeDemoNonstopSlotNotice');
+    if (badgeDemoNonstopSlotNotice) {
+        if (isPremiumUser) {
+            badgeDemoNonstopSlotNotice.classList.add('d-none');
+            badgeDemoNonstopSlotNotice.style.display = 'none';
+        } else {
+            badgeDemoNonstopSlotNotice.classList.remove('d-none');
+            badgeDemoNonstopSlotNotice.style.display = '';
+        }
+    }
+
     // 3. Update Pricing Section with User's Active Package & Expiration
     document.querySelectorAll('.plan-active-indicator').forEach(el => {
         el.className = 'plan-active-indicator d-none';
@@ -332,6 +486,16 @@ function updateAuthUI() {
     document.querySelectorAll('[data-plan-tier]').forEach(el => {
         el.style.boxShadow = '';
     });
+
+    if (isStaff) {
+        document.querySelectorAll('#pricingSection button').forEach(btn => {
+            btn.classList.add('disabled');
+            btn.style.opacity = '0.55';
+            btn.style.pointerEvents = 'none';
+            btn.innerHTML = `<i class="fas fa-shield-check me-2"></i> Tài Khoản Đặc Quyền (${user.primaryRole || user.role})`;
+        });
+        return;
+    }
 
     if (user && user.tier) {
         const userTierKey = user.tier.toLowerCase();
@@ -446,6 +610,7 @@ function initPlayerEvents() {
 
         if (seekSlider && !seekSlider.dataset.dragging && duration > 0) {
             seekSlider.value = (currentTime / duration) * 100 || 0;
+            updateSeekSliderProgress(seekSlider);
         }
 
         if (currentTimeElem && (!seekSlider || !seekSlider.dataset.dragging)) {
@@ -484,6 +649,7 @@ function initPlayerEvents() {
     if (seekSlider) {
         seekSlider.addEventListener('input', (e) => {
             seekSlider.dataset.dragging = 'true';
+            updateSeekSliderProgress(seekSlider);
             const dur = audio.duration;
             const duration = (dur && !isNaN(dur) && isFinite(dur) && dur > 0)
                 ? dur
@@ -497,6 +663,7 @@ function initPlayerEvents() {
                     if (targetTime > limit) {
                         targetTime = limit;
                         e.target.value = (limit / duration) * 100;
+                        updateSeekSliderProgress(seekSlider);
                     }
                 }
                 const currentTimeElem = document.getElementById('playerCurrentTime');
@@ -698,8 +865,16 @@ function playTrack(trackData) {
     document.getElementById('playerTrackArtist').textContent = trackData.artist;
     document.getElementById('playerTrackCover').src = trackData.coverUrl || '/images/logo.png';
     document.getElementById('playerTrackBpm').textContent = `${trackData.bpm || 140} BPM`;
-    document.getElementById('playerTrackKey').textContent = trackData.key || '8A';
-    document.getElementById('playerTrackQuality').textContent = trackData.quality || 'MP3 320kbps';
+    const rawQ = (trackData.quality || '').toUpperCase();
+    const isWavQ = rawQ.includes('WAV') || rawQ.includes('MASTER') || rawQ.includes('LOSSLESS') || rawQ.includes('FLAC');
+    const cleanPlayerQuality = isWavQ ? 'WAV' : 'MP3';
+    const qualityElem = document.getElementById('playerTrackQuality');
+    if (qualityElem) {
+        qualityElem.textContent = cleanPlayerQuality;
+        qualityElem.className = isWavQ
+            ? 'badge-premium-gold d-none d-lg-inline-block font-monospace fw-bold'
+            : 'badge-standard-red d-none d-lg-inline-block font-monospace fw-bold';
+    }
 
     const durationElem = document.getElementById('playerDuration');
     const currentTimeElem = document.getElementById('playerCurrentTime');
@@ -713,13 +888,37 @@ function playTrack(trackData) {
 
     updateDemoBadge();
 
-    // Reset table active rows
+    // ĐỔI MÀU CON TRỎ VÀ HIỆU ỨNG KHI PHÁT BÀI: SLOT = VÀNG, NHÓM = ĐỎ, LỌT = KHÔNG NỀN
+    let trackKind = (trackData.trackType || '').toLowerCase();
+    if (!trackKind) {
+        const catCode = (trackData.categoryCode || '').toLowerCase();
+        const tierReq = (trackData.tierRequired || '').toLowerCase();
+        const titleLower = (trackData.title || '').toLowerCase();
+        if (catCode.includes('slot') || tierReq.includes('premium') || titleLower.includes('slot') || titleLower.includes('dubplate')) {
+            trackKind = 'slot';
+        } else if (catCode.includes('nhom') || tierReq.includes('standard')) {
+            trackKind = 'nhom';
+        } else {
+            trackKind = 'lot';
+        }
+    }
+
+    document.body.classList.remove('playing-slot', 'playing-nhom', 'playing-lot');
+    if (trackKind === 'slot') {
+        document.body.classList.add('playing-slot');
+    } else if (trackKind === 'nhom') {
+        document.body.classList.add('playing-nhom');
+    } else {
+        document.body.classList.add('playing-lot');
+    }
+
+    if (seekSlider) {
+        updateSeekSliderProgress(seekSlider);
+    }
     document.querySelectorAll('.crystal-table-row').forEach(row => {
         row.classList.remove('active-track');
         const playBtn = row.querySelector('.track-play-inline-btn i');
         if (playBtn) playBtn.className = 'fas fa-play';
-        const wave = row.querySelector('.table-mini-wave');
-        if (wave) wave.remove();
     });
 
     const activeRow = document.querySelector(`[data-track-id="${trackData.id}"]`);
@@ -727,14 +926,6 @@ function playTrack(trackData) {
         activeRow.classList.add('active-track');
         const playBtn = activeRow.querySelector('.track-play-inline-btn i');
         if (playBtn) playBtn.className = 'fas fa-pause';
-
-        const titleContainer = activeRow.querySelector('.track-title-wrapper');
-        if (titleContainer && !titleContainer.querySelector('.table-mini-wave')) {
-            const waveElem = document.createElement('div');
-            waveElem.className = 'table-mini-wave';
-            waveElem.innerHTML = '<span></span><span></span><span></span>';
-            titleContainer.appendChild(waveElem);
-        }
     }
 
     // Play direct studio audio file via HTML5 Audio element
@@ -883,84 +1074,23 @@ async function handleDownload(trackId, title, requiredTier) {
     }
 }
 
-// VietQR Checkout Modal - Real Backend Order Creation
-async function openCheckoutModal(planName, price) {
-    const pkgId = planName.toLowerCase().includes('premium') ? 'Premium' : 'Standard';
+// VietQR Checkout - Chuyển sang Trang Thanh Toán Chuyên Biệt
+function openCheckoutModal(planName, price) {
+    const pkgId = (planName && planName.toLowerCase().includes('premium')) ? 'Premium' : 'Standard';
     
     // Check if user is logged in
-    if (!window.TLongPlayer.currentUser) {
-        showToastNotification("Vui lòng đăng nhập trước khi mua gói!");
-        const loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
-        loginModal.show();
+    if (!window.TLongPlayer || !window.TLongPlayer.currentUser) {
+        showToastNotification("Vui lòng đăng nhập trước khi gia hạn / mua gói!");
+        const loginModalEl = document.getElementById('loginModal');
+        if (loginModalEl) {
+            const loginModal = new bootstrap.Modal(loginModalEl);
+            loginModal.show();
+        }
         return;
     }
 
-    try {
-        const res = await fetch('/Payment/CreateOrder', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ packageId: pkgId })
-        });
-        const data = await res.json();
-
-        if (!res.ok || !data.success) {
-            showToastNotification("❌ " + (data.message || "Không thể tạo đơn hàng!"));
-            return;
-        }
-
-        showVipModal(`
-            <div class="p-3 text-center">
-                <h5 class="text-white font-weight-bold mb-1">THANH TOÁN GÓI ${data.packageName.toUpperCase()}</h5>
-                <p class="text-muted small mb-3">Quét mã VietQR để kích hoạt tài khoản tự động trong 5-10 giây</p>
-
-                <div class="vietqr-box mb-3 d-inline-block bg-white p-2 rounded-3 shadow">
-                    <img src="${data.qrUrl}" alt="VietQR" style="width: 170px; height: 170px; object-fit: contain; display: block;" 
-                         onerror="this.onerror=null; this.src='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent('${data.bankAccount} - ${data.orderCode}');" />
-                </div>
-
-                <div class="text-start bg-dark p-3 rounded-3 border border-secondary mb-3 small">
-                    <div class="d-flex justify-content-between py-1 border-bottom border-secondary border-opacity-25">
-                        <span class="text-muted">Ngân hàng:</span>
-                        <strong class="text-white">${data.bankName}</strong>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center py-1 border-bottom border-secondary border-opacity-25">
-                        <span class="text-muted">Số tài khoản:</span>
-                        <div class="d-flex align-items-center gap-2">
-                            <strong class="text-danger font-monospace fs-6">${data.bankAccount}</strong>
-                            <button type="button" class="btn btn-sm btn-outline-warning py-0 px-2" style="font-size: 0.75rem;" onclick="navigator.clipboard.writeText('${data.bankAccount}'); showToastNotification('Đã sao chép STK!');" title="Sao chép STK">
-                                <i class="fas fa-copy"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="d-flex justify-content-between py-1 border-bottom border-secondary border-opacity-25">
-                        <span class="text-muted">Chủ tài khoản:</span>
-                        <strong class="text-white text-uppercase">${data.accountHolder}</strong>
-                    </div>
-                    <div class="d-flex justify-content-between py-1 border-bottom border-secondary border-opacity-25">
-                        <span class="text-muted">Số tiền:</span>
-                        <strong class="text-warning font-monospace" style="font-size: 1.05rem;">${Number(data.amount).toLocaleString()} VNĐ</strong>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center py-1">
-                        <span class="text-muted">Mã đơn / Nội dung CK:</span>
-                        <div class="d-flex align-items-center gap-2">
-                            <strong class="text-info font-monospace fs-6">${data.orderCode}</strong>
-                            <button type="button" class="btn btn-sm btn-outline-info py-0 px-2" style="font-size: 0.75rem;" onclick="navigator.clipboard.writeText('${data.orderCode}'); showToastNotification('Đã sao chép nội dung CK!');" title="Sao chép nội dung">
-                                <i class="fas fa-copy"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <button class="${pkgId === 'Premium' ? 'btn-shimmer-gold' : 'btn-shimmer-ruby'} w-100 py-2 font-weight-bold" 
-                        onclick="confirmOrderPayment('${data.orderCode}', '${data.packageName}');" data-bs-dismiss="modal">
-                    <i class="fas fa-check-circle me-1"></i> Tôi Đã Chuyển Khoản Thành Công
-                </button>
-            </div>
-        `);
-    } catch (err) {
-        console.error("CreateOrder error:", err);
-        showToastNotification("❌ Không thể khởi tạo đơn thanh toán!");
-    }
+    // Điều hướng trực tiếp sang Trang Thanh Toán Riêng Biệt (VietQR động + Tự động kích hoạt)
+    window.location.href = `/Payment/Checkout?package=${encodeURIComponent(pkgId)}`;
 }
 
 async function confirmOrderPayment(orderCode, planName) {
@@ -1090,10 +1220,19 @@ async function submitUpdateProfile(form) {
 }
 
 function openAdminCreateProducerModal() {
+    const modalEl = document.getElementById('adminCreateProducerModal');
+    if (modalEl) {
+        if (modalEl.parentElement !== document.body) {
+            document.body.appendChild(modalEl);
+        }
+        document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+    }
     const form = document.getElementById('adminCreateProducerForm');
     if (form) form.reset();
-    const modal = new bootstrap.Modal(document.getElementById('adminCreateProducerModal'));
-    modal.show();
+    if (modalEl) {
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modal.show();
+    }
 }
 
 function showAdminModal() {
@@ -1661,6 +1800,16 @@ function updateTierUI() {
     } else if (tier === 'standard') {
         badge.className = 'badge badge-standard-red';
         badge.innerHTML = '<i class="fas fa-certificate me-1"></i> Standard VIP';
+        // Tài khoản Standard mặc định chỉ hiển thị Track của Nhóm
+        if (!window.TLongPlayer._customTierSelected || window.TLongPlayer.selectedTierFilter === 'all') {
+            window.TLongPlayer.selectedTierFilter = 'Standard';
+            const nhomBtn = document.getElementById('btnTabTrackNhom');
+            if (nhomBtn) {
+                document.querySelectorAll('#packageFilterPills button').forEach(b => b.classList.remove('active'));
+                nhomBtn.classList.add('active');
+            }
+            if (typeof filterTracks === 'function') filterTracks();
+        }
     } else if (tier === 'premium') {
         badge.className = 'badge badge-premium-gold';
         badge.innerHTML = '<i class="fas fa-crown me-1"></i> Premium Master';
@@ -1918,6 +2067,7 @@ window.TLongPlayer.selectedTierFilter = 'all';
 
 function filterByTier(tier, btnElem) {
     window.TLongPlayer.selectedTierFilter = tier;
+    window.TLongPlayer._customTierSelected = true;
     if (btnElem) {
         document.querySelectorAll('#packageFilterPills button').forEach(b => {
             b.classList.remove('active');
@@ -1943,6 +2093,8 @@ function filterTracks() {
         const genre = (row.dataset.genre || '').toLowerCase();
         const bpm = parseInt(row.dataset.bpm) || 0;
         const requiredTier = row.dataset.tier || 'Free';
+        const isSlotRow = row.classList.contains('track-row-slot') || requiredTier === 'Premium';
+        const isNhomRow = row.classList.contains('track-row-nhom') || requiredTier === 'Standard';
 
         let matchesQuery = !query || title.includes(query) || artist.includes(query);
         let matchesGenre = !genreFilter || genre.includes(genreFilter);
@@ -1953,25 +2105,33 @@ function filterTracks() {
         else if (bpmFilter === '143+') matchesBpm = bpm >= 143;
 
         let matchesTier = true;
-        if (tierFilter === 'all') {
-            matchesTier = true;
+        if (tierFilter === 'demo_slot') {
+            // NÚT RIÊNG: Chỉ hiển thị track Slot để nghe Demo 30s
+            matchesTier = isSlotRow;
+        } else if (tierFilter === 'Standard') {
+            // Chỉ hiển thị track của Nhóm
+            matchesTier = isNhomRow;
+        } else if (tierFilter === 'all') {
+            if (userTier === 'standard') {
+                // Tài khoản Standard mặc định chỉ hiển thị track của Nhóm
+                matchesTier = isNhomRow;
+            } else {
+                matchesTier = true;
+            }
         } else if (tierFilter === 'my_tier') {
-            // Check if current user has permission to download this track
             if (currentUser && (currentUser.role === 'Admin' || currentUser.role === 'Producer')) {
                 matchesTier = true;
             } else if (userTier === 'premium') {
                 matchesTier = true;
             } else if (userTier === 'standard') {
-                matchesTier = (requiredTier === 'Free' || requiredTier === 'Standard');
+                matchesTier = isNhomRow;
             } else {
                 matchesTier = (requiredTier === 'Free');
             }
         } else if (tierFilter === 'Free') {
-            matchesTier = (requiredTier === 'Free');
-        } else if (tierFilter === 'Standard') {
-            matchesTier = (requiredTier === 'Standard');
+            matchesTier = !isSlotRow && !isNhomRow;
         } else if (tierFilter === 'Premium') {
-            matchesTier = (requiredTier === 'Premium');
+            matchesTier = isSlotRow;
         }
 
         const isVisible = matchesQuery && matchesGenre && matchesBpm && matchesTier;
@@ -1981,7 +2141,17 @@ function filterTracks() {
 
     const summaryElem = document.getElementById('packageFilterSummary');
     if (summaryElem) {
-        if (tierFilter === 'all') {
+        if (tierFilter === 'demo_slot') {
+            const isPremium = (currentUser && (currentUser.role === 'Admin' || currentUser.role === 'Producer' || (currentUser.tier && currentUser.tier.toLowerCase() === 'premium'))) || userTier === 'premium';
+            summaryElem.innerHTML = isPremium
+                ? `<span class="text-warning fw-bold"><i class="fas fa-crown me-1"></i> Kho Track Slot VIP (${visibleCount} bài)</span>`
+                : `<span class="text-warning fw-bold"><i class="fas fa-crown me-1"></i> Đang hiển thị Demo track Slot (${visibleCount} bài)</span>`;
+        } else if (tierFilter === 'Standard' || userTier === 'standard') {
+            const isVip = (currentUser && (currentUser.role === 'Admin' || currentUser.role === 'Producer' || (currentUser.tier && (currentUser.tier.toLowerCase() === 'standard' || currentUser.tier.toLowerCase() === 'premium')))) || userTier === 'standard' || userTier === 'premium';
+            summaryElem.innerHTML = isVip
+                ? `<span class="text-danger fw-bold"><i class="fas fa-certificate me-1"></i> Kho Track Nhóm Standard VIP (${visibleCount} bài)</span>`
+                : `<span class="text-danger fw-bold"><i class="fas fa-certificate me-1"></i> Đang hiển thị Demo track Nhóm (${visibleCount} bài)</span>`;
+        } else if (tierFilter === 'all') {
             summaryElem.textContent = `Hiển thị toàn bộ kho nhạc (${visibleCount} bài)`;
         } else if (tierFilter === 'my_tier') {
             summaryElem.innerHTML = `<span class="text-success"><i class="fas fa-check-circle me-1"></i> Có ${visibleCount} bài bạn được phép tải về</span>`;
@@ -2006,55 +2176,108 @@ async function loadAdminStats() {
         const json = await res.json();
         if (json.success && json.data) {
             const s = json.data;
+
+            // Cập nhật số liệu trên các tab
+            const bP = document.getElementById('badgeAdmProducerCount');
+            if (bP) bP.textContent = (s.totalProducers || 0).toLocaleString();
+            const bM = document.getElementById('badgeAdmMusicCount');
+            if (bM) bM.textContent = (s.totalMusics || 0).toLocaleString();
+            const bU = document.getElementById('badgeAdmUserCount');
+            if (bU) bU.textContent = (s.totalUsers || 0).toLocaleString();
+
             container.innerHTML = `
-                <div class="col-6 col-md-4">
-                    <div class="p-3 rounded-4 bg-dark border border-secondary border-opacity-25 text-center shadow">
-                        <i class="fas fa-users text-info fa-2x mb-2"></i>
-                        <h3 class="text-white fw-bold mb-0">${s.totalUsers.toLocaleString()}</h3>
-                        <small class="text-dim">Tổng Người Dùng</small>
+                <!-- 2 MEGA KPI CARDS -->
+                <div class="col-12 col-lg-6">
+                    <div class="admin-mega-kpi admin-mega-revenue h-100 d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="badge bg-success text-dark fw-bold px-2.5 py-1 rounded-pill" style="font-size: 0.72rem;">
+                                    <i class="fas fa-money-bill-wave me-1"></i> VIETQR REVENUE
+                                </span>
+                                <span class="text-dim small font-monospace"><i class="fas fa-bolt text-warning me-1"></i>Tự Động Quyết Toán</span>
+                            </div>
+                            <small class="text-dim text-uppercase fw-bold" style="letter-spacing: 0.5px;">Tổng Doanh Thu Nạp Gói VIP</small>
+                            <h2 class="display-5 fw-bold text-success font-monospace my-1.5">${Number(s.totalRevenue || 0).toLocaleString()} <span class="fs-5">VNĐ</span></h2>
+                            <p class="text-dim small mb-0">Tiền nâng cấp gói Standard VIP (99k) và Premium VIP (199k) từ toàn bộ khách hàng trên sàn.</p>
+                        </div>
+                        <div class="pt-3 mt-3 border-top border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
+                            <span class="text-dim small font-monospace"><i class="fas fa-building-columns text-info me-1"></i>Chuyển thẳng vào STK Admin</span>
+                            <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-3 py-1 font-monospace" onclick="document.getElementById('adm-settings-tab').click()">Xem STK Nhận Tiền</button>
+                        </div>
                     </div>
                 </div>
-                <div class="col-6 col-md-4">
-                    <div class="p-3 rounded-4 bg-dark border border-secondary border-opacity-25 text-center shadow">
-                        <i class="fas fa-headphones text-warning fa-2x mb-2"></i>
-                        <h3 class="text-white fw-bold mb-0">${s.totalProducers.toLocaleString()}</h3>
-                        <small class="text-dim">Nhà Sản Xuất (Producers)</small>
+
+                <div class="col-12 col-lg-6">
+                    <div class="admin-mega-kpi admin-mega-vip h-100 d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="badge bg-warning text-dark fw-bold px-2.5 py-1 rounded-pill" style="font-size: 0.72rem;">
+                                    <i class="fas fa-crown me-1"></i> ACTIVE VIP MEMBERS
+                                </span>
+                                <span class="text-dim small font-monospace"><i class="fas fa-circle-check text-success me-1"></i>Đang Hoạt Động</span>
+                            </div>
+                            <small class="text-dim text-uppercase fw-bold" style="letter-spacing: 0.5px;">Số Tài Khoản VIP Đang Hoạt Động</small>
+                            <h2 class="display-5 fw-bold text-warning font-monospace my-1.5">${(s.activeVipSubscriptions || 0).toLocaleString()} <span class="fs-5">HỘI VIÊN</span></h2>
+                            <p class="text-dim small mb-0">Hội viên sở hữu đặc quyền tải trọn bộ nhạc Nhóm MP3 320k hoặc Slot Full Master WAV 24-Bit.</p>
+                        </div>
+                        <div class="pt-3 mt-3 border-top border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
+                            <span class="text-dim small font-monospace"><i class="fas fa-user-shield text-warning me-1"></i>Quản lý thời hạn & quyền</span>
+                            <button type="button" class="btn btn-sm btn-outline-warning rounded-pill px-3 py-1 font-monospace" onclick="document.getElementById('adm-users-tab').click()">Quản Lý & Gia Hạn</button>
+                        </div>
                     </div>
                 </div>
-                <div class="col-6 col-md-4">
-                    <div class="p-3 rounded-4 bg-dark border border-secondary border-opacity-25 text-center shadow">
-                        <i class="fas fa-compact-disc text-danger fa-2x mb-2"></i>
-                        <h3 class="text-white fw-bold mb-0">${s.totalMusics.toLocaleString()}</h3>
-                        <small class="text-dim">Tổng Bài Nhạc / Nonstop</small>
+
+                <!-- 4 SATELLITE METRIC CARDS -->
+                <div class="col-6 col-md-3">
+                    <div class="admin-metric-card text-center h-100">
+                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle p-2.5 mb-2" style="background: rgba(0, 180, 216, 0.15); width: 48px; height: 48px;">
+                            <i class="fas fa-users text-info fs-5"></i>
+                        </div>
+                        <h3 class="text-white fw-bold font-monospace mb-0">${(s.totalUsers || 0).toLocaleString()}</h3>
+                        <small class="text-dim">Tổng Thành Viên</small>
                     </div>
                 </div>
-                <div class="col-6 col-md-4">
-                    <div class="p-3 rounded-4 bg-dark border border-secondary border-opacity-25 text-center shadow">
-                        <i class="fas fa-money-bill-wave text-success fa-2x mb-2"></i>
-                        <h3 class="text-success fw-bold mb-0">${Number(s.totalRevenue).toLocaleString()}đ</h3>
-                        <small class="text-dim">Doanh Thu VietQR</small>
+
+                <div class="col-6 col-md-3">
+                    <div class="admin-metric-card text-center h-100">
+                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle p-2.5 mb-2" style="background: rgba(255, 209, 102, 0.15); width: 48px; height: 48px;">
+                            <i class="fas fa-headphones text-warning fs-5"></i>
+                        </div>
+                        <h3 class="text-white fw-bold font-monospace mb-0">${(s.totalProducers || 0).toLocaleString()}</h3>
+                        <small class="text-dim">Producer Studio</small>
                     </div>
                 </div>
-                <div class="col-6 col-md-4">
-                    <div class="p-3 rounded-4 bg-dark border border-secondary border-opacity-25 text-center shadow">
-                        <i class="fas fa-gem text-danger fa-2x mb-2"></i>
-                        <h3 class="text-white fw-bold mb-0">${s.activeVipSubscriptions.toLocaleString()}</h3>
-                        <small class="text-dim">Gói VIP Đang Hoạt Động</small>
+
+                <div class="col-6 col-md-3">
+                    <div class="admin-metric-card text-center h-100">
+                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle p-2.5 mb-2" style="background: rgba(255, 19, 74, 0.15); width: 48px; height: 48px;">
+                            <i class="fas fa-compact-disc text-danger fs-5"></i>
+                        </div>
+                        <h3 class="text-white fw-bold font-monospace mb-0">${(s.totalMusics || 0).toLocaleString()}</h3>
+                        <small class="text-dim">Bản Thu & Nonstop</small>
                     </div>
                 </div>
-                <div class="col-6 col-md-4">
-                    <div class="p-3 rounded-4 bg-dark border border-secondary border-opacity-25 text-center shadow">
-                        <i class="fas fa-arrow-down-to-bracket text-primary fa-2x mb-2"></i>
-                        <h3 class="text-white fw-bold mb-0">${s.totalDownloads.toLocaleString()}</h3>
-                        <small class="text-dim">Lượt Tải Nhạc SQL</small>
+
+                <div class="col-6 col-md-3">
+                    <div class="admin-metric-card text-center h-100">
+                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle p-2.5 mb-2" style="background: rgba(162, 89, 255, 0.15); width: 48px; height: 48px;">
+                            <i class="fas fa-cloud-arrow-down fs-5" style="color: #a259ff;"></i>
+                        </div>
+                        <h3 class="text-white fw-bold font-monospace mb-0">${(s.totalDownloads || 0).toLocaleString()}</h3>
+                        <small class="text-dim">Lượt Tải Bản Gốc</small>
                     </div>
                 </div>
             `;
         }
     } catch (e) {
-        console.error(e);
+        console.error("loadAdminStats error:", e);
     }
 }
+
+// ==========================================
+// ADMIN PRODUCERS MANAGEMENT (WITH SEARCH & FILTER)
+// ==========================================
+window._allAdminProducers = [];
 
 async function loadAdminProducers() {
     const container = document.getElementById('adminProducersTableContainer');
@@ -2063,68 +2286,114 @@ async function loadAdminProducers() {
         const res = await fetch('/Admin/Producers');
         const json = await res.json();
         if (json.success && json.data) {
-            if (json.data.length === 0) {
-                container.innerHTML = '<div class="p-4 text-center text-dim">Chưa có Producer nào trong hệ thống.</div>';
-                return;
-            }
-            let rows = json.data.map(p => {
-                const isLocked = p.isLocked || p.userStatus === 'Locked';
-                const statusBadge = isLocked 
-                    ? `<span class="badge bg-danger"><i class="fas fa-lock me-1"></i>Đã Khóa</span>`
-                    : `<span class="badge bg-success"><i class="fas fa-circle-check me-1"></i>Hoạt Động</span>`;
-                
-                const safeStageName = (p.stageName || '').replace(/'/g, "\\'");
-
-                return `
-                <tr class="align-middle">
-                    <td class="fw-bold text-white"><i class="fas fa-headphones text-info me-1"></i> ${p.stageName}</td>
-                    <td class="font-monospace small text-dim">${p.username}</td>
-                    <td>${p.fullName || '--'}</td>
-                    <td>${p.phoneNumber || p.zaloContact || '--'}</td>
-                    <td><span class="badge bg-dark border border-secondary text-info">${p.bankName || '--'}</span></td>
-                    <td class="font-monospace text-warning small fw-bold">${p.bankAccountNumber || '--'}</td>
-                    <td class="text-uppercase small">${p.bankAccountHolder || '--'}</td>
-                    <td><span class="badge badge-shimmer-ruby">${p.tracksCount} bài</span></td>
-                    <td>${statusBadge}</td>
-                    <td class="text-end text-nowrap">
-                        <button class="btn btn-sm ${isLocked ? 'btn-outline-success' : 'btn-outline-warning'} py-1 px-2" 
-                                onclick="adminToggleLockProducer('${p.producerId}', '${safeStageName}')" 
-                                title="${isLocked ? 'Mở khóa tài khoản' : 'Khóa tài khoản Producer'}">
-                            <i class="fas ${isLocked ? 'fa-lock-open' : 'fa-lock'} me-1"></i> ${isLocked ? 'Mở Khóa' : 'Khóa'}
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger py-1 px-2 ms-1" 
-                                onclick="adminDeleteProducer('${p.producerId}', '${safeStageName}')" 
-                                title="Xóa vĩnh viễn Producer">
-                            <i class="fas fa-trash me-1"></i> Xóa
-                        </button>
-                    </td>
-                </tr>
-                `;
-            }).join('');
-
-            container.innerHTML = `
-                <table class="table table-dark table-hover mb-0 small">
-                    <thead class="table-dark text-dim">
-                        <tr>
-                            <th>Nghệ Danh</th>
-                            <th>Tài Khoản</th>
-                            <th>Họ Tên Thật</th>
-                            <th>SĐT / Zalo</th>
-                            <th>Ngân Hàng</th>
-                            <th>Số Tài Khoản</th>
-                            <th>Chủ Tài Khoản</th>
-                            <th>Bài Hát</th>
-                            <th>Trạng Thái</th>
-                            <th class="text-end">Hành Động</th>
-                        </tr>
-                    </thead>
-                    <tbody>${rows}</tbody>
-                </table>
-            `;
+            window._allAdminProducers = json.data;
+            const bP = document.getElementById('badgeAdmProducerCount');
+            if (bP) bP.textContent = window._allAdminProducers.length.toLocaleString();
+            filterAdminProducersTable();
+        } else {
+            container.innerHTML = `<div class="p-4 text-center text-danger">❌ ${json.message || 'Không thể tải danh sách Producer!'}</div>`;
         }
     } catch (e) {
-        console.error(e);
+        console.error("loadAdminProducers error:", e);
+        container.innerHTML = '<div class="p-4 text-center text-danger">❌ Lỗi kết nối khi tải danh sách Producer!</div>';
     }
+}
+
+function filterAdminProducersTable() {
+    const container = document.getElementById('adminProducersTableContainer');
+    if (!container || !window._allAdminProducers) return;
+
+    const searchInput = document.getElementById('adminProducerSearchInput');
+    const statusFilter = document.getElementById('adminProducerStatusFilter');
+
+    const kw = searchInput ? searchInput.value.trim().toLowerCase() : '';
+    const statusVal = statusFilter ? statusFilter.value : 'all';
+
+    let list = window._allAdminProducers.filter(p => {
+        if (kw) {
+            const sName = (p.stageName || '').toLowerCase();
+            const uName = (p.username || '').toLowerCase();
+            const fName = (p.fullName || '').toLowerCase();
+            const phone = (p.phoneNumber || p.zaloContact || '').toLowerCase();
+            if (!sName.includes(kw) && !uName.includes(kw) && !fName.includes(kw) && !phone.includes(kw)) {
+                return false;
+            }
+        }
+
+        const isLocked = p.isLocked || p.userStatus === 'Locked';
+        if (statusVal === 'active' && isLocked) return false;
+        if (statusVal === 'locked' && !isLocked) return false;
+
+        return true;
+    });
+
+    if (list.length === 0) {
+        container.innerHTML = '<div class="p-5 text-center text-dim"><i class="fas fa-filter fa-2x mb-2 text-secondary"></i><br />Không tìm thấy Producer nào phù hợp với bộ lọc.</div>';
+        return;
+    }
+
+    let rows = list.map(p => {
+        const isLocked = p.isLocked || p.userStatus === 'Locked';
+        const statusBadge = isLocked 
+            ? `<span class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-50"><i class="fas fa-lock me-1"></i>Đã Khóa</span>`
+            : `<span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50"><i class="fas fa-circle-check me-1"></i>Hoạt Động</span>`;
+        
+        const safeStageName = (p.stageName || '').replace(/'/g, "\\'");
+
+        return `
+        <tr class="align-middle">
+            <td>
+                <div class="d-flex align-items-center gap-2.5">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center bg-dark border border-warning text-warning fw-bold font-monospace" style="width: 38px; height: 38px; font-size: 0.85rem;">
+                        ${(p.stageName || 'DJ').substring(0, 2).toUpperCase()}
+                    </div>
+                    <div>
+                        <strong class="text-white d-block">${p.stageName}</strong>
+                        <span class="text-dim small font-monospace">@@${p.username}</span>
+                    </div>
+                </div>
+            </td>
+            <td>${p.fullName || '<span class="text-dim">--</span>'}</td>
+            <td class="font-monospace small">${p.phoneNumber || p.zaloContact || '<span class="text-dim">--</span>'}</td>
+            <td><span class="badge bg-dark border border-secondary text-info font-monospace">${p.bankName || '--'}</span></td>
+            <td class="font-monospace text-warning small fw-bold">${p.bankAccountNumber || '--'}</td>
+            <td class="text-uppercase small font-monospace">${p.bankAccountHolder || '--'}</td>
+            <td><span class="badge bg-danger bg-opacity-20 text-danger border border-danger border-opacity-50 font-monospace">${p.tracksCount} bài</span></td>
+            <td>${statusBadge}</td>
+            <td class="text-end text-nowrap">
+                <button class="btn btn-sm ${isLocked ? 'btn-outline-success' : 'btn-outline-warning'} py-1 px-2.5 rounded-pill fw-bold" 
+                        onclick="adminToggleLockProducer('${p.producerId}', '${safeStageName}')" 
+                        title="${isLocked ? 'Mở khóa tài khoản' : 'Khóa tài khoản Producer'}">
+                    <i class="fas ${isLocked ? 'fa-lock-open' : 'fa-lock'} me-1"></i> ${isLocked ? 'Mở Khóa' : 'Khóa'}
+                </button>
+                <button class="btn btn-sm btn-outline-danger py-1 px-2.5 ms-1 rounded-pill" 
+                        onclick="adminDeleteProducer('${p.producerId}', '${safeStageName}')" 
+                        title="Xóa vĩnh viễn Producer">
+                    <i class="fas fa-trash me-1"></i> Xóa
+                </button>
+            </td>
+        </tr>
+        `;
+    }).join('');
+
+    container.innerHTML = `
+        <table class="table table-dark table-hover mb-0 small">
+            <thead class="table-dark text-dim" style="border-bottom: 1.5px solid rgba(255,255,255,0.1);">
+                <tr>
+                    <th>Producer / Nghệ Danh</th>
+                    <th>Họ Tên Thật</th>
+                    <th>SĐT / Zalo</th>
+                    <th>Ngân Hàng</th>
+                    <th>Số Tài Khoản</th>
+                    <th>Chủ Tài Khoản</th>
+                    <th>Kho Bản Thu</th>
+                    <th>Trạng Thái</th>
+                    <th class="text-end">Thao Tác</th>
+                </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+        </table>
+    `;
 }
 
 async function adminToggleLockProducer(producerId, stageName) {
@@ -2179,6 +2448,11 @@ async function adminDeleteProducer(producerId, stageName) {
     }
 }
 
+// ==========================================
+// ADMIN MUSICS MANAGEMENT (WITH SEARCH & FILTER)
+// ==========================================
+window._allAdminMusics = [];
+
 async function loadAdminMusics() {
     const container = document.getElementById('adminMusicsTableContainer');
     if (!container) return;
@@ -2186,57 +2460,123 @@ async function loadAdminMusics() {
         const res = await fetch('/Admin/Musics');
         const json = await res.json();
         if (json.success && json.data) {
-            let rows = json.data.map(m => {
-                const isPublished = m.status === 'Published';
-                return `
-                    <tr class="align-middle">
-                        <td class="fw-bold text-white">${m.title}</td>
-                        <td class="text-dim small">${m.artist}</td>
-                        <td><span class="badge bg-dark border border-info text-info">${m.producerName || 'DJ TLong'}</span></td>
-                        <td><span class="badge ${m.categoryCode.includes('Slot') ? 'badge-premium-gold' : m.categoryCode.includes('Nhom') ? 'badge-standard-red' : 'bg-secondary'}">${m.categoryName}</span></td>
-                        <td><span class="badge bg-dark font-monospace text-dim">${m.qualityAvailable}</span></td>
-                        <td class="text-dim">${m.playsCount}</td>
-                        <td class="text-dim">${m.downloadsCount}</td>
-                        <td>
-                            <span class="badge ${isPublished ? 'bg-success' : 'bg-danger'}">${m.status}</span>
-                        </td>
-                        <td class="text-end">
-                            <button class="btn btn-sm ${isPublished ? 'btn-outline-warning' : 'btn-outline-success'} py-1 px-2" 
-                                    onclick="toggleAdminMusicStatus('${m.musicId}')">
-                                <i class="fas ${isPublished ? 'fa-eye-slash' : 'fa-eye'} me-1"></i> ${isPublished ? 'Ẩn Bài' : 'Hiện Bài'}
-                            </button>
-                            <button class="btn btn-sm btn-outline-danger py-1 px-2 ms-1" 
-                                    onclick="deleteAdminMusic('${m.musicId}', '${m.title.replace(/'/g, "\\'")}')" 
-                                    title="Xóa vĩnh viễn bài hát">
-                                <i class="fas fa-trash me-1"></i> Xóa
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-
-            container.innerHTML = `
-                <table class="table table-dark table-hover mb-0 small">
-                    <thead class="table-dark text-dim">
-                        <tr>
-                            <th>Tiêu Đề</th>
-                            <th>Nghệ Sĩ</th>
-                            <th>Producer</th>
-                            <th>Phân Cấp</th>
-                            <th>Chất Lượng</th>
-                            <th>Lượt Nghe</th>
-                            <th>Lượt Tải</th>
-                            <th>Trạng Thái</th>
-                            <th class="text-end">Hành Động</th>
-                        </tr>
-                    </thead>
-                    <tbody>${rows}</tbody>
-                </table>
-            `;
+            window._allAdminMusics = json.data;
+            const bM = document.getElementById('badgeAdmMusicCount');
+            if (bM) bM.textContent = window._allAdminMusics.length.toLocaleString();
+            filterAdminMusicsTable();
+        } else {
+            container.innerHTML = `<div class="p-4 text-center text-danger">❌ ${json.message || 'Không thể tải kho âm nhạc!'}</div>`;
         }
     } catch (e) {
-        console.error(e);
+        console.error("loadAdminMusics error:", e);
+        container.innerHTML = '<div class="p-4 text-center text-danger">❌ Lỗi kết nối khi tải kho âm nhạc!</div>';
     }
+}
+
+function filterAdminMusicsTable() {
+    const container = document.getElementById('adminMusicsTableContainer');
+    if (!container || !window._allAdminMusics) return;
+
+    const searchInput = document.getElementById('adminMusicSearchInput');
+    const catFilter = document.getElementById('adminMusicCategoryFilter');
+    const statusFilter = document.getElementById('adminMusicStatusFilter');
+
+    const kw = searchInput ? searchInput.value.trim().toLowerCase() : '';
+    const catVal = catFilter ? catFilter.value : 'all';
+    const statusVal = statusFilter ? statusFilter.value : 'all';
+
+    let list = window._allAdminMusics.filter(m => {
+        if (kw) {
+            const title = (m.title || '').toLowerCase();
+            const artist = (m.artist || '').toLowerCase();
+            const prod = (m.producerName || '').toLowerCase();
+            if (!title.includes(kw) && !artist.includes(kw) && !prod.includes(kw)) {
+                return false;
+            }
+        }
+
+        if (catVal !== 'all') {
+            const code = (m.categoryCode || '').toLowerCase();
+            const name = (m.categoryName || '').toLowerCase();
+            if (catVal === 'Slot' && !code.includes('slot') && !name.includes('slot')) return false;
+            if (catVal === 'Nhom' && !code.includes('nhom') && !name.includes('nhóm') && !name.includes('nhom')) return false;
+            if (catVal === 'Lot' && !code.includes('lot') && !name.includes('lọt') && !name.includes('lot')) return false;
+            if (catVal === 'Nonstop' && !code.includes('nonstop') && !name.includes('nonstop')) return false;
+        }
+
+        if (statusVal !== 'all') {
+            if (statusVal === 'Published' && m.status !== 'Published') return false;
+            if (statusVal === 'Hidden' && m.status === 'Published') return false;
+        }
+
+        return true;
+    });
+
+    if (list.length === 0) {
+        container.innerHTML = '<div class="p-5 text-center text-dim"><i class="fas fa-music fa-2x mb-2 text-secondary"></i><br />Không tìm thấy bài hát nào phù hợp với bộ lọc.</div>';
+        return;
+    }
+
+    let rows = list.map(m => {
+        const isPublished = m.status === 'Published';
+        const isSlot = (m.categoryCode || '').includes('Slot') || (m.categoryName || '').includes('Slot');
+        const isNhom = (m.categoryCode || '').includes('Nhom') || (m.categoryName || '').includes('Nhóm');
+        const isNonstop = (m.categoryCode || '').includes('Nonstop') || (m.categoryName || '').includes('Nonstop');
+
+        let catBadge = '<span class="badge bg-secondary">Track Lọt</span>';
+        if (isSlot) catBadge = '<span class="badge badge-premium-gold"><i class="fas fa-crown me-1"></i>Track Slot</span>';
+        else if (isNhom) catBadge = '<span class="badge badge-standard-red"><i class="fas fa-certificate me-1"></i>Track Nhóm</span>';
+        else if (isNonstop) catBadge = '<span class="badge bg-info bg-opacity-25 text-info border border-info border-opacity-50"><i class="fas fa-bolt me-1"></i>Nonstop</span>';
+
+        return `
+            <tr class="align-middle">
+                <td>
+                    <div class="fw-bold text-white d-block">${m.title}</div>
+                    <small class="text-dim">${m.artist || 'Chưa rõ nghệ sĩ'}</small>
+                </td>
+                <td><span class="badge bg-dark border border-info text-info font-monospace"><i class="fas fa-headphones me-1"></i>${m.producerName || 'DJ TLong'}</span></td>
+                <td>${catBadge}</td>
+                <td><span class="badge bg-dark font-monospace text-warning border border-secondary">${m.qualityAvailable || 'MP3 320k'}</span></td>
+                <td class="text-dim font-monospace"><i class="fas fa-play me-1 text-secondary"></i>${(m.playsCount || 0).toLocaleString()}</td>
+                <td class="text-dim font-monospace"><i class="fas fa-download me-1 text-secondary"></i>${(m.downloadsCount || 0).toLocaleString()}</td>
+                <td>
+                    <span class="badge ${isPublished ? 'bg-success bg-opacity-25 text-success border border-success border-opacity-50' : 'bg-danger bg-opacity-25 text-danger border border-danger border-opacity-50'}">
+                        <i class="fas ${isPublished ? 'fa-circle-check' : 'fa-circle-pause'} me-1"></i>${isPublished ? 'Hiển thị' : 'Đang ẩn'}
+                    </span>
+                </td>
+                <td class="text-end text-nowrap">
+                    <button class="btn btn-sm ${isPublished ? 'btn-outline-warning' : 'btn-outline-success'} py-1 px-2.5 rounded-pill fw-bold" 
+                            onclick="toggleAdminMusicStatus('${m.musicId}')"
+                            title="${isPublished ? 'Ẩn bài hát khỏi website' : 'Hiện bài hát trên website'}">
+                        <i class="fas ${isPublished ? 'fa-eye-slash' : 'fa-eye'} me-1"></i> ${isPublished ? 'Ẩn Bài' : 'Hiện Bài'}
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger py-1 px-2.5 ms-1 rounded-pill" 
+                            onclick="deleteAdminMusic('${m.musicId}', '${m.title.replace(/'/g, "\\'")}')" 
+                            title="Xóa vĩnh viễn bài hát khỏi database">
+                        <i class="fas fa-trash me-1"></i> Xóa
+                    </button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+
+    container.innerHTML = `
+        <table class="table table-dark table-hover mb-0 small">
+            <thead class="table-dark text-dim" style="border-bottom: 1.5px solid rgba(255,255,255,0.1);">
+                <tr>
+                    <th>Tiêu Đề & Nghệ Sĩ</th>
+                    <th>Producer Studio</th>
+                    <th>Phân Cấp Gói</th>
+                    <th>Định Dạng</th>
+                    <th>Lượt Nghe</th>
+                    <th>Lượt Tải</th>
+                    <th>Trạng Thái</th>
+                    <th class="text-end">Thao Tác</th>
+                </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+        </table>
+    `;
 }
 
 async function toggleAdminMusicStatus(musicId) {
@@ -2268,6 +2608,708 @@ async function deleteAdminMusic(musicId, title) {
     } catch (e) {
         console.error(e);
         showToastNotification("❌ Lỗi kết nối khi xóa bài hát!");
+    }
+}
+
+// ==========================================
+// ADMIN USER MANAGEMENT & VIP SUBSCRIPTION EXTENSION
+// ==========================================
+window._allAdminUsers = [];
+
+async function loadAdminUsers() {
+    const container = document.getElementById('adminUsersTableContainer');
+    if (!container) return;
+
+    try {
+        const res = await fetch('/Admin/Users');
+        const json = await res.json();
+        if (json.success && json.data) {
+            window._allAdminUsers = json.data;
+            filterAdminUsersTable();
+        } else {
+            container.innerHTML = `<div class="p-4 text-center text-danger">❌ ${json.message || 'Không thể tải danh sách người dùng!'}</div>`;
+        }
+    } catch (e) {
+        console.error("loadAdminUsers error:", e);
+        container.innerHTML = '<div class="p-4 text-center text-danger">❌ Lỗi kết nối khi tải danh sách người dùng!</div>';
+    }
+}
+
+function filterAdminUsersTable() {
+    const container = document.getElementById('adminUsersTableContainer');
+    if (!container || !window._allAdminUsers) return;
+
+    const searchInput = document.getElementById('adminUserSearchInput');
+    const roleFilterEl = document.getElementById('adminUserRoleFilter');
+    const tierFilter = document.getElementById('adminUserTierFilter');
+
+    const kw = searchInput ? searchInput.value.trim().toLowerCase() : '';
+    const roleFilter = roleFilterEl ? roleFilterEl.value : 'all';
+    const filter = tierFilter ? tierFilter.value : 'all';
+
+    let list = window._allAdminUsers.filter(u => {
+        // Keyword match
+        if (kw) {
+            const uName = (u.username || '').toLowerCase();
+            const fName = (u.fullName || '').toLowerCase();
+            const email = (u.email || '').toLowerCase();
+            const phone = (u.phoneNumber || '').toLowerCase();
+            if (!uName.includes(kw) && !fName.includes(kw) && !email.includes(kw) && !phone.includes(kw)) {
+                return false;
+            }
+        }
+
+        // Role filter: Producer vs User vs Admin
+        const isAdmin = (u.roles && u.roles.includes('Admin')) || u.primaryRole === 'Admin';
+        const isProducer = (u.roles && u.roles.includes('Producer')) || u.primaryRole === 'Producer';
+        const isRegularUser = !isAdmin && !isProducer;
+
+        if (roleFilter === 'producer' && !isProducer) return false;
+        if (roleFilter === 'user' && !isRegularUser) return false;
+        if (roleFilter === 'admin' && !isAdmin) return false;
+
+        // Tier / status filter
+        if (filter === 'Premium') {
+            return (u.tierCode === 'premium' || (u.currentTier && u.currentTier.toLowerCase().includes('premium')));
+        } else if (filter === 'Standard') {
+            return (u.tierCode === 'standard' || (u.currentTier && u.currentTier.toLowerCase().includes('standard')));
+        } else if (filter === 'Free') {
+            return (u.tierCode === 'free' || !u.tierExpiresAt);
+        } else if (filter === 'expired') {
+            return (u.tierExpiresAt && !u.isVipActive);
+        } else if (filter === 'locked') {
+            return (u.status === 'Locked');
+        }
+
+        return true;
+    });
+
+    // Sắp xếp danh sách: Người tạo mới nhất xuống dưới cùng (Cũ nhất ở trên cùng -> Mới nhất ở dưới cùng)
+    list.sort((a, b) => {
+        const timeA = a.createdAtRaw ? new Date(a.createdAtRaw).getTime() : 0;
+        const timeB = b.createdAtRaw ? new Date(b.createdAtRaw).getTime() : 0;
+        return timeA - timeB;
+    });
+
+    renderAdminUsersTable(list);
+}
+
+function renderAdminUsersTable(users) {
+    const container = document.getElementById('adminUsersTableContainer');
+    if (!container) return;
+
+    if (!users || users.length === 0) {
+        container.innerHTML = '<div class="p-4 text-center text-dim"><i class="fas fa-user-slash fa-2x mb-2 d-block"></i>Không tìm thấy người dùng nào phù hợp.</div>';
+        return;
+    }
+
+    let rows = users.map(u => {
+        const isLocked = u.status === 'Locked';
+        const isAdmin = (u.roles && u.roles.includes('Admin')) || u.primaryRole === 'Admin';
+        const isProducer = (u.roles && u.roles.includes('Producer')) || u.primaryRole === 'Producer';
+        const isStaff = isAdmin || isProducer;
+
+        // Role badges
+        let roleBadge = '<span class="badge bg-secondary text-white">Thành Viên</span>';
+        if (isAdmin) roleBadge = '<span class="badge bg-danger text-white"><i class="fas fa-shield-halved me-1"></i>Admin Tối Cao</span>';
+        else if (isProducer) roleBadge = '<span class="badge bg-warning text-dark"><i class="fas fa-headphones me-1"></i>Producer Studio</span>';
+
+        // Format expiration date and calculate days left reliably
+        let daysLeft = (typeof u.daysRemaining === 'number' && !isNaN(u.daysRemaining)) ? u.daysRemaining : 0;
+        let formattedExpiry = u.tierExpiresAt || '';
+
+        if (u.tierExpiresAt) {
+            // Check if tierExpiresAt is an ISO string (e.g. 2026-10-23T11:16:21) or needs formatting
+            if (u.tierExpiresAt.includes('T') || u.tierExpiresAt.includes('-')) {
+                const parsedDate = new Date(u.tierExpiresAt);
+                if (!isNaN(parsedDate.getTime())) {
+                    const now = new Date();
+                    const diffDays = Math.ceil((parsedDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+                    daysLeft = Math.max(0, diffDays);
+                    const dd = String(parsedDate.getDate()).padStart(2, '0');
+                    const MM = String(parsedDate.getMonth() + 1).padStart(2, '0');
+                    const yyyy = parsedDate.getFullYear();
+                    const hh = String(parsedDate.getHours()).padStart(2, '0');
+                    const mm = String(parsedDate.getMinutes()).padStart(2, '0');
+                    formattedExpiry = `${dd}/${MM}/${yyyy} ${hh}:${mm}`;
+                }
+            } else if (daysLeft === 0 && u.tierExpiresAt.includes('/')) {
+                // Parse dd/MM/yyyy HH:mm
+                const parts = u.tierExpiresAt.split(' ');
+                if (parts.length >= 1) {
+                    const dParts = parts[0].split('/');
+                    if (dParts.length === 3) {
+                        const parsedDate = new Date(parseInt(dParts[2]), parseInt(dParts[1]) - 1, parseInt(dParts[0]));
+                        const now = new Date();
+                        const diffDays = Math.ceil((parsedDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+                        if (diffDays > 0) daysLeft = diffDays;
+                    }
+                }
+            }
+        }
+
+        const safeFullName = (u.fullName || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        const safeUsername = (u.username || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        const safeAvatar = (u.avatarUrl || '/images/logo.png').replace(/'/g, "\\'");
+        const safeTier = (u.currentTier || 'Free').replace(/'/g, "\\'");
+        const safeExpires = formattedExpiry.replace(/'/g, "\\'");
+
+        // Lock button
+        let lockBtn = '';
+        if (!isAdmin) {
+            lockBtn = `
+                <button class="btn btn-sm ${isLocked ? 'btn-outline-success' : 'btn-outline-danger'} py-1 px-2 ms-1" 
+                        onclick="adminToggleLockUser('${u.userId}', '${safeUsername}')" 
+                        title="${isLocked ? 'Mở khóa tài khoản' : 'Khóa tài khoản'}">
+                    <i class="fas ${isLocked ? 'fa-lock-open' : 'fa-lock'} me-1"></i> ${isLocked ? 'Mở' : 'Khóa'}
+                </button>
+            `;
+        }
+
+        // CỘT: HẠN DÙNG VIP & NÂNG CẤP
+        let vipColumnHtml = '';
+        let actionColumnHtml = '';
+
+        if (isAdmin) {
+            vipColumnHtml = `
+                <span class="badge bg-danger"><i class="fas fa-infinity me-1"></i>Toàn Quyền Hệ Thống</span>
+                <small class="text-dim d-block mt-1 font-monospace">Tài khoản Admin không cần nâng cấp VIP</small>
+            `;
+            actionColumnHtml = `<span class="badge bg-dark border border-secondary text-dim">Toàn Quyền</span>`;
+        } else if (isProducer) {
+            vipColumnHtml = `
+                <span class="badge bg-warning text-dark"><i class="fas fa-infinity me-1"></i>Studio Producer</span>
+                <small class="text-dim d-block mt-1 font-monospace">Tài khoản Producer không cần nâng cấp VIP</small>
+            `;
+            actionColumnHtml = lockBtn || `<span class="text-dim small">--</span>`;
+        } else {
+            // REGULAR MEMBER: Hiển thị rõ Gói nào, Còn bao nhiêu ngày, và Muốn nâng cấp lên gói nào được
+            const tierLower = (u.currentTier || '').toLowerCase();
+            const isPremium = tierLower.includes('premium');
+            const isStandard = tierLower.includes('standard');
+
+            // 1. Gói nào
+            const isFree = !isPremium && !isStandard;
+            let tierBadge = '<span class="badge bg-dark border border-secondary text-dim"><i class="fas fa-user me-1"></i>Free Member</span>';
+            if (isPremium) tierBadge = '<span class="badge badge-premium-gold"><i class="fas fa-crown me-1"></i>👑 PREMIUM VIP</span>';
+            else if (isStandard) tierBadge = '<span class="badge badge-standard-red"><i class="fas fa-certificate me-1"></i>💎 STANDARD VIP</span>';
+
+            // 2. Còn bao nhiêu ngày: Free member thì TUYỆT ĐỐI KHÔNG hiển thị hạn
+            let remainingHtml = '';
+            if (!isFree) {
+                if (formattedExpiry) {
+                    if (daysLeft > 0 || u.isVipActive) {
+                        remainingHtml = `<div class="text-success small fw-bold mt-1"><i class="fas fa-clock me-1"></i>Còn <strong>${daysLeft} ngày</strong> <span class="text-dim font-monospace fw-normal" style="font-size: 0.72rem;">(đến ${formattedExpiry})</span></div>`;
+                    } else {
+                        remainingHtml = `<div class="text-danger small fw-bold mt-1"><i class="fas fa-circle-exclamation me-1"></i>Đã hết hạn <span class="text-dim font-monospace fw-normal" style="font-size: 0.72rem;">(từ ${formattedExpiry})</span></div>`;
+                    }
+                }
+            }
+
+            // 3. Muốn nâng cấp lên gói nào được (Gia hạn tự động 30 ngày hoặc Tùy chỉnh ngày/tuần/tháng)
+            let upgradeOptionsHtml = '';
+            if (isPremium) {
+                upgradeOptionsHtml = `
+                    <div class="mt-2 pt-1 border-top border-secondary border-opacity-25 d-flex flex-wrap align-items-center gap-1">
+                        <span class="text-dim" style="font-size: 0.7rem;">Gói cao nhất:</span>
+                        <button class="btn btn-sm btn-outline-warning py-0 px-2 rounded-pill fw-bold" style="font-size: 0.68rem;"
+                                onclick="adminQuickExtend('${u.userId}', 'Premium', 30, '${safeFullName}')" title="Gia hạn tự động 30 ngày Premium VIP">
+                            <i class="fas fa-crown me-1"></i>+ 👑 Gia Hạn Premium (30d)
+                        </button>
+                        <button class="btn btn-sm btn-outline-light py-0 px-2 rounded-pill fw-bold" style="font-size: 0.68rem;"
+                                onclick="openAdminExtendModal('${u.userId}', '${safeFullName}', '${safeUsername}', '${safeAvatar}', '${safeTier}', '${safeExpires}')" title="Tùy chỉnh số ngày, tuần, tháng">
+                            <i class="fas fa-sliders me-1 text-warning"></i> Tùy Chỉnh...
+                        </button>
+                    </div>
+                `;
+            } else if (isStandard) {
+                upgradeOptionsHtml = `
+                    <div class="mt-2 pt-1 border-top border-secondary border-opacity-25 d-flex flex-wrap align-items-center gap-1">
+                        <span class="text-dim" style="font-size: 0.7rem;">Nâng cấp / Gia hạn:</span>
+                        <button class="btn btn-sm btn-outline-warning py-0 px-2 rounded-pill fw-bold" style="font-size: 0.68rem;"
+                                onclick="adminQuickExtend('${u.userId}', 'Premium', 30, '${safeFullName}')" title="Nâng cấp lên Premium VIP (+30 ngày)">
+                            <i class="fas fa-arrow-up text-warning me-1"></i>👑 Nâng Lên Premium (30d)
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger py-0 px-2 rounded-pill fw-bold" style="font-size: 0.68rem;"
+                                onclick="adminQuickExtend('${u.userId}', 'Standard', 30, '${safeFullName}')" title="Gia hạn thêm 30 ngày Standard VIP">
+                            <i class="fas fa-rotate-right me-1"></i>+ 💎 Standard (30d)
+                        </button>
+                        <button class="btn btn-sm btn-outline-light py-0 px-2 rounded-pill fw-bold" style="font-size: 0.68rem;"
+                                onclick="openAdminExtendModal('${u.userId}', '${safeFullName}', '${safeUsername}', '${safeAvatar}', '${safeTier}', '${safeExpires}')" title="Tùy chỉnh số ngày, tuần, tháng">
+                            <i class="fas fa-sliders me-1 text-warning"></i> Tùy Chỉnh...
+                        </button>
+                    </div>
+                `;
+            } else {
+                // Free Member
+                upgradeOptionsHtml = `
+                    <div class="mt-2 pt-1 border-top border-secondary border-opacity-25 d-flex flex-wrap align-items-center gap-1">
+                        <span class="text-dim" style="font-size: 0.7rem;">Nâng cấp lên:</span>
+                        <button class="btn btn-sm btn-outline-danger py-0 px-2 rounded-pill fw-bold" style="font-size: 0.68rem;"
+                                onclick="adminQuickExtend('${u.userId}', 'Standard', 30, '${safeFullName}')" title="Gia hạn tự động 30 ngày Standard VIP">
+                            <i class="fas fa-certificate me-1"></i>+ 💎 Standard (30d)
+                        </button>
+                        <button class="btn btn-sm btn-outline-warning py-0 px-2 rounded-pill fw-bold" style="font-size: 0.68rem;"
+                                onclick="adminQuickExtend('${u.userId}', 'Premium', 30, '${safeFullName}')" title="Gia hạn tự động 30 ngày Premium VIP">
+                            <i class="fas fa-crown me-1"></i>+ 👑 Premium (30d)
+                        </button>
+                        <button class="btn btn-sm btn-outline-light py-0 px-2 rounded-pill fw-bold" style="font-size: 0.68rem;"
+                                onclick="openAdminExtendModal('${u.userId}', '${safeFullName}', '${safeUsername}', '${safeAvatar}', '${safeTier}', '${safeExpires}')" title="Tùy chỉnh số ngày, tuần, tháng">
+                            <i class="fas fa-sliders me-1 text-warning"></i> Tùy Chỉnh...
+                        </button>
+                    </div>
+                `;
+            }
+
+            vipColumnHtml = `
+                <div>
+                    ${tierBadge}
+                    ${remainingHtml}
+                    ${upgradeOptionsHtml}
+                </div>
+            `;
+
+            actionColumnHtml = `
+                <button class="btn btn-sm btn-outline-warning py-1 px-2 fw-bold text-nowrap" 
+                        onclick="openAdminExtendModal('${u.userId}', '${safeFullName}', '${safeUsername}', '${safeAvatar}', '${safeTier}', '${safeExpires}')"
+                        title="Tùy chỉnh gia hạn theo ngày, tuần, tối đa tháng">
+                    <i class="fas fa-sliders me-1"></i> Tùy Chỉnh VIP
+                </button>
+                ${lockBtn}
+            `;
+        }
+
+        return `
+            <tr class="align-middle">
+                <td>
+                    <div class="d-flex align-items-center gap-2">
+                        <img src="${u.avatarUrl || '/images/logo.png'}" class="rounded-circle border border-secondary" style="width: 38px; height: 38px; object-fit: cover;" onerror="this.src='/images/logo.png';" />
+                        <div>
+                            <strong class="text-white d-block">${u.fullName || u.username}</strong>
+                            <span class="text-dim font-monospace small">${u.username}</span>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="small text-dim"><i class="fas fa-envelope me-1"></i>${u.email || '--'}</div>
+                    <div class="small text-dim"><i class="fas fa-phone me-1"></i>${u.phoneNumber || '--'}</div>
+                </td>
+                <td>${roleBadge}</td>
+                <td>${vipColumnHtml}</td>
+                <td class="font-monospace text-warning small fw-bold">${Number(u.totalSpent || 0).toLocaleString()} đ</td>
+                <td>
+                    <span class="badge ${isLocked ? 'bg-danger' : 'bg-success'}">
+                        <i class="fas ${isLocked ? 'fa-lock' : 'fa-circle-check'} me-1"></i>${isLocked ? 'Đã Khóa' : 'Hoạt Động'}
+                    </span>
+                </td>
+                <td class="text-dim small font-monospace">${u.createdAt || '--'}</td>
+                <td class="text-end text-nowrap">${actionColumnHtml}</td>
+            </tr>
+        `;
+    }).join('');
+
+    container.innerHTML = `
+        <table class="table table-dark table-hover mb-0 small">
+            <thead class="table-dark text-dim">
+                <tr>
+                    <th>Người Dùng</th>
+                    <th>Liên Hệ</th>
+                    <th>Vai Trò</th>
+                    <th style="min-width: 280px;">Hạn Dùng VIP & Nâng Cấp</th>
+                    <th>Đã Nạp</th>
+                    <th>Trạng Thái</th>
+                    <th>Ngày Tạo</th>
+                    <th class="text-end">Hành Động</th>
+                </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+        </table>
+    `;
+}
+
+// GIA HẠN NHANH TỰ ĐỘNG CHO ADMIN (1-CLICK)
+async function adminQuickExtend(userId, packageId, days, userName) {
+    const pkgName = packageId === 'Premium' ? 'PREMIUM VIP' : 'STANDARD VIP';
+    if (!confirm(`XÁC NHẬN GIA HẠN TỰ ĐỘNG:\nBạn có chắc chắn muốn gia hạn tự động gói '${pkgName}' (+${days} ngày) cho người dùng '${userName}'?`)) {
+        return;
+    }
+
+    try {
+        const res = await fetch('/Admin/ExtendSubscription', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                userId: userId,
+                packageId: packageId,
+                durationDays: days,
+                reason: `Admin gia hạn tự động gói ${pkgName}`
+            })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+            showToastNotification(`🎉 ${data.message}`);
+            loadAdminUsers();
+            if (typeof loadAdminStats === 'function') loadAdminStats();
+        } else {
+            showToastNotification(`❌ ${data.message || 'Gia hạn thất bại!'}`);
+        }
+    } catch (e) {
+        console.error(e);
+        showToastNotification("❌ Lỗi kết nối khi gia hạn tự động!");
+    }
+}
+
+// MODAL TÙY CHỈNH GIA HẠN GÓI VIP (THEO NGÀY, TUẦN, TỐI ĐA THÁNG)
+window._currentExtendingUser = null;
+
+function openAdminExtendModal(userId, fullName, username, avatarUrl, currentTier, expiresAt, preselectedPkg) {
+    window._currentExtendingUser = { userId, fullName, username, currentTier, expiresAt };
+
+    const modalEl = document.getElementById('adminExtendModal');
+    if (modalEl) {
+        if (modalEl.parentElement !== document.body) {
+            document.body.appendChild(modalEl);
+        }
+        document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+    }
+
+    const idInput = document.getElementById('extendTargetUserId');
+    if (idInput) idInput.value = userId;
+
+    const avatarEl = document.getElementById('extendUserAvatar');
+    if (avatarEl) avatarEl.src = avatarUrl || '/images/logo.png';
+
+    const nameEl = document.getElementById('extendUserFullName');
+    if (nameEl) nameEl.textContent = fullName || username;
+
+    const subInfoEl = document.getElementById('extendUserSubInfo');
+    const tierBadgeEl = document.getElementById('extendUserTierBadge');
+    const tierPinEl = document.getElementById('extendUserTierPin');
+    const currentExpiryValEl = document.getElementById('extendCurrentExpiryVal');
+
+    const tierLower = (currentTier || 'free').toLowerCase();
+    const isPrem = tierLower.includes('premium');
+    const isStd = tierLower.includes('standard');
+    const isFree = !isPrem && !isStd;
+
+    if (subInfoEl) {
+        subInfoEl.textContent = `@${username} • ${isFree ? 'Thành viên Free' : 'Hội viên VIP'}`;
+    }
+
+    if (tierBadgeEl) {
+        if (isPrem) {
+            tierBadgeEl.className = 'badge bg-warning text-dark font-monospace fw-bold';
+            tierBadgeEl.textContent = '👑 Premium VIP';
+        } else if (isStd) {
+            tierBadgeEl.className = 'badge bg-danger text-white font-monospace fw-bold';
+            tierBadgeEl.textContent = '💎 Standard VIP';
+        } else {
+            tierBadgeEl.className = 'badge bg-secondary text-light font-monospace';
+            tierBadgeEl.textContent = '👤 Free Member';
+        }
+    }
+
+    if (tierPinEl) {
+        tierPinEl.textContent = isPrem ? '👑 VIP' : (isStd ? '💎 VIP' : 'FREE');
+        tierPinEl.className = `position-absolute bottom-0 end-0 badge rounded-pill ${isPrem ? 'bg-warning text-dark' : (isStd ? 'bg-danger text-white' : 'bg-secondary text-white')}`;
+    }
+
+    if (currentExpiryValEl) {
+        currentExpiryValEl.textContent = (!isFree && expiresAt) ? `${expiresAt}` : 'Chưa kích hoạt VIP';
+    }
+
+    // Badge "Đang dùng gói này" trên 2 card
+    const bStd = document.getElementById('badgeCurrentPkgStd');
+    const bPrem = document.getElementById('badgeCurrentPkgPrem');
+    if (bStd) bStd.classList.toggle('d-none', !isStd);
+    if (bPrem) bPrem.classList.toggle('d-none', !isPrem);
+
+    // Chọn gói mặc định: ưu tiên preselectedPkg -> gói đang dùng -> Premium
+    let defaultPkg = preselectedPkg || (isPrem ? 'Premium' : (isStd ? 'Standard' : 'Premium'));
+    selectExtendPkg(defaultPkg);
+
+    // Reset về 7 ngày
+    setExtendDays(7);
+
+    // Reset lý do
+    setExtendReason('');
+
+    if (modalEl) {
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modal.show();
+    }
+}
+
+function selectExtendPkg(pkgName) {
+    const input = document.getElementById('extendSelectedPkgInput');
+    if (input) input.value = pkgName;
+
+    const cardStd = document.getElementById('cardPkgStandard');
+    const cardPrem = document.getElementById('cardPkgPremium');
+
+    if (pkgName === 'Premium') {
+        if (cardPrem) cardPrem.classList.add('active');
+        if (cardStd) cardStd.classList.remove('active');
+    } else {
+        if (cardStd) cardStd.classList.add('active');
+        if (cardPrem) cardPrem.classList.remove('active');
+    }
+
+    updateExtendPreview();
+}
+
+function setExtendDays(days) {
+    let val = parseInt(days, 10) || 1;
+    if (val < 1) val = 1;
+    if (val > 30) val = 30;
+
+    const hiddenInput = document.getElementById('extendDurationDays');
+    if (hiddenInput) hiddenInput.value = val;
+
+    const slider = document.getElementById('extendDurationSlider');
+    if (slider) slider.value = val;
+
+    const displayText = document.getElementById('extendDisplayDaysText');
+    if (displayText) displayText.textContent = val;
+
+    const btnDaysText = document.getElementById('btnSubmitDaysText');
+    if (btnDaysText) btnDaysText.textContent = `+${val} ngày`;
+
+    // Highlight preset chip tương ứng
+    [1, 3, 7, 14, 21, 30].forEach(d => {
+        const chip = document.getElementById(`chipDay${d}`);
+        if (chip) {
+            chip.classList.toggle('active', d === val);
+        }
+    });
+
+    updateExtendPreview();
+}
+
+function onExtendSliderChange(val) {
+    setExtendDays(val);
+}
+
+function adjustExtendDays(delta) {
+    const hiddenInput = document.getElementById('extendDurationDays');
+    let currentVal = parseInt(hiddenInput ? hiddenInput.value : 7, 10) || 7;
+    setExtendDays(currentVal + delta);
+}
+
+function setExtendReason(reasonText) {
+    const input = document.getElementById('extendReason');
+    if (input) {
+        input.value = reasonText;
+        if (reasonText) input.focus();
+    }
+
+    // Toggle active state on reason chips
+    document.querySelectorAll('.reason-chip').forEach(btn => {
+        btn.classList.toggle('active', btn.textContent.trim().includes(reasonText) && reasonText !== '');
+    });
+}
+
+function updateExtendPreview() {
+    const selectedPkg = document.getElementById('extendSelectedPkgInput')?.value || 'Premium';
+    const isPremium = selectedPkg === 'Premium';
+    const selectedPkgName = isPremium ? 'PREMIUM VIP' : 'STANDARD VIP';
+    const selectedPkgClass = isPremium ? 'text-warning' : 'text-danger';
+    const selectedPkgIcon = isPremium ? '👑' : '💎';
+
+    const selDisplay = document.getElementById('extendSelectedPkgDisplay');
+    if (selDisplay) {
+        selDisplay.className = `${selectedPkgClass} fw-bold font-monospace small`;
+        selDisplay.textContent = `${selectedPkgIcon} ${selectedPkgName}`;
+    }
+
+    const hiddenDaysInput = document.getElementById('extendDurationDays');
+    let days = parseInt(hiddenDaysInput ? hiddenDaysInput.value : 7, 10) || 7;
+    if (days < 1) days = 1;
+    if (days > 30) days = 30;
+
+    const user = window._currentExtendingUser;
+    if (!user) return;
+
+    const isFree = !user.currentTier || user.currentTier.toLowerCase() === 'free';
+    const userTierLower = (user.currentTier || '').toLowerCase();
+    const isSameTier = !isFree && userTierLower.includes(isPremium ? 'premium' : 'standard');
+
+    // Phân tích ngày hết hạn hiện tại
+    let baseDate = new Date();
+    let isContinuing = false;
+
+    if (isSameTier && user.expiresAt) {
+        let parsedExpiry = null;
+        if (user.expiresAt.includes('/')) {
+            const parts = user.expiresAt.split(' ');
+            const dateParts = parts[0].split('/');
+            let hh = 0, mm = 0;
+            if (parts.length >= 2) {
+                const timeParts = parts[1].split(':');
+                if (timeParts.length >= 2) {
+                    hh = parseInt(timeParts[0], 10) || 0;
+                    mm = parseInt(timeParts[1], 10) || 0;
+                }
+            }
+            if (dateParts.length === 3) {
+                parsedExpiry = new Date(parseInt(dateParts[2]), parseInt(dateParts[1]) - 1, parseInt(dateParts[0]), hh, mm);
+            }
+        } else {
+            const p = new Date(user.expiresAt);
+            if (!isNaN(p.getTime())) parsedExpiry = p;
+        }
+
+        if (parsedExpiry && parsedExpiry > baseDate) {
+            baseDate = parsedExpiry;
+            isContinuing = true;
+        }
+    }
+
+    // Tính ngày hết hạn mới
+    const newDate = new Date(baseDate.getTime() + days * 24 * 60 * 60 * 1000);
+    const dd = String(newDate.getDate()).padStart(2, '0');
+    const MM = String(newDate.getMonth() + 1).padStart(2, '0');
+    const yyyy = newDate.getFullYear();
+    const hh = String(newDate.getHours()).padStart(2, '0');
+    const mm = String(newDate.getMinutes()).padStart(2, '0');
+    const formattedNewExpiry = `${dd}/${MM}/${yyyy} ${hh}:${mm}`;
+
+    // Tổng số ngày còn lại tính từ hiện tại
+    const totalRemainingDays = Math.max(1, Math.ceil((newDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
+
+    // Cập nhật Timeline Preview
+    const methodBadge = document.getElementById('extendCalculationMethodBadge');
+    if (methodBadge) {
+        if (isContinuing) {
+            methodBadge.className = 'badge bg-success bg-opacity-25 text-success border border-success border-opacity-50 font-monospace';
+            methodBadge.innerHTML = `<i class="fas fa-link me-1"></i>Cộng nối tiếp hạn cũ (+${days} ngày)`;
+        } else {
+            methodBadge.className = 'badge bg-info bg-opacity-25 text-info border border-info border-opacity-50 font-monospace';
+            methodBadge.innerHTML = `<i class="fas fa-play me-1"></i>Kích hoạt từ hôm nay (+${days} ngày)`;
+        }
+    }
+
+    const curTierEl = document.getElementById('timelineCurrentTier');
+    if (curTierEl) {
+        curTierEl.textContent = isFree ? 'Free Member' : user.currentTier;
+    }
+
+    const curExpEl = document.getElementById('timelineCurrentExpiry');
+    if (curExpEl) {
+        curExpEl.textContent = (!isFree && user.expiresAt) ? user.expiresAt : 'Chưa kích hoạt';
+    }
+
+    const addedBadge = document.getElementById('timelineAddedDaysBadge');
+    if (addedBadge) {
+        addedBadge.textContent = `+${days} ngày`;
+    }
+
+    const newTierEl = document.getElementById('timelineNewTier');
+    if (newTierEl) {
+        newTierEl.className = `small fw-bold text-truncate ${selectedPkgClass}`;
+        newTierEl.textContent = `${selectedPkgIcon} ${selectedPkgName}`;
+    }
+
+    const newExpEl = document.getElementById('timelineNewExpiry');
+    if (newExpEl) {
+        newExpEl.textContent = formattedNewExpiry;
+    }
+
+    const totalRemainingEl = document.getElementById('timelineTotalRemaining');
+    if (totalRemainingEl) {
+        totalRemainingEl.textContent = `Tổng còn: ${totalRemainingDays} ngày`;
+    }
+
+    const btnSubmit = document.getElementById('btnSubmitExtend');
+    if (btnSubmit) {
+        btnSubmit.className = isPremium
+            ? 'btn btn-shimmer-gold px-4 py-2.5 rounded-pill fw-bold d-flex align-items-center gap-2 shadow-lg'
+            : 'btn btn-shimmer-ruby px-4 py-2.5 rounded-pill fw-bold d-flex align-items-center gap-2 shadow-lg';
+    }
+}
+
+async function submitAdminExtendSubscription(form) {
+    const userId = form.userId.value;
+    const packageId = form.packageId.value;
+    let durationDays = parseInt(form.durationDays.value, 10);
+    const reason = form.reason ? form.reason.value.trim() : '';
+
+    if (!userId) {
+        showToastNotification("❌ Không tìm thấy mã người dùng!");
+        return;
+    }
+    if (!durationDays || durationDays < 1) {
+        showToastNotification("❌ Vui lòng nhập số ngày gia hạn hợp lệ (tối thiểu 1 ngày)!");
+        return;
+    }
+    if (durationDays > 30) {
+        durationDays = 30;
+    }
+
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const origBtnHtml = submitBtn ? submitBtn.innerHTML : '';
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Đang gia hạn...';
+    }
+
+    try {
+        const res = await fetch('/Admin/ExtendSubscription', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                userId: userId,
+                packageId: packageId,
+                durationDays: durationDays,
+                reason: reason
+            })
+        });
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+            const modalEl = document.getElementById('adminExtendModal');
+            if (modalEl) {
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                if (modal) modal.hide();
+            }
+            document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+            showToastNotification(`🎉 ${data.message}`);
+            loadAdminUsers();
+            if (typeof loadAdminStats === 'function') loadAdminStats();
+            return;
+        }
+
+        showToastNotification(`❌ ${data.message || 'Gia hạn gói thất bại!'}`);
+    } catch (e) {
+        console.error(e);
+        showToastNotification("❌ Lỗi kết nối khi gia hạn gói!");
+    } finally {
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = origBtnHtml;
+        }
+    }
+}
+
+async function adminToggleLockUser(userId, username) {
+    if (!confirm(`Bạn có chắc chắn muốn thay đổi trạng thái Khóa / Mở khóa cho tài khoản "${username}"?`)) {
+        return;
+    }
+
+    try {
+        const res = await fetch(`/Admin/ToggleLockUser/${userId}`, { method: 'POST' });
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+            showToastNotification(data.message);
+            loadAdminUsers();
+            return;
+        }
+
+        showToastNotification(`❌ ${data.message || 'Thao tác khóa thất bại!'}`);
+    } catch (e) {
+        console.error(e);
+        showToastNotification("❌ Lỗi kết nối khi thao tác tài khoản!");
     }
 }
 
@@ -2347,11 +3389,15 @@ function renderProducerTracksTable(filterType) {
         const safeTitle = (m.title || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
         const safeArtist = (m.artist || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
         const safeAudioUrl = (m.sourceUrl || '').replace(/'/g, "\\'");
+        const isSlot = m.categoryCode?.includes('Slot');
+        const isNhom = !isSlot && m.categoryCode?.includes('Nhom');
+        const trackKind = isSlot ? 'slot' : (isNhom ? 'nhom' : 'lot');
+        const isWav = m.qualityAvailable && m.qualityAvailable.toUpperCase().includes('WAV');
 
         return `
-            <tr class="align-middle">
-                <td style="width: 45px;">
-                    <button class="btn btn-sm btn-outline-warning rounded-circle p-1" 
+            <tr class="align-middle border-bottom border-secondary border-opacity-10">
+                <td style="width: 44px;" class="ps-2">
+                    <button class="btn btn-sm btn-outline-warning rounded-circle p-1 d-flex align-items-center justify-content-center" 
                             style="width: 32px; height: 32px;"
                             onclick='playTrack({
                                 id: "${m.musicId}",
@@ -2361,38 +3407,56 @@ function renderProducerTracksTable(filterType) {
                                 bpm: ${m.bpm || 140},
                                 key: "${m.musicalKey || '8A'}",
                                 durationSeconds: ${m.durationSeconds || 240},
-                                quality: "${m.qualityAvailable || 'MP3 320kbps'}",
+                                quality: "${isWav ? 'WAV' : 'MP3'}",
+                                trackType: "${trackKind}",
                                 isDemo: false
                             })' 
-                            title="Phát thử bài này">
+                            title="Phát bài này">
                         <i class="fas fa-play" style="font-size: 0.75rem;"></i>
                     </button>
                 </td>
-                <td>
-                    <div class="d-flex align-items-center gap-2">
-                        <span class="badge ${isNonstop ? 'bg-warning text-dark' : 'bg-info text-dark'}" style="font-size: 0.68rem;">
-                            <i class="fas ${isNonstop ? 'fa-fire-flame-curved' : 'fa-compact-disc'} me-1"></i>${isNonstop ? 'NONSTOP' : 'TRACK'}
+                <td style="min-width: 260px; max-width: 420px;">
+                    <div class="d-flex align-items-start gap-2">
+                        <span class="badge ${isNonstop ? 'bg-warning text-dark' : 'bg-info text-dark'} flex-shrink-0 mt-0.5" style="font-size: 0.65rem; font-weight: 800; letter-spacing: 0.5px; padding: 3px 6px;">
+                            ${isNonstop ? 'NONSTOP' : 'TRACK'}
                         </span>
-                        <strong class="text-white">${m.title}</strong>
+                        <div class="flex-grow-1" style="min-width: 0;">
+                            <div style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; line-height: 1.35; font-size: 0.92rem; font-weight: 700; color: #ffffff; word-break: break-word;" title="${safeTitle}">
+                                ${m.title}
+                            </div>
+                            <div class="text-dim small mt-0.5 text-truncate" style="max-width: 100%;">
+                                <span class="text-warning">${m.artist}</span> • <span class="text-silver">${m.genre}</span>
+                            </div>
+                        </div>
                     </div>
-                    <small class="text-dim">${m.artist} • ${m.genre}</small>
                 </td>
-                <td>
-                    <span class="badge" style="background: rgba(0, 180, 216, 0.2); color: #00b4d8; border: 1px solid #00b4d8;"><i class="fas fa-file-audio me-1"></i>File Phòng Thu</span>
-                </td>
-                <td>
-                    <span class="badge ${m.categoryCode.includes('Slot') ? 'badge-premium-gold' : m.categoryCode.includes('Nhom') ? 'badge-standard-red' : 'bg-secondary'}">
-                        ${m.categoryName}
+                <td class="text-nowrap">
+                    <span class="badge ${isSlot ? 'badge-premium-gold' : (isNhom ? 'badge-standard-red' : 'bg-secondary')} fw-bold" style="font-size: 0.72rem;">
+                        ${isSlot ? '👑 Slot VIP' : (isNhom ? '💎 Nhóm VIP' : '🎵 Track Lọt')}
                     </span>
                 </td>
-                <td class="font-monospace small text-dim">${m.bpm} BPM / ${m.musicalKey}</td>
-                <td><span class="badge bg-dark font-monospace text-white small">${m.qualityAvailable}</span></td>
-                <td class="text-dim small"><i class="fas fa-headphones me-1"></i>${m.playsCount}</td>
-                <td class="text-dim small"><i class="fas fa-download me-1"></i>${m.downloadsCount}</td>
-                <td><span class="badge bg-success">${m.status}</span></td>
-                <td class="text-end">
-                    <button class="btn btn-sm btn-outline-danger py-1 px-2" onclick="deleteProducerTrack('${m.musicId}', '${safeTitle}')" title="Xóa bài hát của bạn">
-                        <i class="fas fa-trash me-1"></i> Xóa
+                <td class="font-monospace small text-nowrap">
+                    <span class="badge-shimmer-ruby px-2 py-0.5">${m.bpm ? m.bpm + ' BPM' : '--'}</span>
+                    <span class="badge-shimmer-cyan px-2 py-0.5 ms-1">${m.musicalKey || '--'}</span>
+                </td>
+                <td class="text-nowrap">
+                    <span class="badge ${isWav ? 'badge-premium-gold' : 'badge-standard-red'} font-monospace fw-bold" style="font-size: 0.72rem; padding: 2px 7px;">
+                        ${isWav ? 'WAV' : 'MP3'}
+                    </span>
+                </td>
+                <td class="text-nowrap small font-monospace text-center">
+                    <span class="text-info" title="Lượt nghe"><i class="fas fa-headphones me-1"></i>${m.playsCount || 0}</span>
+                    <span class="text-muted mx-1">/</span>
+                    <span class="text-success" title="Lượt tải"><i class="fas fa-download me-1"></i>${m.downloadsCount || 0}</span>
+                </td>
+                <td class="text-nowrap">
+                    <span class="badge bg-success-subtle text-success border border-success border-opacity-25 px-2 py-1" style="font-size: 0.72rem;">
+                        <i class="fas fa-check-circle me-1"></i>${m.status === 'Published' ? 'Đã duyệt' : m.status}
+                    </span>
+                </td>
+                <td class="text-end pe-2 text-nowrap">
+                    <button class="btn btn-sm btn-outline-danger py-1 px-2.5 rounded-pill" onclick="deleteProducerTrack('${m.musicId}', '${safeTitle}')" title="Xóa bài hát khỏi kho">
+                        <i class="fas fa-trash-can"></i>
                     </button>
                 </td>
             </tr>
@@ -2400,23 +3464,23 @@ function renderProducerTracksTable(filterType) {
     }).join('');
 
     container.innerHTML = filterToolbar + `
-        <table class="table table-dark table-hover mb-0 small">
-            <thead class="table-dark text-dim">
-                <tr>
-                    <th style="width: 45px;"></th>
-                    <th>Tên Bài Hát & Loại</th>
-                    <th>Nguồn</th>
-                    <th>Phân Cấp</th>
-                    <th>BPM / Key</th>
-                    <th>Chất Lượng</th>
-                    <th>Lượt Nghe</th>
-                    <th>Lượt Tải</th>
-                    <th>Trạng Thái</th>
-                    <th class="text-end">Thao Tác</th>
-                </tr>
-            </thead>
-            <tbody>${rows}</tbody>
-        </table>
+        <div class="table-responsive">
+            <table class="table table-dark table-hover mb-0 small" style="background: transparent;">
+                <thead style="background: rgba(14, 15, 26, 0.9);">
+                    <tr class="text-dim border-bottom border-secondary border-opacity-25">
+                        <th style="width: 44px;" class="ps-2"></th>
+                        <th style="min-width: 260px;">Tên Bản Thu & Nghệ Sĩ</th>
+                        <th>Phân Cấp</th>
+                        <th>BPM / Key</th>
+                        <th>Chất Lượng</th>
+                        <th class="text-center">Nghe / Tải</th>
+                        <th>Trạng Thái</th>
+                        <th class="text-end pe-2" style="width: 70px;">Xóa</th>
+                    </tr>
+                </thead>
+                <tbody>${rows}</tbody>
+            </table>
+        </div>
     `;
 }
 
@@ -2438,3 +3502,14 @@ async function deleteProducerTrack(musicId, title) {
         showToastNotification("❌ Lỗi kết nối khi xóa bài hát!");
     }
 }
+
+// CẬP NHẬT MÀU DẢI TIẾN TRÌNH CON TRỎ TUA NHẠC
+function updateSeekSliderProgress(seekSlider) {
+    if (!seekSlider) return;
+    const val = parseFloat(seekSlider.value) || 0;
+    const isSlot = document.body.classList.contains('playing-slot');
+    const isNhom = document.body.classList.contains('playing-nhom');
+    const color = isSlot ? '#ffd166' : (isNhom ? '#ff134a' : '#00b4d8');
+    seekSlider.style.background = `linear-gradient(to right, ${color} 0%, ${color} ${val}%, rgba(255, 255, 255, 0.18) ${val}%, rgba(255, 255, 255, 0.18) 100%)`;
+}
+

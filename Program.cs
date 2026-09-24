@@ -66,12 +66,20 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-// Initialize Audio Processing & Upgrade Existing Tracks
-TLongMusic.Services.AudioProcessingService.EnsureInitialized();
+// Clean Orphaned Files on Startup (Keep original uploaded files as-is: MP3 stays MP3, WAV stays WAV)
 if (!string.IsNullOrEmpty(app.Environment.WebRootPath))
 {
-    var musicDir = Path.Combine(app.Environment.WebRootPath, "uploads", "music");
-    TLongMusic.Services.AudioProcessingService.UpgradeExistingFilesOnStartup(musicDir);
+    try
+    {
+        using var scope = app.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<TLongMusicDbContext>();
+        var activeUrls = db.Musics.Select(m => m.SourceUrl).ToList();
+        TLongMusic.Services.AudioProcessingService.CleanOrphanedMusicFiles(app.Environment.WebRootPath, activeUrls);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"[Startup] Audio sync note: {ex.Message}");
+    }
 }
 
 app.Run();

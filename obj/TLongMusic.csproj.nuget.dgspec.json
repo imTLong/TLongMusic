@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Nguyen Thanh Long\\Documents\\GitHub\\TLongMusic\\TLongMusic.csproj": {}
+    "D:\\Code\\WEB NGHE NHẠC\\TLongMusic.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Nguyen Thanh Long\\Documents\\GitHub\\TLongMusic\\TLongMusic.csproj": {
+    "D:\\Code\\WEB NGHE NHẠC\\TLongMusic.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Nguyen Thanh Long\\Documents\\GitHub\\TLongMusic\\TLongMusic.csproj",
+        "projectUniqueName": "D:\\Code\\WEB NGHE NHẠC\\TLongMusic.csproj",
         "projectName": "TLongMusic",
-        "projectPath": "C:\\Users\\Nguyen Thanh Long\\Documents\\GitHub\\TLongMusic\\TLongMusic.csproj",
+        "projectPath": "D:\\Code\\WEB NGHE NHẠC\\TLongMusic.csproj",
         "packagesPath": "C:\\Users\\Nguyen Thanh Long\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Nguyen Thanh Long\\Documents\\GitHub\\TLongMusic\\obj\\",
+        "outputPath": "D:\\Code\\WEB NGHE NHẠC\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

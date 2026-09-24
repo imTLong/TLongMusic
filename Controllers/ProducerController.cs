@@ -13,10 +13,12 @@ namespace TLongMusic.Controllers
     public class ProducerController : ControllerBase
     {
         private readonly TLongMusicDbContext _context;
+        private readonly IWebHostEnvironment _env;
 
-        public ProducerController(TLongMusicDbContext context)
+        public ProducerController(TLongMusicDbContext context, IWebHostEnvironment env)
         {
             _context = context;
+            _env = env;
         }
 
         // FR-PRO-01: UPLOAD MUSIC (Supports File Upload)
@@ -303,24 +305,8 @@ namespace TLongMusic.Controllers
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
 
-                // 3. Clean up physical audio and cover files from disk (excluding template)
-                if (!string.IsNullOrWhiteSpace(music.SourceUrl) && music.SourceUrl.StartsWith("/uploads/music/"))
-                {
-                    var physicalAudioPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", music.SourceUrl.TrimStart('/'));
-                    if (System.IO.File.Exists(physicalAudioPath) && !physicalAudioPath.EndsWith("template_track.mp3"))
-                    {
-                        try { System.IO.File.Delete(physicalAudioPath); } catch { }
-                    }
-                }
-
-                if (!string.IsNullOrWhiteSpace(music.CoverUrl) && music.CoverUrl.StartsWith("/uploads/covers/"))
-                {
-                    var physicalCoverPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", music.CoverUrl.TrimStart('/'));
-                    if (System.IO.File.Exists(physicalCoverPath))
-                    {
-                        try { System.IO.File.Delete(physicalCoverPath); } catch { }
-                    }
-                }
+                // 3. Clean up physical audio, transcoded versions (_320k, _master), and cover files from disk
+                AudioProcessingService.DeletePhysicalAudioAndRelatedFiles(_env.WebRootPath, music.SourceUrl, music.CoverUrl, music.DemoFilePath);
 
                 return Ok(new { success = true, message = $"Đã xóa vĩnh viễn bài hát '{music.Title}' khỏi hệ thống thành công!" });
             }

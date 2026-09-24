@@ -1,37 +1,40 @@
 @{
-    ViewData["Title"] = "Trung Tâm Quản Trị Admin - TLongMusic";
+    ViewData["Title"] = "Trung Tâm Điều Hành Admin - TLongMusic";
 }
 
 <div class="container-fluid px-3 px-xl-5 py-4" style="max-width: 1720px;">
-    <!-- HEADER HERO QUẢN TRỊ ADMIN -->
-    <div class="p-4 p-md-5 rounded-4 mb-4 position-relative overflow-hidden border border-danger border-opacity-50"
-         style="background: linear-gradient(135deg, rgba(255, 19, 74, 0.15) 0%, rgba(15, 16, 28, 0.95) 100%); backdrop-filter: blur(25px); box-shadow: 0 0 50px rgba(255, 19, 74, 0.25);">
-        
+    <!-- HEADER HERO COMMAND CENTER -->
+    <div class="admin-hero-banner p-4 p-md-5 mb-4">
         <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center gap-3 position-relative" style="z-index: 2;">
             <div>
-                <div class="d-flex align-items-center gap-2 mb-2">
-                    <span class="badge bg-danger text-white px-3 py-1 rounded-pill fw-bold text-uppercase" style="letter-spacing: 1px; font-size: 0.75rem;">
-                        <i class="fas fa-shield-halved me-1"></i> KHU VỰC QUẢN TRỊ TỐI CAO - SYSTEM ADMIN
+                <!-- System Status Bar -->
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-2.5">
+                    <span class="badge bg-danger text-white px-3 py-1 rounded-pill fw-bold text-uppercase d-flex align-items-center gap-1.5" style="letter-spacing: 0.8px; font-size: 0.75rem;">
+                        <i class="fas fa-shield-halved"></i> SUPER ADMIN CONTROL PANEL
                     </span>
-                    <span class="badge bg-dark border border-secondary text-dim small">
-                        <i class="fas fa-server text-success me-1"></i> SQL Server Online
+                    <span class="badge bg-dark border border-success border-opacity-50 text-success small font-monospace">
+                        <i class="fas fa-circle text-success me-1" style="font-size: 0.55rem;"></i> SQL Server Online (v16.0)
+                    </span>
+                    <span class="badge bg-dark border border-warning border-opacity-50 text-warning small font-monospace">
+                        <i class="fas fa-bolt me-1"></i> VietQR Gateway Active
                     </span>
                 </div>
-                <h2 class="text-white fw-bold mb-1 display-6">TRUNG TÂM QUẢN TRỊ HỆ THỐNG</h2>
-                <p class="text-dim mb-0" style="max-width: 750px;">
-                    Trang điều khiển trung tâm dành riêng cho <strong>Quản Trị Viên (Admin)</strong>: Theo dõi doanh thu VietQR toàn sàn, quản lý phân quyền Producer (thêm/khóa/xóa) và kiểm duyệt kho âm nhạc.
+                <h2 class="text-white fw-bold mb-1 display-6">TRUNG TÂM ĐIỀU HÀNH HỆ THỐNG</h2>
+                <p class="text-dim mb-0" style="max-width: 800px; font-size: 0.92rem; line-height: 1.5;">
+                    Trang điều khiển trung tâm dành riêng cho <strong>Quản Trị Viên (Admin)</strong>: Theo dõi biến động doanh thu VietQR toàn sàn, quản lý phân quyền Producer, kiểm duyệt kho bài hát & gia hạn linh hoạt gói hội viên VIP.
                 </p>
             </div>
 
+            <!-- Quick Action Toolbar -->
             <div class="d-flex flex-wrap align-items-center gap-2">
-                <button class="btn btn-outline-light rounded-pill px-3 py-2 fw-bold" onclick="refreshAdminData()">
-                    <i class="fas fa-rotate me-1"></i> Làm Mới Dữ Liệu
+                <button class="btn btn-outline-light rounded-pill px-3 py-2 fw-bold d-flex align-items-center gap-2 shadow-sm" onclick="refreshAdminData()">
+                    <i class="fas fa-rotate"></i> <span>Làm Mới</span>
                 </button>
-                <a href="/Profile" class="btn btn-outline-warning rounded-pill px-3 py-2 fw-bold">
-                    <i class="fas fa-building-columns me-1"></i> Đổi STK Nhận Tiền VIP
-                </a>
-                <a href="/" class="btn btn-glass-crystal rounded-pill px-3 py-2 text-white">
-                    <i class="fas fa-arrow-left me-1"></i> Về Trang Chủ
+                <button class="btn btn-outline-warning rounded-pill px-3 py-2 fw-bold d-flex align-items-center gap-2 shadow-sm" onclick="document.getElementById('adm-settings-tab').click()">
+                    <i class="fas fa-building-columns"></i> <span>STK Nhận Tiền VIP</span>
+                </button>
+                <a href="/" class="btn btn-glass-crystal rounded-pill px-3.5 py-2 text-white d-flex align-items-center gap-2">
+                    <i class="fas fa-house"></i> <span>Về Trang Chủ</span>
                 </a>
             </div>
         </div>
@@ -39,27 +42,47 @@
 
     <!-- MAIN TABS CONTAINER -->
     <div class="p-3 p-md-4 rounded-4 border border-secondary border-opacity-25 mb-5"
-         style="background: rgba(15, 16, 28, 0.92); backdrop-filter: blur(25px); box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);">
+         style="background: rgba(15, 16, 28, 0.95); backdrop-filter: blur(30px); box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);">
 
-        <ul class="nav nav-pills mb-4 gap-2 flex-wrap" id="adminDedicatedTabs" role="tablist">
+        <!-- NAVIGATION TABS -->
+        <ul class="nav admin-nav-tabs mb-4" id="adminDedicatedTabs" role="tablist">
             <li class="nav-item">
-                <button class="nav-link active rounded-pill fw-bold px-4 py-2" id="adm-stats-tab" data-bs-toggle="pill" data-bs-target="#adm-stats-pane" type="button" role="tab">
-                    <i class="fas fa-chart-pie me-2"></i> 1. Thống Kê & Doanh Thu
+                <button class="nav-link active" id="adm-stats-tab" data-bs-toggle="pill" data-bs-target="#adm-stats-pane" type="button" role="tab">
+                    <i class="fas fa-chart-line text-success"></i>
+                    <span>1. Thống Kê & Doanh Thu</span>
                 </button>
             </li>
             <li class="nav-item">
-                <button class="nav-link rounded-pill fw-bold px-4 py-2 text-white" id="adm-producers-tab" data-bs-toggle="pill" data-bs-target="#adm-producers-pane" type="button" role="tab" style="background: rgba(255, 255, 255, 0.08);" onclick="loadAdminProducers()">
-                    <i class="fas fa-users-gear me-2"></i> 2. Quản Lý Producers
+                <button class="nav-link" id="adm-producers-tab" data-bs-toggle="pill" data-bs-target="#adm-producers-pane" type="button" role="tab" onclick="loadAdminProducers()">
+                    <i class="fas fa-headphones text-warning"></i>
+                    <span>2. Quản Lý Producers</span>
+                    <span class="badge bg-dark border border-secondary text-warning font-monospace" id="badgeAdmProducerCount">...</span>
                 </button>
             </li>
             <li class="nav-item">
-                <button class="nav-link rounded-pill fw-bold px-4 py-2 text-white" id="adm-musics-tab" data-bs-toggle="pill" data-bs-target="#adm-musics-pane" type="button" role="tab" style="background: rgba(255, 255, 255, 0.08);" onclick="loadAdminMusics()">
-                    <i class="fas fa-music me-2"></i> 3. Kiểm Duyệt Kho Nhạc
+                <button class="nav-link" id="adm-musics-tab" data-bs-toggle="pill" data-bs-target="#adm-musics-pane" type="button" role="tab" onclick="loadAdminMusics()">
+                    <i class="fas fa-sliders text-danger"></i>
+                    <span>3. Kiểm Duyệt Kho Nhạc</span>
+                    <span class="badge bg-dark border border-secondary text-danger font-monospace" id="badgeAdmMusicCount">...</span>
                 </button>
             </li>
             <li class="nav-item">
-                <button class="nav-link rounded-pill fw-bold px-4 py-2 text-white" id="adm-settings-tab" data-bs-toggle="pill" data-bs-target="#adm-settings-pane" type="button" role="tab" style="background: rgba(255, 255, 255, 0.08);">
-                    <i class="fas fa-gear me-2"></i> 4. Cài Đặt Gói VIP & STK Admin
+                <button class="nav-link" id="adm-users-tab" data-bs-toggle="pill" data-bs-target="#adm-users-pane" type="button" role="tab" onclick="loadAdminUsers()">
+                    <i class="fas fa-users-gear text-info"></i>
+                    <span>4. Thành Viên & Gói VIP</span>
+                    <span class="badge bg-dark border border-secondary text-info font-monospace" id="badgeAdmUserCount">...</span>
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="adm-settings-tab" data-bs-toggle="pill" data-bs-target="#adm-settings-pane" type="button" role="tab">
+                    <i class="fas fa-building-columns text-warning"></i>
+                    <span>5. Cài Đặt STK & Gói VIP</span>
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="adm-vietqr-tab" data-bs-toggle="pill" data-bs-target="#adm-vietqr-pane" type="button" role="tab">
+                    <i class="fas fa-qrcode text-warning"></i>
+                    <span>6. Tạo Mã VietQR Tùy Chỉnh</span>
                 </button>
             </li>
         </ul>
@@ -67,33 +90,83 @@
         <div class="tab-content" id="adminDedicatedTabContent">
             <!-- TAB 1: THỐNG KÊ & DOANH THU -->
             <div class="tab-pane fade show active" id="adm-stats-pane" role="tabpanel">
-                <div class="row g-3" id="adminStatsGrid">
+                <!-- GRID STATS RENDERED DYNAMICALLY VIA JS -->
+                <div class="row g-3 mb-4" id="adminStatsGrid">
                     <div class="col-12 text-center py-5 text-dim">
                         <i class="fas fa-spinner fa-spin fa-2x mb-2 text-danger"></i>
                         <br />Đang tổng hợp dữ liệu thống kê từ SQL Server...
                     </div>
                 </div>
 
-                <div class="mt-4 p-4 rounded-4 border border-secondary border-opacity-25" style="background: rgba(255, 255, 255, 0.02);">
-                    <h5 class="text-white fw-bold mb-2"><i class="fas fa-circle-info text-info me-2"></i>Ghi Chú Vận Hành Hệ Thống</h5>
-                    <ul class="text-dim small mb-0 ps-3" style="line-height: 1.8;">
-                        <li>Doanh thu được tính tự động từ các giao dịch thanh toán VietQR gói <strong>Standard VIP (99.000đ)</strong> và <strong>Premium VIP (199.000đ)</strong> đã xác nhận thành công.</li>
-                        <li>Toàn bộ tiền đăng ký gói VIP của khách hàng sẽ được chuyển trực tiếp vào <strong>Số tài khoản ngân hàng của Admin</strong>.</li>
-                        <li>Quyền Admin có thể phân quyền hoặc thu hồi quyền Producer bất kỳ lúc nào tại Tab <strong>2. Quản Lý Producers</strong>.</li>
-                    </ul>
+                <!-- OPERATIONS & SYSTEM HEALTH ROW -->
+                <div class="row g-3">
+                    <div class="col-lg-7">
+                        <div class="p-4 rounded-4 border border-secondary border-opacity-25 h-100" style="background: rgba(255, 255, 255, 0.02);">
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <span class="badge bg-danger p-1.5 rounded-circle"><i class="fas fa-info text-white"></i></span>
+                                <h5 class="text-white fw-bold mb-0">Cơ Chế Phân Phối & Quyền Lợi Toàn Hệ Thống</h5>
+                            </div>
+                            <ul class="text-dim small mb-0 ps-3 mt-3" style="line-height: 1.9;">
+                                <li><strong>Doanh thu VietQR:</strong> Tiền nâng cấp gói hội viên của tất cả khách hàng được tự động xác nhận và chuyển thẳng 100% vào số tài khoản ngân hàng của <strong>Admin</strong>.</li>
+                                <li><strong>Kho Track Nhóm & Nonstop Nhóm:</strong> Dành cho hội viên <strong>Standard VIP (99k)</strong> và <strong>Premium VIP (199k)</strong> tải file chất lượng cao MP3 320kbps. Thành viên Free chỉ nghe thử Demo.</li>
+                                <li><strong>Kho Track Slot Độc Quyền:</strong> Đặc quyền tối cao dành riêng cho <strong>Premium VIP</strong> tải Full Lossless & Master WAV 24-Bit.</li>
+                                <li><strong>Phân quyền Producer:</strong> Producer có quyền tự do phát hành bản thu vào kho cá nhân. Admin có toàn quyền tạm khóa hoặc gỡ bỏ bản quyền bất cứ lúc nào.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-lg-5">
+                        <div class="p-4 rounded-4 border border-secondary border-opacity-25 h-100" style="background: rgba(255, 255, 255, 0.02);">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="text-white fw-bold mb-0"><i class="fas fa-server text-success me-2"></i>Trạng Thái Dịch Vụ</h5>
+                                <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50">100% HOẠT ĐỘNG</span>
+                            </div>
+                            <div class="p-2.5 rounded-3 bg-dark border border-secondary border-opacity-25 mb-2 d-flex justify-content-between align-items-center small font-monospace">
+                                <span class="text-dim"><i class="fas fa-database text-info me-2"></i>Cơ sở dữ liệu SQL Server:</span>
+                                <span class="text-success fw-bold">ONLINE (v16.0)</span>
+                            </div>
+                            <div class="p-2.5 rounded-3 bg-dark border border-secondary border-opacity-25 mb-2 d-flex justify-content-between align-items-center small font-monospace">
+                                <span class="text-dim"><i class="fas fa-qrcode text-warning me-2"></i>Cổng thanh toán VietQR:</span>
+                                <span class="text-success fw-bold">READY (NAPAS247)</span>
+                            </div>
+                            <div class="p-2.5 rounded-3 bg-dark border border-secondary border-opacity-25 mb-2 d-flex justify-content-between align-items-center small font-monospace">
+                                <span class="text-dim"><i class="fas fa-cloud-arrow-down text-danger me-2"></i>Hệ thống CDN Tải Nhạc:</span>
+                                <span class="text-success fw-bold">TỐC ĐỘ CAO</span>
+                            </div>
+                            <div class="p-2.5 rounded-3 bg-dark border border-secondary border-opacity-25 d-flex justify-content-between align-items-center small font-monospace">
+                                <span class="text-dim"><i class="fas fa-lock text-primary me-2"></i>Bảo mật Cookie & JWT:</span>
+                                <span class="text-success fw-bold">SECURED</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- TAB 2: QUẢN LÝ PRODUCERS -->
             <div class="tab-pane fade" id="adm-producers-pane" role="tabpanel">
-                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
                     <div>
-                        <h5 class="text-white fw-bold mb-1"><i class="fas fa-headphones text-warning me-2"></i>Danh Sách Nhà Sản Xuất Âm Nhạc (Producers)</h5>
-                        <p class="text-dim small mb-0">Producer được quyền đăng tải bản thu và quản lý kho nhạc riêng của mình.</p>
+                        <h5 class="text-white fw-bold mb-1"><i class="fas fa-headphones text-warning me-2"></i>Quản Lý Nhà Sản Xuất Âm Nhạc (Producers)</h5>
+                        <p class="text-dim small mb-0">Theo dõi, cấp phép và phân quyền tài khoản đăng tải nhạc cho các Producer / DJ Studio.</p>
                     </div>
-                    <button class="btn btn-shimmer-ruby px-3 py-2 fw-bold" onclick="openAdminCreateProducerModal()">
-                        <i class="fas fa-user-plus me-2"></i> + Cấp Tài Khoản Producer Mới
-                    </button>
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        <!-- Search Producer -->
+                        <div class="input-group input-group-sm rounded-pill border border-secondary border-opacity-50 overflow-hidden" style="max-width: 250px; background: rgba(0,0,0,0.4);">
+                            <span class="input-group-text bg-transparent border-0 text-dim"><i class="fas fa-search"></i></span>
+                            <input type="text" id="adminProducerSearchInput" class="form-control bg-transparent border-0 text-white" placeholder="Tìm nghệ danh, tài khoản..." oninput="filterAdminProducersTable()" />
+                        </div>
+                        <!-- Status Filter -->
+                        <select id="adminProducerStatusFilter" class="form-select form-select-sm rounded-pill bg-dark text-white border-secondary" style="max-width: 170px;" onchange="filterAdminProducersTable()">
+                            <option value="all">Tất cả trạng thái</option>
+                            <option value="active">🟢 Đang hoạt động</option>
+                            <option value="locked">🔴 Đã khóa</option>
+                        </select>
+                        <button class="btn btn-outline-light btn-sm rounded-pill px-3" onclick="loadAdminProducers()" title="Tải lại danh sách">
+                            <i class="fas fa-rotate"></i>
+                        </button>
+                        <button class="btn btn-shimmer-ruby btn-sm px-3.5 py-1.5 fw-bold rounded-pill" onclick="openAdminCreateProducerModal()">
+                            <i class="fas fa-user-plus me-1.5"></i> + Cấp Producer Mới
+                        </button>
+                    </div>
                 </div>
 
                 <div class="table-responsive rounded-4 border border-secondary border-opacity-25" id="adminProducersTableContainer">
@@ -103,14 +176,35 @@
 
             <!-- TAB 3: KIỂM DUYỆT TOÀN BỘ KHO NHẠC -->
             <div class="tab-pane fade" id="adm-musics-pane" role="tabpanel">
-                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
                     <div>
                         <h5 class="text-white fw-bold mb-1"><i class="fas fa-sliders text-danger me-2"></i>Kiểm Duyệt Kho Âm Nhạc Toàn Sàn</h5>
-                        <p class="text-dim small mb-0">Quản lý bài hát của tất cả Producers: Có thể ẩn bài hoặc xóa vĩnh viễn khỏi SQL Server.</p>
+                        <p class="text-dim small mb-0">Quản trị toàn bộ bài hát từ tất cả Producers: Lọc theo phân cấp (Slot/Nhóm/Lọt), ẩn hoặc xóa vĩnh viễn.</p>
                     </div>
-                    <span class="badge bg-secondary text-light px-3 py-2 rounded-pill">
-                        <i class="fas fa-database me-1"></i> Bảng dữ liệu SQL Musics
-                    </span>
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        <!-- Search Music -->
+                        <div class="input-group input-group-sm rounded-pill border border-secondary border-opacity-50 overflow-hidden" style="max-width: 260px; background: rgba(0,0,0,0.4);">
+                            <span class="input-group-text bg-transparent border-0 text-dim"><i class="fas fa-search"></i></span>
+                            <input type="text" id="adminMusicSearchInput" class="form-control bg-transparent border-0 text-white" placeholder="Tìm tên bài hát, nghệ sĩ..." oninput="filterAdminMusicsTable()" />
+                        </div>
+                        <!-- Category Filter -->
+                        <select id="adminMusicCategoryFilter" class="form-select form-select-sm rounded-pill bg-dark text-white border-secondary" style="max-width: 170px;" onchange="filterAdminMusicsTable()">
+                            <option value="all">Tất cả phân cấp</option>
+                            <option value="Slot">👑 Track Slot</option>
+                            <option value="Nhom">💎 Track Nhóm</option>
+                            <option value="Lot">🎵 Track Lọt</option>
+                            <option value="Nonstop">🔥 Nonstop Mix</option>
+                        </select>
+                        <!-- Status Filter -->
+                        <select id="adminMusicStatusFilter" class="form-select form-select-sm rounded-pill bg-dark text-white border-secondary" style="max-width: 160px;" onchange="filterAdminMusicsTable()">
+                            <option value="all">Tất cả trạng thái</option>
+                            <option value="Published">🟢 Đang hiển thị</option>
+                            <option value="Hidden">🔴 Đang ẩn</option>
+                        </select>
+                        <button class="btn btn-outline-light btn-sm rounded-pill px-3" onclick="loadAdminMusics()" title="Tải lại kho nhạc">
+                            <i class="fas fa-rotate"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="table-responsive rounded-4 border border-secondary border-opacity-25" id="adminMusicsTableContainer">
@@ -118,64 +212,306 @@
                 </div>
             </div>
 
-            <!-- TAB 4: CÀI ĐẶT GÓI VIP & STK ADMIN -->
+            <!-- TAB 4: QUẢN LÝ & GIA HẠN USERS -->
+            <div class="tab-pane fade" id="adm-users-pane" role="tabpanel">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+                    <div>
+                        <h5 class="text-white fw-bold mb-1"><i class="fas fa-users text-danger me-2"></i>Danh Sách Thành Viên & Quản Lý Gói VIP</h5>
+                        <p class="text-dim small mb-0">Theo dõi toàn bộ tài khoản thành viên, thời hạn VIP và sử dụng công cụ tùy chỉnh gia hạn ngày/tuần/tháng.</p>
+                    </div>
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        <div class="input-group input-group-sm rounded-pill border border-secondary border-opacity-50 overflow-hidden" style="max-width: 240px; background: rgba(0,0,0,0.4);">
+                            <span class="input-group-text bg-transparent border-0 text-dim"><i class="fas fa-search"></i></span>
+                            <input type="text" id="adminUserSearchInput" class="form-control bg-transparent border-0 text-white" placeholder="Tìm tên, username..." oninput="filterAdminUsersTable()" />
+                        </div>
+                        <select id="adminUserRoleFilter" class="form-select form-select-sm rounded-pill bg-dark text-white border-secondary" style="max-width: 170px;" onchange="filterAdminUsersTable()">
+                            <option value="all">Tất cả vai trò</option>
+                            <option value="producer">🎧 Producer</option>
+                            <option value="user">👤 Users (Thành viên)</option>
+                            <option value="admin">🛡️ Admin</option>
+                        </select>
+                        <select id="adminUserTierFilter" class="form-select form-select-sm rounded-pill bg-dark text-white border-secondary" style="max-width: 165px;" onchange="filterAdminUsersTable()">
+                            <option value="all">Tất cả gói cước</option>
+                            <option value="Premium">👑 Premium VIP</option>
+                            <option value="Standard">💎 Standard VIP</option>
+                            <option value="Free">Free Member</option>
+                            <option value="expired">Đã hết hạn VIP</option>
+                            <option value="locked">Bị khóa</option>
+                        </select>
+                        <button class="btn btn-outline-light btn-sm rounded-pill px-3" onclick="loadAdminUsers()">
+                            <i class="fas fa-rotate me-1"></i> Tải Lại
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-responsive rounded-4 border border-secondary border-opacity-25" id="adminUsersTableContainer">
+                    <div class="p-5 text-center text-dim">Đang tải danh sách người dùng...</div>
+                </div>
+            </div>
+
+            <!-- TAB 5: CÀI ĐẶT GÓI VIP & STK ADMIN -->
             <div class="tab-pane fade" id="adm-settings-pane" role="tabpanel">
                 <div class="row g-4">
-                    <!-- THÔNG TIN TÀI KHOẢN NHẬN TIỀN ADMIN -->
+                    <!-- THẺ TITANIUM METAL: TÀI KHOẢN NGÂN HÀNG ADMIN -->
                     <div class="col-lg-6">
-                        <div class="p-4 rounded-4 border border-warning border-opacity-50 h-100" style="background: rgba(255, 209, 102, 0.04);">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <h5 class="text-white fw-bold mb-0">
-                                    <i class="fas fa-building-columns text-warning me-2"></i>Tài Khoản Ngân Hàng Nhận Tiền VIP (Admin)
-                                </h5>
-                                <span class="badge bg-warning text-dark fw-bold">VIETQR RECEIVER</span>
-                            </div>
-                            <p class="text-dim small mb-4">
-                                Đây là tài khoản ngân hàng và mã QR hiển thị cho tất cả khách hàng khi họ bấm nâng cấp gói VIP trên website.
-                            </p>
+                        <div class="p-4 rounded-4 border border-warning border-opacity-40 h-100 d-flex flex-column justify-content-between" style="background: rgba(255, 209, 102, 0.03);">
+                            <div>
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="text-white fw-bold mb-0">
+                                        <i class="fas fa-building-columns text-warning me-2"></i>Tài Khoản Nhận Tiền VIP (Admin)
+                                    </h5>
+                                    <span class="badge bg-warning text-dark fw-bold font-monospace">VIETQR RECEIVER</span>
+                                </div>
+                                <p class="text-dim small mb-3">
+                                    Số tài khoản ngân hàng chính thức nhận tiền chuyển khoản khi người dùng quét mã VietQR nâng cấp gói VIP.
+                                </p>
 
-                            <div class="p-3 rounded-3 bg-dark border border-secondary mb-4 small font-monospace">
-                                <div class="d-flex justify-content-between py-2 border-bottom border-secondary border-opacity-25">
-                                    <span class="text-dim">Ngân hàng thụ hưởng:</span>
-                                    <strong class="text-white" id="adminDisplayBankName">Đang tải...</strong>
-                                </div>
-                                <div class="d-flex justify-content-between py-2 border-bottom border-secondary border-opacity-25">
-                                    <span class="text-dim">Số tài khoản:</span>
-                                    <strong class="text-warning fs-6" id="adminDisplayBankAccount">Đang tải...</strong>
-                                </div>
-                                <div class="d-flex justify-content-between py-2">
-                                    <span class="text-dim">Chủ tài khoản:</span>
-                                    <strong class="text-white text-uppercase" id="adminDisplayAccountHolder">Đang tải...</strong>
+                                <!-- TITANIUM BANK CARD COMPONENT -->
+                                <div class="metal-bank-card mb-4 text-white">
+                                    <div class="d-flex justify-content-between align-items-center mb-4">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="metal-chip"></div>
+                                            <i class="fas fa-wifi text-warning" style="transform: rotate(90deg);"></i>
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="badge bg-warning text-dark fw-bold font-monospace px-2 py-0.5" style="font-size: 0.65rem;">VIETQR 24/7</span>
+                                            <div class="text-dim small mt-0.5 font-monospace" style="font-size: 0.7rem;">NAPAS THỰC THỜI</div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <small class="text-dim d-block font-monospace" style="font-size: 0.72rem;">SỐ TÀI KHOẢN THỤ HƯỞNG</small>
+                                        <span class="fs-4 fw-bold font-monospace text-warning letter-spacing-1" id="adminDisplayBankAccount">0988.888.888</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-end">
+                                        <div>
+                                            <small class="text-dim d-block font-monospace" style="font-size: 0.68rem;">CHỦ TÀI KHOẢN</small>
+                                            <strong class="text-uppercase font-monospace fs-6" id="adminDisplayAccountHolder">NGUYEN THANH LONG</strong>
+                                        </div>
+                                        <div class="text-end">
+                                            <small class="text-dim d-block font-monospace" style="font-size: 0.68rem;">NGÂN HÀNG</small>
+                                            <strong class="text-info font-monospace" id="adminDisplayBankName">MB Bank</strong>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
-                            <a href="/Profile" class="btn btn-outline-warning w-100 py-2 fw-bold">
-                                <i class="fas fa-pen-to-square me-2"></i> Cập Nhật / Đổi Số Tài Khoản Ngân Hàng Mới
+                            <a href="/Profile" class="btn btn-outline-warning w-100 py-2.5 rounded-pill fw-bold d-flex align-items-center justify-content-center gap-2">
+                                <i class="fas fa-pen-to-square"></i> Cập Nhật / Đổi Số Tài Khoản Ngân Hàng Mới
                             </a>
                         </div>
                     </div>
 
-                    <!-- THÔNG TIN CÁC GÓI CƯỚC VIP -->
+                    <!-- THÔNG TIN & CẤU HÌNH CÁC GÓI VIP -->
                     <div class="col-lg-6">
-                        <div class="p-4 rounded-4 border border-secondary border-opacity-50 h-100" style="background: rgba(255, 255, 255, 0.02);">
-                            <h5 class="text-white fw-bold mb-3">
-                                <i class="fas fa-gem text-danger me-2"></i>Cấu Hình Các Gói Hội Viên
-                            </h5>
-                            
-                            <div class="p-3 rounded-3 bg-dark border border-danger border-opacity-50 mb-3">
-                                <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <strong class="text-danger"><i class="fas fa-certificate me-1"></i> STANDARD VIP</strong>
-                                    <span class="text-white font-monospace fw-bold">99.000 VNĐ / 30 ngày</span>
+                        <div class="p-4 rounded-4 border border-secondary border-opacity-50 h-100 d-flex flex-column justify-content-between" style="background: rgba(255, 255, 255, 0.02);">
+                            <div>
+                                <h5 class="text-white fw-bold mb-3">
+                                    <i class="fas fa-gem text-danger me-2"></i>Cấu Hình Bảng Giá & Đặc Quyền Hội Viên
+                                </h5>
+
+                                <!-- STANDARD VIP CARD -->
+                                <div class="p-3 rounded-4 bg-dark border border-danger border-opacity-60 mb-3 shadow">
+                                    <div class="d-flex justify-content-between align-items-center mb-1.5">
+                                        <strong class="text-danger fs-6"><i class="fas fa-certificate me-1.5"></i>STANDARD VIP</strong>
+                                        <span class="badge bg-danger text-white font-monospace fs-6">99.000 VNĐ / 30 ngày</span>
+                                    </div>
+                                    <div class="text-dim small mb-2">Gói phổ thông cho người nghe yêu thích âm thanh chất lượng cao.</div>
+                                    <ul class="text-white small mb-0 ps-3 font-monospace" style="font-size: 0.78rem; line-height: 1.7;">
+                                        <li>Tải trọn bộ kho <strong>Track Nhóm & Nonstop Nhóm</strong> chuẩn MP3 320kbps.</li>
+                                        <li>Tải nhạc Lọt không giới hạn.</li>
+                                        <li>Nghe thử 30s chất lượng Demo kho Track Slot.</li>
+                                    </ul>
                                 </div>
-                                <small class="text-dim d-block">Quyền tải kho Track Nhóm & Nonstop Nhóm chuẩn MP3 320kbps. Demo 30s kho Track Slot.</small>
+
+                                <!-- PREMIUM VIP CARD -->
+                                <div class="p-3 rounded-4 bg-dark border border-warning border-opacity-60 shadow">
+                                    <div class="d-flex justify-content-between align-items-center mb-1.5">
+                                        <strong class="text-warning fs-6"><i class="fas fa-crown me-1.5"></i>PREMIUM VIP ĐỘC QUYỀN</strong>
+                                        <span class="badge bg-warning text-dark font-monospace fs-6">199.000 VNĐ / 30 ngày</span>
+                                    </div>
+                                    <div class="text-dim small mb-2">Đặc quyền tối cao nhất trên toàn hệ thống sàn nhạc DJ TLong.</div>
+                                    <ul class="text-white small mb-0 ps-3 font-monospace" style="font-size: 0.78rem; line-height: 1.7;">
+                                        <li>Toàn quyền tải <strong>WAV Master 24-Bit & FLAC Lossless</strong> toàn bộ kho Slot, Nhóm, Lọt.</li>
+                                        <li>Bỏ hoàn toàn giới hạn 30s Demo - Mở khóa 100% kho Slot.</li>
+                                        <li>Huy hiệu vương miện hoàng gia trên tài khoản cá nhân.</li>
+                                    </ul>
+                                </div>
                             </div>
 
-                            <div class="p-3 rounded-3 bg-dark border border-warning border-opacity-50">
-                                <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <strong class="text-warning"><i class="fas fa-crown me-1"></i> PREMIUM VIP ĐỘC QUYỀN</strong>
-                                    <span class="text-white font-monospace fw-bold">199.000 VNĐ / 30 ngày</span>
+                            <div class="text-dim small mt-3 text-center">
+                                <i class="fas fa-shield-halved text-success me-1"></i> Giá cước và cấu hình được đồng bộ tự động trên toàn bộ hệ thống VietQR
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 6: TẠO MÃ QR THANH TOÁN TÙY CHỈNH THEO SỐ TIỀN & NỘI DUNG -->
+            <div class="tab-pane fade" id="adm-vietqr-pane" role="tabpanel">
+                <div class="row g-4">
+                    <!-- CỘT TRÁI: FORM NHẬP THÔNG TIN TÙY CHỈNH -->
+                    <div class="col-lg-6">
+                        <div class="p-4 rounded-4 border border-warning border-opacity-50 h-100" style="background: rgba(18, 19, 32, 0.85); backdrop-filter: blur(20px);">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="text-white fw-bold mb-0">
+                                    <i class="fas fa-qrcode text-warning me-2"></i>Tạo Mã VietQR Tùy Chỉnh
+                                </h5>
+                                <span class="badge bg-warning text-dark fw-bold font-monospace">VIETQR GENERATOR</span>
+                            </div>
+                            <p class="text-dim small mb-3">
+                                Nhập số tiền và nội dung chuyển khoản để tạo mã QR ngân hàng tự động. Khách hàng quét mã là số tiền và nội dung sẽ được điền sẵn 100%.
+                            </p>
+
+                            <!-- Ngân hàng nhận -->
+                            <div class="mb-3">
+                                <label class="form-label text-dim small fw-bold">1. Ngân Hàng Nhận Tiền:</label>
+                                <select id="qrGenBank" class="form-select bg-dark text-white border-secondary" onchange="generateCustomQr()">
+                                    <option value="MB" selected>MB Bank (Ngân hàng Quân Đội)</option>
+                                    <option value="VCB">Vietcombank (Ngoại Thương Việt Nam)</option>
+                                    <option value="TCB">Techcombank (Kỹ Thương Việt Nam)</option>
+                                    <option value="ICB">VietinBank (Công Thương Việt Nam)</option>
+                                    <option value="BIDV">BIDV (Đầu Tư & Phát Triển)</option>
+                                    <option value="ACB">ACB (Á Châu)</option>
+                                    <option value="VPB">VPBank (Việt Nam Thịnh Vượng)</option>
+                                    <option value="TPB">TPBank (Tiên Phong)</option>
+                                    <option value="VBA">Agribank (Nông Nghiệp)</option>
+                                    <option value="STB">Sacombank (Sài Gòn Thương Tín)</option>
+                                    <option value="HDB">HDBank (Phát Triển TP.HCM)</option>
+                                    <option value="VIB">VIB (Quốc Tế)</option>
+                                    <option value="SHB">SHB (Sài Gòn - Hà Nội)</option>
+                                    <option value="MSB">MSB (Hàng Hải)</option>
+                                    <option value="LPB">LPBank (Lộc Phát)</option>
+                                    <option value="OCB">OCB (Phương Đông)</option>
+                                    <option value="SEAB">SeABank (Đông Nam Á)</option>
+                                </select>
+                            </div>
+
+                            <div class="row g-2 mb-3">
+                                <!-- Số tài khoản -->
+                                <div class="col-md-6">
+                                    <label class="form-label text-dim small fw-bold">2. Số Tài Khoản:</label>
+                                    <input type="text" id="qrGenAccount" class="form-control bg-dark text-warning border-secondary font-monospace fw-bold" placeholder="Nhập số tài khoản..." oninput="generateCustomQr()" />
                                 </div>
-                                <small class="text-dim d-block">Đặc quyền cao nhất: Tải Full WAV Master 24-Bit và FLAC Lossless toàn bộ kho Slot, Nhóm và Lọt.</small>
+                                <!-- Tên chủ tài khoản -->
+                                <div class="col-md-6">
+                                    <label class="form-label text-dim small fw-bold">3. Tên Chủ Tài Khoản:</label>
+                                    <input type="text" id="qrGenAccountHolder" class="form-control bg-dark text-white border-secondary text-uppercase font-monospace fw-bold" placeholder="NGUYEN THANH LONG" oninput="generateCustomQr()" />
+                                </div>
+                            </div>
+
+                            <!-- Số tiền tùy chỉnh -->
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <label class="form-label text-dim small fw-bold mb-0">4. Số Tiền Tùy Chỉnh (VNĐ):</label>
+                                    <span class="text-warning fw-bold font-monospace" id="qrFormattedAmount">0 VNĐ</span>
+                                </div>
+                                <div class="input-group">
+                                    <input type="number" id="qrGenAmount" class="form-control bg-dark text-white border-secondary fs-5 font-monospace fw-bold" placeholder="VD: 150000" min="0" step="1000" oninput="updateQrAmountFormatted(); generateCustomQr();" />
+                                    <span class="input-group-text bg-dark border-secondary text-warning fw-bold">VNĐ</span>
+                                </div>
+                                <!-- Nút chọn số tiền nhanh -->
+                                <div class="d-flex flex-wrap gap-1 mt-2">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary text-white py-0 px-2" onclick="setQuickAmount(50000)">50K</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary text-white py-0 px-2" onclick="setQuickAmount(99000)">99K (Standard)</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary text-white py-0 px-2" onclick="setQuickAmount(150000)">150K</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary text-white py-0 px-2" onclick="setQuickAmount(199000)">199K (Premium)</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary text-white py-0 px-2" onclick="setQuickAmount(300000)">300K</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary text-white py-0 px-2" onclick="setQuickAmount(500000)">500K</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary text-white py-0 px-2" onclick="setQuickAmount(1000000)">1 Triệu</button>
+                                </div>
+                            </div>
+
+                            <!-- Nội dung chuyển khoản tùy chỉnh -->
+                            <div class="mb-3">
+                                <label class="form-label text-dim small fw-bold">5. Nội Dung Chuyển Khoản Tùy Chỉnh:</label>
+                                <input type="text" id="qrGenContent" class="form-control bg-dark text-white border-secondary font-monospace" placeholder="VD: TLONG NAP TIEN VIP 098888" oninput="generateCustomQr()" />
+                                <small class="text-dim">Nội dung khách hàng sẽ thấy tự động điền sẵn khi quét app ngân hàng.</small>
+                            </div>
+
+                            <!-- Kiểu hiển thị mã QR -->
+                            <div class="mb-4">
+                                <label class="form-label text-dim small fw-bold">6. Mẫu Hiển Thị VietQR:</label>
+                                <div class="d-flex gap-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="qrTemplate" id="qrTplCompact2" value="compact2" checked onchange="generateCustomQr()">
+                                        <label class="form-check-label text-white small" for="qrTplCompact2">
+                                            Khung Đầy Đủ (Kèm Tên + Số Tiền + Logo VietQR)
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="qrTemplate" id="qrTplQrOnly" value="qr_only" onchange="generateCustomQr()">
+                                        <label class="form-check-label text-white small" for="qrTplQrOnly">
+                                            Chỉ Mã QR Đơn Giản
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-warning fw-bold flex-grow-1 py-2.5 rounded-pill shadow" onclick="generateCustomQr()">
+                                    <i class="fas fa-qrcode me-2"></i> Tạo / Làm Mới Mã QR
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary px-3.5 rounded-pill" onclick="resetQrForm()" title="Khôi phục mặc định STK Admin">
+                                    <i class="fas fa-rotate-left"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CỘT PHẢI: KẾT QUẢ HIỂN THỊ MÃ QR & CÔNG CỤ -->
+                    <div class="col-lg-6">
+                        <div class="p-4 rounded-4 border border-secondary border-opacity-50 h-100 text-center d-flex flex-column justify-content-between" style="background: rgba(18, 19, 32, 0.95); backdrop-filter: blur(20px);">
+                            <div>
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="text-white fw-bold mb-0">
+                                        <i class="fas fa-eye text-info me-2"></i>Mã QR Đã Tạo Sẵn Sàng
+                                    </h5>
+                                    <span class="badge bg-success text-white fw-bold" id="qrReadyBadge">
+                                        <i class="fas fa-circle-check me-1"></i> SẴN SÀNG QUÉT
+                                    </span>
+                                </div>
+
+                                <!-- Khung ảnh QR -->
+                                <div class="p-3 rounded-4 bg-white d-inline-block shadow-lg my-2 position-relative" style="max-width: 320px; width: 100%;">
+                                    <img id="qrGeneratedImage" src="" alt="Mã VietQR Tùy Chỉnh" class="img-fluid rounded-3" style="width: 100%; min-height: 250px; object-fit: contain;" />
+                                </div>
+
+                                <!-- Thông tin tóm tắt -->
+                                <div class="mt-3 p-3 rounded-3 bg-dark border border-secondary text-start small font-monospace">
+                                    <div class="d-flex justify-content-between py-1 border-bottom border-secondary border-opacity-25">
+                                        <span class="text-dim">Ngân hàng:</span>
+                                        <span class="text-white fw-bold" id="qrSummaryBank">-</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between py-1 border-bottom border-secondary border-opacity-25">
+                                        <span class="text-dim">Số tài khoản:</span>
+                                        <span class="text-warning fw-bold" id="qrSummaryAccount">-</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between py-1 border-bottom border-secondary border-opacity-25">
+                                        <span class="text-dim">Chủ TK:</span>
+                                        <span class="text-white fw-bold text-uppercase" id="qrSummaryHolder">-</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between py-1 border-bottom border-secondary border-opacity-25">
+                                        <span class="text-dim">Số tiền:</span>
+                                        <span class="text-danger fw-bold fs-6" id="qrSummaryAmount">0 VNĐ</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between py-1">
+                                        <span class="text-dim">Nội dung:</span>
+                                        <span class="text-info fw-bold text-break" id="qrSummaryContent">-</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Các nút hành động: Tải ảnh, copy link, copy nội dung -->
+                            <div class="d-flex flex-wrap gap-2 justify-content-center mt-3 pt-3 border-top border-secondary border-opacity-25">
+                                <button type="button" class="btn btn-sm btn-outline-info rounded-pill px-3 py-2 fw-bold" onclick="copyQrLink()">
+                                    <i class="fas fa-link me-1"></i> Sao Chép Link Ảnh QR
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-warning rounded-pill px-3 py-2 fw-bold" onclick="downloadQrImage()">
+                                    <i class="fas fa-download me-1"></i> Tải Ảnh QR Về Máy
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-light rounded-pill px-3 py-2 fw-bold" onclick="openQrFullScreen()">
+                                    <i class="fas fa-expand me-1"></i> Xem Toàn Màn Hình
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -260,9 +596,216 @@
     </div>
 </div>
 
+<!-- MODAL TÙY CHỈNH GIA HẠN GÓI VIP (THEO NGÀY, TUẦN, TỐI ĐA THÁNG) -->
+<div class="modal fade" id="adminExtendModal" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="background: rgba(18, 19, 32, 0.98); backdrop-filter: blur(30px); border: 1px solid rgba(255, 209, 102, 0.7); border-radius: 24px; box-shadow: 0 0 60px rgba(255, 209, 102, 0.35);">
+            <div class="modal-header border-bottom border-secondary border-opacity-25 pb-3">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-warning text-dark p-2 fs-6 rounded-circle"><i class="fas fa-sliders"></i></span>
+                    <div>
+                        <h5 class="modal-title text-white fw-bold mb-0">TÙY CHỈNH GIA HẠN GÓI VIP</h5>
+                        <small class="text-dim">Cấp & gia hạn linh hoạt ngày dùng VIP cho thành viên (1 - 30 ngày)</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="adminExtendForm" onsubmit="event.preventDefault(); submitAdminExtendSubscription(this);">
+                    <input type="hidden" id="extendTargetUserId" name="userId" />
+                    <input type="hidden" id="extendSelectedPkgInput" name="packageId" value="Premium" />
+                    <input type="hidden" id="extendDurationDays" name="durationDays" value="7" />
+
+                    <!-- USER IDENTITY CARD -->
+                    <div class="p-3 rounded-4 mb-3 border border-secondary border-opacity-25 d-flex align-items-center gap-3" style="background: rgba(255, 255, 255, 0.03);">
+                        <div class="position-relative">
+                            <img id="extendUserAvatar" src="/images/logo.png" class="rounded-circle border border-warning" style="width: 52px; height: 52px; object-fit: cover;" onerror="this.src='/images/logo.png';" />
+                            <span id="extendUserTierPin" class="position-absolute bottom-0 end-0 badge rounded-pill bg-warning text-dark" style="font-size: 0.6rem;">VIP</span>
+                        </div>
+                        <div class="flex-grow-1 overflow-hidden">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <strong class="text-white fs-6 text-truncate" id="extendUserFullName">Tên người dùng</strong>
+                                <span id="extendUserTierBadge" class="badge bg-dark border border-secondary text-dim font-monospace">Free</span>
+                            </div>
+                            <div class="text-dim small font-monospace text-truncate" id="extendUserSubInfo">username • Free Member</div>
+                            <div id="extendCurrentExpiryNotice" class="text-info small font-monospace mt-0.5" style="font-size: 0.72rem;">
+                                <i class="fas fa-clock me-1"></i>Hạn hiện tại: <span id="extendCurrentExpiryVal">Chưa có</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 1. CHỌN GÓI HỘI VIÊN -->
+                    <div class="mb-3">
+                        <label class="form-label text-white small fw-bold d-flex justify-content-between align-items-center mb-1.5">
+                            <span>1. Chọn Gói Cước Cần Gia Hạn:</span>
+                            <span id="extendSelectedPkgDisplay" class="text-warning fw-bold font-monospace small">👑 PREMIUM VIP</span>
+                        </label>
+                        <div class="row g-2">
+                            <!-- STANDARD VIP CARD -->
+                            <div class="col-6">
+                                <div class="vip-select-card card-standard" id="cardPkgStandard" onclick="selectExtendPkg('Standard')">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-50" style="font-size: 0.65rem;">MP3 320K</span>
+                                        <span class="vip-check-indicator text-danger"><i class="fas fa-circle-check"></i></span>
+                                    </div>
+                                    <div class="fw-bold text-white small mb-1"><i class="fas fa-certificate text-danger me-1"></i>Standard VIP</div>
+                                    <div class="text-dim" style="font-size: 0.7rem; line-height: 1.25;">Kho Track & Nonstop Nhóm</div>
+                                    <span id="badgeCurrentPkgStd" class="badge bg-secondary text-white mt-1.5 d-none" style="font-size: 0.62rem;">Đang dùng gói này</span>
+                                </div>
+                            </div>
+                            <!-- PREMIUM VIP CARD -->
+                            <div class="col-6">
+                                <div class="vip-select-card card-premium active" id="cardPkgPremium" onclick="selectExtendPkg('Premium')">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="badge bg-warning bg-opacity-25 text-warning border border-warning border-opacity-50" style="font-size: 0.65rem;">24-BIT MASTER</span>
+                                        <span class="vip-check-indicator text-warning"><i class="fas fa-circle-check"></i></span>
+                                    </div>
+                                    <div class="fw-bold text-white small mb-1"><i class="fas fa-crown text-warning me-1"></i>Premium VIP</div>
+                                    <div class="text-dim" style="font-size: 0.7rem; line-height: 1.25;">Full WAV Slot, Nhóm, Lọt</div>
+                                    <span id="badgeCurrentPkgPrem" class="badge bg-secondary text-white mt-1.5 d-none" style="font-size: 0.62rem;">Đang dùng gói này</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. THỜI HẠN CỘNG THÊM (1 - 30 NGÀY) -->
+                    <div class="mb-3">
+                        <label class="form-label text-white small fw-bold d-flex justify-content-between align-items-center mb-1.5">
+                            <span>2. Thời Hạn Cộng Thêm:</span>
+                            <span class="badge bg-warning text-dark font-monospace" style="font-size: 0.68rem;">TỐI ĐA 30 NGÀY / LẦN</span>
+                        </label>
+
+                        <!-- STEPPER & RANGE SLIDER BOX -->
+                        <div class="p-3 rounded-3 mb-2" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);">
+                            <div class="d-flex align-items-center justify-content-center gap-3 mb-2">
+                                <button type="button" class="btn btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center p-0" style="width: 36px; height: 36px;" onclick="adjustExtendDays(-1)">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <div class="text-center px-4 py-1 rounded-3 bg-dark border border-secondary border-opacity-50" style="min-width: 140px;">
+                                    <span class="fs-3 fw-bold text-warning font-monospace" id="extendDisplayDaysText">7</span>
+                                    <span class="text-dim small fw-bold ms-1">NGÀY</span>
+                                </div>
+                                <button type="button" class="btn btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center p-0" style="width: 36px; height: 36px;" onclick="adjustExtendDays(1)">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                            <input type="range" class="form-range" id="extendDurationSlider" min="1" max="30" value="7" oninput="onExtendSliderChange(this.value)" />
+                            <div class="d-flex justify-content-between text-dim font-monospace" style="font-size: 0.68rem;">
+                                <span>1 ngày</span>
+                                <span>10 ngày</span>
+                                <span>20 ngày</span>
+                                <span class="text-warning">30 ngày (1 tháng)</span>
+                            </div>
+                        </div>
+
+                        <!-- PRESET CHIPS NHANH -->
+                        <div class="d-flex flex-wrap gap-1.5 justify-content-between">
+                            <button type="button" class="btn day-chip-btn" id="chipDay1" onclick="setExtendDays(1)">+1 ngày</button>
+                            <button type="button" class="btn day-chip-btn" id="chipDay3" onclick="setExtendDays(3)">+3 ngày</button>
+                            <button type="button" class="btn day-chip-btn active" id="chipDay7" onclick="setExtendDays(7)">+7 ngày (1 tuần)</button>
+                            <button type="button" class="btn day-chip-btn" id="chipDay14" onclick="setExtendDays(14)">+14 ngày (2 tuần)</button>
+                            <button type="button" class="btn day-chip-btn" id="chipDay21" onclick="setExtendDays(21)">+21 ngày (3 tuần)</button>
+                            <button type="button" class="btn day-chip-btn" id="chipDay30" onclick="setExtendDays(30)">👑 +30 ngày (1 tháng)</button>
+                        </div>
+                    </div>
+
+                    <!-- 3. TIMELINE TRỰC QUAN (TRƯỚC & SAU GIA HẠN) -->
+                    <div class="p-3 rounded-4 border border-secondary border-opacity-50 mb-3" style="background: rgba(0, 0, 0, 0.4);">
+                        <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom border-secondary border-opacity-25">
+                            <span class="text-dim small fw-bold text-uppercase" style="font-size: 0.72rem;">
+                                <i class="fas fa-calendar-check text-warning me-1"></i> BẢNG DỰ KIẾN HẠN DÙNG:
+                            </span>
+                            <span id="extendCalculationMethodBadge" class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50 font-monospace" style="font-size: 0.68rem;">
+                                Cộng dồn nối tiếp hạn cũ
+                            </span>
+                        </div>
+                        <div class="row g-2 align-items-center text-center">
+                            <!-- Cột Trái: Hiện tại -->
+                            <div class="col-5">
+                                <div class="p-2 rounded-3 bg-dark border border-secondary border-opacity-25">
+                                    <div class="text-dim" style="font-size: 0.68rem;">TRƯỚC GIA HẠN</div>
+                                    <div id="timelineCurrentTier" class="small fw-bold text-truncate text-white">Free Member</div>
+                                    <div id="timelineCurrentExpiry" class="font-monospace text-dim" style="font-size: 0.72rem;">Chưa có hạn</div>
+                                </div>
+                            </div>
+                            <!-- Mũi tên cộng ngày -->
+                            <div class="col-2 px-0">
+                                <div class="text-warning fw-bold font-monospace" style="font-size: 0.75rem;">
+                                    <i class="fas fa-arrow-right d-block mb-1"></i>
+                                    <span id="timelineAddedDaysBadge">+7 ngày</span>
+                                </div>
+                            </div>
+                            <!-- Cột Phải: Sau gia hạn -->
+                            <div class="col-5">
+                                <div class="p-2 rounded-3 bg-dark border border-warning border-opacity-50" style="background: rgba(255, 209, 102, 0.05) !important;">
+                                    <div class="text-warning fw-bold" style="font-size: 0.68rem;">SAU GIA HẠN</div>
+                                    <div id="timelineNewTier" class="small fw-bold text-truncate text-warning">👑 PREMIUM VIP</div>
+                                    <div id="timelineNewExpiry" class="font-monospace text-success fw-bold" style="font-size: 0.72rem;">Đang tính...</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-2 pt-2 border-top border-secondary border-opacity-25 d-flex justify-content-between align-items-center small">
+                            <span class="text-dim" style="font-size: 0.72rem;">Tổng thời gian VIP có được:</span>
+                            <span id="timelineTotalRemaining" class="badge bg-dark border border-secondary text-warning font-monospace">Còn 7 ngày</span>
+                        </div>
+                    </div>
+
+                    <!-- 4. LÝ DO / GHI CHÚ -->
+                    <div class="mb-3">
+                        <label class="form-label text-dim small mb-1 fw-bold">4. Lý Do / Ghi Chú (Tùy chọn):</label>
+                        <div class="d-flex flex-wrap gap-1 mb-2">
+                            <button type="button" class="btn reason-chip" onclick="setExtendReason('Admin tặng quà tri ân VIP')">🎁 Quà tri ân</button>
+                            <button type="button" class="btn reason-chip" onclick="setExtendReason('Khách chuyển khoản trực tiếp')">💵 Đã nhận CK</button>
+                            <button type="button" class="btn reason-chip" onclick="setExtendReason('Bù lỗi / bảo trì hệ thống')">🔧 Bù bảo trì</button>
+                            <button type="button" class="btn reason-chip" onclick="setExtendReason('Ưu đãi sự kiện thành viên')">⭐ Ưu đãi sự kiện</button>
+                        </div>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-dark border-secondary text-dim"><i class="fas fa-pencil"></i></span>
+                            <input type="text" id="extendReason" name="reason" class="form-control bg-dark text-white border-secondary" placeholder="Nhập lý do cụ thể..." />
+                            <button type="button" class="btn btn-outline-secondary" onclick="setExtendReason('')" title="Xóa"><i class="fas fa-xmark"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- FOOTER ACTIONS -->
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top border-secondary border-opacity-25">
+                        <button type="button" class="btn btn-outline-secondary px-4 rounded-pill" data-bs-dismiss="modal">Đóng</button>
+                        <button type="submit" id="btnSubmitExtend" class="btn btn-shimmer-gold px-4 py-2.5 rounded-pill fw-bold d-flex align-items-center gap-2 shadow-lg">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Xác Nhận Gia Hạn (<span id="btnSubmitDaysText">+7 ngày</span>)</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Đảm bảo modal quản trị luôn nổi lên trên backdrop */
+    #adminExtendModal, #adminCreateProducerModal {
+        z-index: 1060 !important;
+    }
+    .modal-backdrop {
+        z-index: 1050 !important;
+    }
+</style>
+
 @section Scripts {
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Tự động di chuyển các modal ra ngoài <body> để thoát khỏi stacking context của <main>
+        ['adminExtendModal', 'adminCreateProducerModal'].forEach(function(id) {
+            const el = document.getElementById(id);
+            if (el && el.parentElement !== document.body) {
+                document.body.appendChild(el);
+            }
+            if (el) {
+                el.addEventListener('hidden.bs.modal', function() {
+                    document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+                });
+            }
+        });
+
         // 1. Phân quyền chặt chẽ: Kiểm tra nếu không phải Admin thì chặn ngay
         setTimeout(function() {
             const user = window.TLongPlayer ? window.TLongPlayer.currentUser : null;
@@ -299,6 +842,8 @@
         loadAdminStats();
         loadAdminProducers();
         loadAdminMusics();
+        loadAdminUsers();
+        initAdminQrGenerator(adminUser);
     }
 
     function refreshAdminData() {
@@ -306,6 +851,156 @@
         loadAdminStats();
         loadAdminProducers();
         loadAdminMusics();
+        loadAdminUsers();
+    }
+
+    /* ========================================================
+       CÔNG CỤ TẠO MÃ VIETQR TÙY CHỈNH THEO SỐ TIỀN & NỘI DUNG
+       ======================================================== */
+    let currentAdminBankData = {
+        bank: 'MB',
+        account: '0988888888',
+        holder: 'NGUYEN THANH LONG'
+    };
+
+    function initAdminQrGenerator(adminUser) {
+        if (adminUser) {
+            if (adminUser.bankAccountNumber) {
+                currentAdminBankData.account = adminUser.bankAccountNumber.trim();
+            }
+            if (adminUser.bankAccountHolder || adminUser.fullName) {
+                currentAdminBankData.holder = (adminUser.bankAccountHolder || adminUser.fullName).trim().toUpperCase();
+            }
+            if (adminUser.bankName) {
+                const b = adminUser.bankName.toUpperCase();
+                if (b.includes('VIETCOM') || b.includes('VCB')) currentAdminBankData.bank = 'VCB';
+                else if (b.includes('TECHCOM') || b.includes('TCB')) currentAdminBankData.bank = 'TCB';
+                else if (b.includes('VIETIN') || b.includes('ICB') || b.includes('CTG')) currentAdminBankData.bank = 'ICB';
+                else if (b.includes('BIDV')) currentAdminBankData.bank = 'BIDV';
+                else if (b.includes('ACB')) currentAdminBankData.bank = 'ACB';
+                else if (b.includes('VPB') || b.includes('VPBANK')) currentAdminBankData.bank = 'VPB';
+                else if (b.includes('TPB') || b.includes('TPBANK')) currentAdminBankData.bank = 'TPB';
+                else if (b.includes('AGRI') || b.includes('VBA')) currentAdminBankData.bank = 'VBA';
+                else if (b.includes('SACOM') || b.includes('STB')) currentAdminBankData.bank = 'STB';
+                else if (b.includes('HDB')) currentAdminBankData.bank = 'HDB';
+                else if (b.includes('VIB')) currentAdminBankData.bank = 'VIB';
+                else if (b.includes('SHB')) currentAdminBankData.bank = 'SHB';
+                else if (b.includes('MSB')) currentAdminBankData.bank = 'MSB';
+                else if (b.includes('LPB') || b.includes('LIENVIET')) currentAdminBankData.bank = 'LPB';
+                else if (b.includes('OCB')) currentAdminBankData.bank = 'OCB';
+                else if (b.includes('SEAB')) currentAdminBankData.bank = 'SEAB';
+                else currentAdminBankData.bank = 'MB';
+            }
+        }
+
+        resetQrForm();
+    }
+
+    function resetQrForm() {
+        const bankSelect = document.getElementById('qrGenBank');
+        const accInput = document.getElementById('qrGenAccount');
+        const holderInput = document.getElementById('qrGenAccountHolder');
+        const amtInput = document.getElementById('qrGenAmount');
+        const contentInput = document.getElementById('qrGenContent');
+
+        if (bankSelect) bankSelect.value = currentAdminBankData.bank;
+        if (accInput) accInput.value = currentAdminBankData.account;
+        if (holderInput) holderInput.value = currentAdminBankData.holder;
+        if (amtInput) amtInput.value = 100000;
+        if (contentInput) {
+            const randCode = Math.floor(100000 + Math.random() * 900000);
+            contentInput.value = `TLONG VIP ${randCode}`;
+        }
+
+        updateQrAmountFormatted();
+        generateCustomQr();
+    }
+
+    function setQuickAmount(amount) {
+        const amtInput = document.getElementById('qrGenAmount');
+        if (amtInput) {
+            amtInput.value = amount;
+            updateQrAmountFormatted();
+            generateCustomQr();
+        }
+    }
+
+    function updateQrAmountFormatted() {
+        const amtInput = document.getElementById('qrGenAmount');
+        const display = document.getElementById('qrFormattedAmount');
+        const val = parseInt(amtInput?.value) || 0;
+        if (display) {
+            display.textContent = new Intl.NumberFormat('vi-VN').format(val) + ' VNĐ';
+        }
+    }
+
+    function generateCustomQr() {
+        const bank = document.getElementById('qrGenBank')?.value || 'MB';
+        const rawAccount = (document.getElementById('qrGenAccount')?.value || '').trim();
+        const cleanAccount = rawAccount.replace(/[.\s-]/g, '');
+        const holder = (document.getElementById('qrGenAccountHolder')?.value || '').trim().toUpperCase();
+        const amount = parseInt(document.getElementById('qrGenAmount')?.value) || 0;
+        const content = (document.getElementById('qrGenContent')?.value || '').trim();
+        const template = document.querySelector('input[name="qrTemplate"]:checked')?.value || 'compact2';
+
+        const bankSelect = document.getElementById('qrGenBank');
+        const bankText = bankSelect ? bankSelect.options[bankSelect.selectedIndex].text : bank;
+
+        if (!cleanAccount) {
+            return;
+        }
+
+        // Link chuẩn VietQR API quốc gia
+        // https://img.vietqr.io/image/<BANK_ID>-<ACCOUNT_NO>-<TEMPLATE>.png?amount=<AMOUNT>&addInfo=<DESCRIPTION>&accountName=<ACCOUNT_NAME>
+        let qrUrl = `https://img.vietqr.io/image/${bank}-${cleanAccount}-${template}.png?amount=${amount}&addInfo=${encodeURIComponent(content)}&accountName=${encodeURIComponent(holder)}`;
+
+        const imgElem = document.getElementById('qrGeneratedImage');
+        if (imgElem) {
+            imgElem.src = qrUrl;
+        }
+
+        // Cập nhật bảng tóm tắt
+        const sumBank = document.getElementById('qrSummaryBank');
+        const sumAcc = document.getElementById('qrSummaryAccount');
+        const sumHolder = document.getElementById('qrSummaryHolder');
+        const sumAmt = document.getElementById('qrSummaryAmount');
+        const sumContent = document.getElementById('qrSummaryContent');
+
+        if (sumBank) sumBank.textContent = bankText;
+        if (sumAcc) sumAcc.textContent = rawAccount;
+        if (sumHolder) sumHolder.textContent = holder || '(Chưa điền)';
+        if (sumAmt) sumAmt.textContent = new Intl.NumberFormat('vi-VN').format(amount) + ' VNĐ';
+        if (sumContent) sumContent.textContent = content || '(Để trống)';
+    }
+
+    function copyQrLink() {
+        const imgElem = document.getElementById('qrGeneratedImage');
+        if (imgElem && imgElem.src) {
+            navigator.clipboard.writeText(imgElem.src).then(() => {
+                alert('✅ ĐÃ SAO CHÉP LINK ẢNH VIETQR!\nBạn có thể dán (Paste) để gửi cho khách hàng qua Zalo/Facebook.');
+            }).catch(() => {
+                prompt('Link ảnh mã QR của bạn:', imgElem.src);
+            });
+        }
+    }
+
+    function downloadQrImage() {
+        const imgElem = document.getElementById('qrGeneratedImage');
+        if (!imgElem || !imgElem.src) return;
+        const link = document.createElement('a');
+        link.href = imgElem.src;
+        link.target = '_blank';
+        link.download = `VietQR_${Date.now()}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function openQrFullScreen() {
+        const imgElem = document.getElementById('qrGeneratedImage');
+        if (imgElem && imgElem.src) {
+            window.open(imgElem.src, '_blank');
+        }
     }
 </script>
 }

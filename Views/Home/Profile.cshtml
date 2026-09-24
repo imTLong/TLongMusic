@@ -363,16 +363,24 @@
         }
 
         if (tierBadgeEl) {
-            const tier = (user.tier || 'free').toLowerCase();
-            if (tier === 'premium') {
-                tierBadgeEl.className = 'badge badge-premium-gold';
-                tierBadgeEl.textContent = 'Gói Premium VIP';
-            } else if (tier === 'standard') {
-                tierBadgeEl.className = 'badge badge-standard-red';
-                tierBadgeEl.textContent = 'Gói Standard VIP';
+            if (primaryRole === 'Admin') {
+                tierBadgeEl.className = 'badge bg-danger text-white';
+                tierBadgeEl.innerHTML = '<i class="fas fa-infinity me-1"></i> Toàn Quyền Quản Trị';
+            } else if (primaryRole === 'Producer') {
+                tierBadgeEl.className = 'badge bg-warning text-dark';
+                tierBadgeEl.innerHTML = '<i class="fas fa-infinity me-1"></i> Producer Studio';
             } else {
-                tierBadgeEl.className = 'badge bg-secondary';
-                tierBadgeEl.textContent = 'Gói Free';
+                const tier = (user.tier || 'free').toLowerCase();
+                if (tier === 'premium') {
+                    tierBadgeEl.className = 'badge badge-premium-gold';
+                    tierBadgeEl.innerHTML = '<i class="fas fa-crown me-1"></i> Gói Premium VIP';
+                } else if (tier === 'standard') {
+                    tierBadgeEl.className = 'badge badge-standard-red';
+                    tierBadgeEl.innerHTML = '<i class="fas fa-certificate me-1"></i> Gói Standard VIP';
+                } else {
+                    tierBadgeEl.className = 'badge bg-secondary';
+                    tierBadgeEl.innerHTML = '<i class="fas fa-user me-1"></i> Gói Free';
+                }
             }
         }
 
@@ -392,11 +400,26 @@
                     </a>
                 `;
             } else {
-                actionsHtml += `
-                    <a href="/#pricingSection" class="btn btn-outline-light rounded-pill py-2">
-                        <i class="fas fa-gem text-danger me-2"></i> Nâng Cấp Gói VIP
-                    </a>
-                `;
+                const userTier = (user.tier || 'free').toLowerCase();
+                if (userTier === 'standard') {
+                    actionsHtml += `
+                        <a href="/Payment/Checkout?package=Premium" class="btn btn-shimmer-gold rounded-pill py-2 text-dark fw-bold">
+                            <i class="fas fa-crown me-2"></i> Nâng Cấp Lên Premium VIP
+                        </a>
+                    `;
+                } else if (userTier === 'premium') {
+                    actionsHtml += `
+                        <a href="/Payment/Checkout?package=Premium" class="btn btn-outline-warning rounded-pill py-2 fw-bold">
+                            <i class="fas fa-rotate-right me-2"></i> Gia Hạn Gói Premium VIP
+                        </a>
+                    `;
+                } else {
+                    actionsHtml += `
+                        <a href="/Payment/Checkout?package=Standard" class="btn btn-shimmer-ruby rounded-pill py-2 fw-bold">
+                            <i class="fas fa-gem me-2"></i> Nâng Cấp Gói VIP
+                        </a>
+                    `;
+                }
             }
             roleActionsEl.innerHTML = actionsHtml;
         }

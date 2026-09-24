@@ -149,20 +149,200 @@ namespace TLongMusic.Services
         }
 
         /// <summary>
+        /// Strictly and permanently delete all physical audio files, transcoded variations (_320k, _master, _demo),
+        /// waveforms, and uploaded covers from disk when a music track is deleted.
+        /// Ensures no orphaned files remain in uploads/music.
+        /// </summary>
+        public static void DeletePhysicalAudioAndRelatedFiles(string? webRootPath, string? sourceUrl, string? coverUrl = null, string? demoFilePath = null)
+        {
+            try
+            {
+                var root = !string.IsNullOrWhiteSpace(webRootPath)
+                    ? webRootPath
+                    : Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+
+                var musicDir = Path.Combine(root, "uploads", "music");
+
+                // 1. Delete all audio files associated with sourceUrl
+                if (Directory.Exists(musicDir) && !string.IsNullOrWhiteSpace(sourceUrl))
+                {
+                    var cleanUrl = sourceUrl.Split('?')[0].Replace('\\', '/');
+                    var rawFileName = Path.GetFileName(cleanUrl);
+                    if (!string.IsNullOrEmpty(rawFileName))
+                    {
+                        var baseName = Path.GetFileNameWithoutExtension(rawFileName)
+                            .Replace("_320k", "", StringComparison.OrdinalIgnoreCase)
+                            .Replace("_master", "", StringComparison.OrdinalIgnoreCase)
+                            .Replace("_demo", "", StringComparison.OrdinalIgnoreCase);
+
+                        // Strict guard: Never delete template_track or empty base
+                        if (!string.IsNullOrWhiteSpace(baseName) && !baseName.Equals("template_track", StringComparison.OrdinalIgnoreCase))
+                        {
+                            var matchingFiles = Directory.GetFiles(musicDir, $"{baseName}*");
+                            foreach (var file in matchingFiles)
+                            {
+                                var fileName = Path.GetFileName(file);
+                                if (!fileName.Equals("template_track.mp3", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    try
+                                    {
+                                        if (File.Exists(file))
+                                        {
+                                            File.Delete(file);
+                                        }
+                                    }
+                                    catch (Exception delEx)
+                                    {
+                                        Console.WriteLine($"[AudioProcessingService] Failed to delete file {file}: {delEx.Message}");
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // 2. Clean up DemoFilePath if specified and not template
+                if (!string.IsNullOrWhiteSpace(demoFilePath))
+                {
+                    var cleanDemo = demoFilePath.Split('?')[0].Replace('\\', '/');
+                    var rawDemoName = Path.GetFileName(cleanDemo);
+                    if (!string.IsNullOrEmpty(rawDemoName) && !rawDemoName.Equals("template_track.mp3", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var demoPhysical = Path.Combine(musicDir, rawDemoName);
+                        if (File.Exists(demoPhysical))
+                        {
+                            try { File.Delete(demoPhysical); } catch { }
+                        }
+                    }
+                }
+
+                // 3. Clean up Cover file if stored locally in uploads
+                if (!string.IsNullOrWhiteSpace(coverUrl) && coverUrl.Contains("/uploads/"))
+                {
+                    var coverDir = Path.Combine(root, "uploads", "covers");
+                    var cleanCover = coverUrl.Split('?')[0].Replace('\\', '/');
+                    var rawCoverName = Path.GetFileName(cleanCover);
+                    if (!string.IsNullOrEmpty(rawCoverName) && !rawCoverName.Contains("default", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var coverPhysical = Path.Combine(coverDir, rawCoverName);
+                        if (File.Exists(coverPhysical))
+                        {
+                            try { File.Delete(coverPhysical); } catch { }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[AudioProcessingService] DeletePhysicalAudioAndRelatedFiles error: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Scan uploads/music and delete all files that do not correspond to any active Music record in the database.
+        /// Preserves template_track.mp3.
+        /// </summary>
+        public static int CleanOrphanedMusicFiles(string webRootPath, IEnumerable<string?> activeSourceUrls)
+        {
+            int deletedCount = 0;
+            try
+            {
+                var musicDir = Path.Combine(webRootPath, "uploads", "music");
+                if (!Directory.Exists(musicDir)) return 0;
+
+                var activePrefixes = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    "template_track"
+                };
+
+                foreach (var url in activeSourceUrls)
+                {
+                    if (string.IsNullOrWhiteSpace(url)) continue;
+                    var cleanUrl = url.Split('?')[0].Replace('\\', '/');
+                    var fileName = Path.GetFileName(cleanUrl);
+                    var baseName = Path.GetFileNameWithoutExtension(fileName)
+                        .Replace("_320k", "", StringComparison.OrdinalIgnoreCase)
+                        .Replace("_master", "", StringComparison.OrdinalIgnoreCase)
+                        .Replace("_demo", "", StringComparison.OrdinalIgnoreCase);
+
+                    if (!string.IsNullOrWhiteSpace(baseName))
+                    {
+                        activePrefixes.Add(baseName);
+                    }
+                }
+
+                var allFiles = Directory.GetFiles(musicDir);
+                foreach (var file in allFiles)
+                {
+                    var fileName = Path.GetFileName(file);
+                    var isAssociated = false;
+                    foreach (var prefix in activePrefixes)
+                    {
+                        if (fileName.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                        {
+                            isAssociated = true;
+                            break;
+                        }
+                    }
+
+                    if (!isAssociated)
+                    {
+                        try
+                        {
+                            File.Delete(file);
+                            deletedCount++;
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[AudioProcessingService] CleanOrphanedMusicFiles error: {ex.Message}");
+            }
+            return deletedCount;
+        }
+
+        /// <summary>
         /// Scan and upgrade all existing audio tracks in uploads/music to 320kbps and Master WAV
         /// </summary>
-        public static void UpgradeExistingFilesOnStartup(string uploadsFolder)
+        public static void UpgradeExistingFilesOnStartup(string uploadsFolder, IEnumerable<string?>? activeSourceUrls = null)
         {
             Task.Run(() =>
             {
                 try
                 {
                     if (!Directory.Exists(uploadsFolder)) return;
+
+                    HashSet<string>? validPrefixes = null;
+                    if (activeSourceUrls != null)
+                    {
+                        validPrefixes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                        foreach (var url in activeSourceUrls)
+                        {
+                            if (string.IsNullOrWhiteSpace(url)) continue;
+                            var cleanUrl = url.Split('?')[0].Replace('\\', '/');
+                            var fileName = Path.GetFileName(cleanUrl);
+                            var baseName = Path.GetFileNameWithoutExtension(fileName)
+                                .Replace("_320k", "", StringComparison.OrdinalIgnoreCase)
+                                .Replace("_master", "", StringComparison.OrdinalIgnoreCase)
+                                .Replace("_demo", "", StringComparison.OrdinalIgnoreCase);
+                            if (!string.IsNullOrWhiteSpace(baseName))
+                                validPrefixes.Add(baseName);
+                        }
+                    }
+
                     var mp3Files = Directory.GetFiles(uploadsFolder, "*.mp3");
                     foreach (var file in mp3Files)
                     {
                         var name = Path.GetFileNameWithoutExtension(file);
                         if (name.EndsWith("_320k") || name.EndsWith("_master") || name == "template_track") continue;
+
+                        if (validPrefixes != null && !validPrefixes.Contains(name))
+                        {
+                            // Skip orphaned or unassociated files so we don't regenerate gigabytes of waste
+                            continue;
+                        }
 
                         var path320k = Path.Combine(uploadsFolder, $"{name}_320k.mp3");
                         var pathWav = Path.Combine(uploadsFolder, $"{name}_master.wav");

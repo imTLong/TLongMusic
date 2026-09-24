@@ -1,6 +1,16 @@
 [
   {
     "ContainingType": "TLongMusic.Controllers.AdminController",
+    "Method": "CleanOrphanedFiles",
+    "RelativePath": "Admin/CleanOrphanedFiles",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TLongMusic.Controllers.AdminController",
     "Method": "CreateProducer",
     "RelativePath": "Admin/CreateProducer",
     "HttpMethod": "POST",
@@ -42,6 +52,22 @@
       {
         "Name": "id",
         "Type": "System.Guid",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TLongMusic.Controllers.AdminController",
+    "Method": "ExtendSubscription",
+    "RelativePath": "Admin/ExtendSubscription",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "model",
+        "Type": "TLongMusic.Models.Dto.AdminExtendSubscriptionDto",
         "IsRequired": true
       }
     ],
@@ -95,6 +121,22 @@
   },
   {
     "ContainingType": "TLongMusic.Controllers.AdminController",
+    "Method": "ToggleLockUser",
+    "RelativePath": "Admin/ToggleLockUser/{id}",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Guid",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TLongMusic.Controllers.AdminController",
     "Method": "ToggleMusicStatus",
     "RelativePath": "Admin/ToggleMusicStatus/{id}",
     "HttpMethod": "POST",
@@ -107,6 +149,16 @@
         "IsRequired": true
       }
     ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TLongMusic.Controllers.AdminController",
+    "Method": "GetUsers",
+    "RelativePath": "Admin/Users",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
     "ReturnTypes": []
   },
   {
@@ -262,6 +314,22 @@
   },
   {
     "ContainingType": "TLongMusic.Controllers.PaymentController",
+    "Method": "CheckStatus",
+    "RelativePath": "Payment/CheckStatus/{orderCode}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "orderCode",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TLongMusic.Controllers.PaymentController",
     "Method": "ConfirmPayment",
     "RelativePath": "Payment/ConfirmPayment",
     "HttpMethod": "POST",
@@ -287,6 +355,38 @@
       {
         "Name": "model",
         "Type": "TLongMusic.Models.Dto.CreateOrderDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TLongMusic.Controllers.PaymentController",
+    "Method": "SimulateTransferSuccess",
+    "RelativePath": "Payment/SimulateTransferSuccess/{orderCode}",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "orderCode",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TLongMusic.Controllers.PaymentController",
+    "Method": "Webhook",
+    "RelativePath": "Payment/Webhook",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "model",
+        "Type": "TLongMusic.Models.Dto.PaymentWebhookDto",
         "IsRequired": true
       }
     ],

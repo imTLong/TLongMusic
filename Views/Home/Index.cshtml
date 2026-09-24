@@ -31,7 +31,7 @@
                     <a href="#masterNonstopContainer" onclick="switchMusicSectionView('nonstop')" class="btn btn-shimmer-gold">
                         <i class="fas fa-fire-flame-curved me-2"></i> 🔥 Khám Phá Kho Nonstop
                     </a>
-                    <a href="#pricingSection" class="btn btn-glass-crystal">
+                    <a href="#pricingSection" id="heroUpgradeVipBtn" class="btn btn-glass-crystal">
                         <i class="fas fa-gem me-2"></i> Nâng Cấp Gói VIP
                     </a>
                 </div>
@@ -122,10 +122,11 @@
                         <span class="badge bg-info text-dark fw-bold px-2 py-1" style="font-size: 0.75rem;">PHẦN 1</span>
                         <h2 class="h4 text-white font-weight-bold mb-0">KHO TRACK NHẠC DJ (BẢN THU ĐƠN 3 - 6 PHÚT)</h2>
                     </div>
-                    <span class="text-dim small">Track lẻ, Intro, Extended Mix chuẩn bị sẵn thông số Key Camelot & BPM (MP3 320k / WAV 24-Bit)</span>
+                    <span class="text-dim small">Track lẻ, Intro, Extended Mix chuẩn bị sẵn thông số Key Camelot & BPM (MP3 / WAV)</span>
                 </div>
             </div>
             <div class="d-flex align-items-center gap-2">
+                <a href="/Track" class="btn btn-sm btn-glass-crystal"><i class="fas fa-calendar-day me-1 text-info"></i> Xem Theo Ngày</a>
                 <span class="badge badge-shimmer-cyan px-3 py-2 fw-bold">@Model.LatestTracks.Count Bản Track Sẵn Sàng</span>
             </div>
         </div>
@@ -167,21 +168,25 @@
             <!-- Thanh Phân Loại Theo Gói Hội Viên Chuẩn SRS (Package Categorization Tabs) -->
             <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 p-2 mb-3 rounded-pill border border-secondary border-opacity-25" 
                  style="background: rgba(18, 19, 32, 0.7); backdrop-filter: blur(15px);">
-                <div class="d-flex flex-wrap gap-1" id="packageFilterPills">
-                    <button class="btn btn-sm btn-dark text-white rounded-pill px-3 py-1 fw-bold active border-secondary" onclick="filterByTier('all', this)">
+                <div class="d-flex flex-wrap gap-2" id="packageFilterPills">
+                    <button class="btn btn-sm btn-dark text-white rounded-pill px-3 py-1.5 fw-bold active border-secondary pill-all" id="btnTabTrackAll" onclick="filterByTier('all', this)">
                         <i class="fas fa-layer-group me-1 text-info"></i> Tất Cả Kho Nhạc
                     </button>
-                    <button class="btn btn-sm btn-dark text-warning rounded-pill px-3 py-1 fw-bold border-secondary" onclick="filterByTier('my_tier', this)">
-                        <i class="fas fa-unlock-keyhole me-1 text-success"></i> Gói Của Bạn (Được Tải Về)
+                    <!-- TAB TRACK NHÓM (ẤN VÀO SẼ RA MÀU ĐỎ RỰC RỠ) -->
+                    <button class="btn btn-sm btn-dark rounded-pill px-3 py-1.5 fw-bold pill-nhom" id="btnTabTrackNhom" onclick="filterByTier('Standard', this)" title="Kho Track Nhóm (Standard VIP)">
+                        <i class="fas fa-certificate text-danger me-1"></i> 💎 <span id="homeTabTrackNhomText">Demo track Nhóm</span>
                     </button>
-                    <button class="btn btn-sm btn-dark text-white rounded-pill px-3 py-1 fw-bold border-secondary" onclick="filterByTier('Free', this)">
-                        <span class="badge bg-secondary me-1">Free</span> Nhạc Lọt Miễn Phí
+                    <!-- TAB DEMO TRACK SLOT (MÀU VÀNG) -->
+                    <button class="btn btn-sm btn-dark rounded-pill px-3 py-1.5 fw-bold pill-slot" id="btnDemoTrackSlot" onclick="filterByTier('demo_slot', this)" title="Chỉ hiển thị các bản Track Slot">
+                        <i class="fas fa-crown text-warning me-1"></i> 👑 <span id="homeTabTrackSlotText">Demo track Slot</span>
                     </button>
-                    <button class="btn btn-sm btn-dark rounded-pill px-3 py-1 fw-bold border-secondary" onclick="filterByTier('Standard', this)" style="color: #ff6b8b;">
-                        <i class="fas fa-certificate text-danger me-1"></i> Standard VIP (Nhạc Nhóm 99K)
+                    <!-- TAB RIÊNG: TRACK LỌT (MIỄN PHÍ) -->
+                    <button class="btn btn-sm btn-dark rounded-pill px-3 py-1.5 fw-bold pill-lot" id="btnTabTrackLot" onclick="filterByTier('Free', this)" title="Kho Track Lọt nghe và tải miễn phí 100%">
+                        <i class="fas fa-music text-info me-1"></i> 🎵 Track Lọt (Free)
                     </button>
-                    <button class="btn btn-sm btn-dark rounded-pill px-3 py-1 fw-bold border-secondary" onclick="filterByTier('Premium', this)" style="color: #ffd166;">
-                        <i class="fas fa-crown text-warning me-1"></i> Premium Master (Slot VIP 199K)
+                    <!-- GÓI CỦA BẠN (DÀNH CHO USER ĐÃ ĐĂNG NHẬP) -->
+                    <button class="btn btn-sm btn-dark text-warning rounded-pill px-3 py-1.5 fw-bold border-secondary" onclick="filterByTier('my_tier', this)">
+                        <i class="fas fa-unlock-keyhole me-1 text-success"></i> Gói Của Bạn
                     </button>
                 </div>
                 <div class="text-dim small px-3 d-none d-md-inline-block" id="packageFilterSummary">
@@ -208,8 +213,22 @@
                     <tbody id="trackTableBody">
                         @foreach (var track in Model.LatestTracks)
                         {
-                            <tr class="crystal-table-row"
+                            var isTrackSlot = (track.CategoryCode != null && track.CategoryCode.Contains("Slot", StringComparison.OrdinalIgnoreCase))
+                                           || track.TierRequiredToDownload == TLongMusic.Models.RequiredTier.Premium
+                                           || track.Type == TLongMusic.Models.AudioType.TrackDat;
+                            var isTrackNhom = !isTrackSlot && ((track.CategoryCode != null && track.CategoryCode.Contains("Nhom", StringComparison.OrdinalIgnoreCase))
+                                           || track.TierRequiredToDownload == TLongMusic.Models.RequiredTier.Standard);
+                            var trackKind = isTrackSlot ? "slot" : (isTrackNhom ? "nhom" : "lot");
+
+                            var rowClass = "crystal-table-row track-row-" + trackKind;
+                            var coverImgClass = "rounded " + (isTrackSlot ? "track-cover-slot" : (isTrackNhom ? "track-cover-nhom" : ""));
+                            var coverImgStyle = "width: 42px; height: 42px; object-fit: cover;" + (!isTrackSlot && !isTrackNhom ? " border: 1px solid rgba(255, 255, 255, 0.15);" : "");
+                            var isWav = isTrackSlot || (track.QualityAvailable != null && track.QualityAvailable.ToUpperInvariant().Contains("WAV"));
+                            var cleanQuality = isWav ? "WAV" : "MP3";
+
+                            <tr class="@rowClass"
                                 data-track-id="@track.Id"
+                                data-track-type="@trackKind"
                                 data-title="@track.Title"
                                 data-artist="@track.Artist"
                                 data-genre="@track.Genre"
@@ -227,9 +246,10 @@
                                                 key: "@track.MusicalKey",
                                                 durationSeconds: @track.DurationSeconds,
                                                 categoryCode: "@track.CategoryCode",
-                                                isDemo: @((track.IsDemoOnlyForFree || track.TierRequiredToDownload == RequiredTier.Premium || track.CategoryCode.Contains("Slot")).ToString().ToLower()),
+                                                trackType: "@trackKind",
+                                                isDemo: @((track.IsDemoOnlyForFree || track.TierRequiredToDownload == RequiredTier.Premium || (track.CategoryCode != null && track.CategoryCode.Contains("Slot"))).ToString().ToLower()),
                                                 demoLimit: @(track.DemoLimitSeconds > 0 ? track.DemoLimitSeconds : 30),
-                                                quality: "@track.QualityAvailable",
+                                                quality: "@cleanQuality",
                                                 tierRequired: "@track.TierRequiredToDownload"
                                             })'
                                             title="Phát bài này">
@@ -238,13 +258,21 @@
                                 </td>
                                 <td>
                                     <div class="d-flex align-items-center gap-3">
-                                        <img src="@track.CoverUrl" alt="@track.Title" class="rounded" style="width: 40px; height: 40px; object-fit: cover; border: 1px solid rgba(255, 255, 255, 0.15);" />
+                                        <img src="@track.CoverUrl" alt="@track.Title" class="@coverImgClass" style="@coverImgStyle" />
                                         <div>
-                                            <div class="track-title-wrapper d-inline-flex align-items-center">
+                                            <div class="track-title-wrapper d-inline-flex align-items-center flex-wrap">
                                                 <span class="text-white font-weight-bold" style="font-size: 0.92rem;">@track.Title</span>
-                                                @if (track.Type == TLongMusic.Models.AudioType.TrackDat)
+                                                @if (isTrackSlot)
                                                 {
-                                                    <span class="badge badge-shimmer-ruby ms-2" style="font-size: 0.65rem;">ĐẶT VIP</span>
+                                                    <span class="badge badge-premium-gold ms-2 fw-bold" style="font-size: 0.65rem; border: 1px solid #ffd166;" title="Track Slot (Viền Vàng)"><i class="fas fa-crown me-1"></i>SLOT</span>
+                                                }
+                                                else if (isTrackNhom)
+                                                {
+                                                    <span class="badge badge-standard-red ms-2 fw-bold" style="font-size: 0.65rem; border: 1px solid #ff134a;" title="Track Nhóm (Viền Đỏ)"><i class="fas fa-certificate me-1"></i>NHÓM</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary ms-2" style="font-size: 0.65rem;" title="Track Lọt Miễn Phí">LỌT</span>
                                                 }
                                             </div>
                                             <div class="text-dim small">@track.Artist</div>
@@ -264,7 +292,14 @@
                                     @track.FormattedDuration
                                 </td>
                                 <td>
-                                    <span class="badge-shimmer-gold" style="font-size: 0.68rem; padding: 2px 7px;">@track.QualityAvailable</span>
+                                    @if (isWav)
+                                    {
+                                        <span class="badge badge-premium-gold font-monospace fw-bold" style="font-size: 0.72rem; padding: 2px 8px; letter-spacing: 0.5px;">WAV</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-standard-red font-monospace fw-bold" style="font-size: 0.72rem; padding: 2px 8px; letter-spacing: 0.5px;">MP3</span>
+                                    }
                                 </td>
                                 <td>
                                     @if (track.TierRequiredToDownload == TLongMusic.Models.RequiredTier.Premium)
@@ -333,6 +368,7 @@
                 </div>
             </div>
             <div class="d-flex align-items-center gap-2">
+                <a href="/Nonstop" class="btn btn-sm btn-glass-crystal"><i class="fas fa-calendar-day me-1 text-warning"></i> Xem Theo Ngày</a>
                 <span class="badge badge-shimmer-ruby px-3 py-2 fw-bold">@(Model.HotNonstops.Count + Model.VipNonstops.Count) Bản Nonstop Tuyển Chọn</span>
             </div>
         </div>
@@ -353,14 +389,35 @@
             <div class="row g-4">
                 @foreach (var track in Model.HotNonstops)
                 {
+                    var isNonstopSlot = (track.CategoryCode != null && track.CategoryCode.Contains("Slot", StringComparison.OrdinalIgnoreCase))
+                                     || track.TierRequiredToDownload == TLongMusic.Models.RequiredTier.Premium
+                                     || track.Type == TLongMusic.Models.AudioType.NonstopDat;
+                    var isNonstopNhom = !isNonstopSlot && ((track.CategoryCode != null && track.CategoryCode.Contains("Nhom", StringComparison.OrdinalIgnoreCase))
+                                     || track.TierRequiredToDownload == TLongMusic.Models.RequiredTier.Standard);
+                    var cardBorderClass = isNonstopSlot ? "border-slot-gold" : (isNonstopNhom ? "border-nhom-red" : "");
+                    var isWav = isNonstopSlot || (track.QualityAvailable != null && track.QualityAvailable.ToUpperInvariant().Contains("WAV"));
+                    var cleanQuality = isWav ? "WAV" : "MP3";
+
                     <div class="col-12 col-sm-6 col-lg-3">
-                        <div class="crystal-card">
+                        <div class="crystal-card @cardBorderClass">
                             <div class="crystal-card-img-wrapper">
                                 <img src="@track.CoverUrl" alt="@track.Title" class="crystal-card-img" />
 
-                                <div class="position-absolute top-0 start-0 p-2 d-flex gap-1">
-                                    <span class="badge-shimmer-ruby">HÀNG LỌT</span>
-                                    <span class="badge-shimmer-ruby" style="background: rgba(0,0,0,0.6);">@track.Bpm BPM</span>
+                                <div class="position-absolute top-0 start-0 p-2 d-flex gap-1 flex-wrap">
+                                    @if (isNonstopSlot)
+                                    {
+                                        <span class="badge badge-premium-gold"><i class="fas fa-crown me-1"></i>SLOT</span>
+                                    }
+                                    else if (isNonstopNhom)
+                                    {
+                                        <span class="badge badge-standard-red"><i class="fas fa-certificate me-1"></i>NHÓM</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge-shimmer-ruby">HÀNG LỌT</span>
+                                    }
+                                    <span class="badge @(isWav ? "badge-premium-gold" : "badge-standard-red") font-monospace fw-bold">@cleanQuality</span>
+                                    <span class="badge bg-dark bg-opacity-75 text-white" style="font-size: 0.7rem;">@track.Bpm BPM</span>
                                 </div>
                                 <div class="position-absolute top-0 end-0 p-2">
                                     <span class="badge-shimmer-cyan">@track.MusicalKey</span>
@@ -378,7 +435,7 @@
                                             durationSeconds: @track.DurationSeconds,
                                             categoryCode: "@track.CategoryCode",
                                             isDemo: false,
-                                            quality: "@track.QualityAvailable",
+                                            quality: "@cleanQuality",
                                             tierRequired: "@track.TierRequiredToDownload"
                                         })'>
                                     <i class="fas fa-play"></i>
@@ -430,13 +487,18 @@
             <div class="row g-4">
                 @foreach (var track in Model.VipNonstops)
                 {
+                    var isNonstopSlot = true;
+                    var isWav = isNonstopSlot || (track.QualityAvailable != null && track.QualityAvailable.ToUpperInvariant().Contains("WAV"));
+                    var cleanQuality = isWav ? "WAV" : "MP3";
+
                     <div class="col-12 col-md-4">
-                        <div class="crystal-card" style="border: 1px solid rgba(255, 209, 102, 0.45); box-shadow: 0 10px 30px rgba(0,0,0,0.6), 0 0 20px rgba(255, 209, 102, 0.15);">
+                        <div class="crystal-card border-slot-gold">
                             <div class="crystal-card-img-wrapper">
                                 <img src="@track.CoverUrl" alt="@track.Title" class="crystal-card-img" />
 
-                                <div class="position-absolute top-0 start-0 p-2 d-flex gap-1">
-                                    <span class="badge badge-premium-gold"><i class="fas fa-crown me-1"></i> BẢN ĐẶT VIP</span>
+                                <div class="position-absolute top-0 start-0 p-2 d-flex gap-1 flex-wrap">
+                                    <span class="badge badge-premium-gold"><i class="fas fa-crown me-1"></i> BẢN ĐẶT SLOT</span>
+                                    <span class="badge badge-premium-gold font-monospace fw-bold">@cleanQuality</span>
                                     <span class="badge-shimmer-ruby" style="background: rgba(0,0,0,0.6);">@track.Bpm BPM</span>
                                 </div>
                                 <div class="position-absolute top-0 end-0 p-2">
@@ -457,7 +519,7 @@
                                             categoryCode: "@track.CategoryCode",
                                             isDemo: true,
                                             demoLimit: @(track.DemoLimitSeconds > 0 ? track.DemoLimitSeconds : 30),
-                                            quality: "@track.QualityAvailable",
+                                            quality: "@cleanQuality",
                                             tierRequired: "@track.TierRequiredToDownload"
                                         })'>
                                     <i class="fas fa-play"></i>
@@ -481,7 +543,7 @@
                                 <div class="crystal-card-artist"><i class="fas fa-gem text-warning me-1"></i> @track.Artist</div>
 
                                 <div class="d-flex align-items-center gap-2 mb-3">
-                                    <span class="badge-premium-gold" style="font-size: 0.68rem; padding: 2px 7px;">@track.QualityAvailable</span>
+                                    <span class="badge-premium-gold font-monospace fw-bold" style="font-size: 0.72rem; padding: 2px 8px;">@cleanQuality</span>
                                     <span class="text-dim small"><i class="fas fa-lock text-warning me-1"></i> Cần Premium VIP</span>
                                 </div>
 
@@ -493,7 +555,7 @@
                                         <span class="text-dim small font-italic">Bảo mật phòng thu</span>
                                     </div>
                                     <button class="btn btn-sm btn-download-premium px-3 py-1" onclick="handleDownload('@track.Id', '@track.Title.Replace("'", "\\'")', '@track.TierRequiredToDownload')">
-                                        <i class="fas fa-crown me-1"></i> Tải Master WAV
+                                        <i class="fas fa-crown me-1"></i> Tải WAV
                                     </button>
                                 </div>
                             </div>

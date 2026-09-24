@@ -173,4 +173,26 @@ namespace TLongMusic.Models.Dto
         public decimal TotalRevenue { get; set; }
         public int ActiveVipSubscriptions { get; set; }
     }
+
+    public class AdminExtendSubscriptionDto
+    {
+        [Required(ErrorMessage = "Vui lòng chọn tài khoản người dùng")]
+        public Guid UserId { get; set; }
+
+        [Required(ErrorMessage = "Vui lòng chọn gói cước")]
+        public string PackageId { get; set; } = "Standard"; // 'Standard', 'Premium'
+
+        [Range(1, 3650, ErrorMessage = "Số ngày gia hạn phải từ 1 đến 3650 ngày")]
+        public int DurationDays { get; set; } = 30;
+
+        public string? Reason { get; set; }
+    }
+
+    public class PaymentWebhookDto
+    {
+        public string? OrderCode { get; set; }
+        public string? Content { get; set; }
+        public decimal? Amount { get; set; }
+        public string? TransactionNumber { get; set; }
+    }
 }

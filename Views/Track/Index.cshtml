@@ -1,0 +1,345 @@
+@model TLongMusic.Controllers.DailyTracksViewModel
+@{
+    ViewData["Title"] = "Kho Track DJ Theo Ngày - TLong Music Record Pool";
+}
+
+<div class="container px-lg-4 py-4">
+    <!-- ==========================================
+         HERO BANNER: KHO TRACK DJ CẬP NHẬT THEO NGÀY
+         ========================================== -->
+    <div class="crystal-hero-stage mb-5">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <div class="hero-pill-badge mb-3">
+                    <i class="fas fa-calendar-star text-danger"></i>
+                    <span>DAILY RECORD POOL • CẬP NHẬT HÀNG NGÀY</span>
+                </div>
+
+                <h1 class="crystal-hero-title mb-3">
+                    KHO TRACK NHẠC DJ <br />
+                    <span class="text-gradient-shimmer">CẬP NHẬT THEO TỪNG NGÀY</span>
+                </h1>
+
+                <p class="crystal-hero-desc mb-4">
+                    Kho Track DJ tuyển chọn chất lượng cao chuẩn BPM & Camelot Key được cập nhật liên tục mỗi ngày.
+                    Phân định trực quan: <strong class="text-warning">👑 Track Slot (Viền Vàng)</strong> &amp; <strong class="text-danger">💎 Track Nhóm (Viền Đỏ)</strong>.
+                </p>
+
+                <!-- Legend phân biệt màu -->
+                <div class="d-flex flex-wrap align-items-center gap-3 pt-2">
+                    <div class="d-flex align-items-center gap-2 p-2 px-3 rounded-pill" style="background: rgba(255, 209, 102, 0.1); border: 1px solid rgba(255, 209, 102, 0.4);">
+                        <span class="rounded-circle" style="width: 14px; height: 14px; background: #ffd166; box-shadow: 0 0 10px #ffd166;"></span>
+                        <strong class="text-warning small">Track Slot (Viền Vàng • WAV)</strong>
+                    </div>
+                    <div class="d-flex align-items-center gap-2 p-2 px-3 rounded-pill" style="background: rgba(255, 19, 74, 0.1); border: 1px solid rgba(255, 19, 74, 0.4);">
+                        <span class="rounded-circle" style="width: 14px; height: 14px; background: #ff134a; box-shadow: 0 0 10px #ff134a;"></span>
+                        <strong class="text-danger small">Track Nhóm (Viền Đỏ • MP3)</strong>
+                    </div>
+                    <div class="d-flex align-items-center gap-2 p-2 px-3 rounded-pill" style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.15);">
+                        <span class="rounded-circle" style="width: 14px; height: 14px; background: #8e9aaf;"></span>
+                        <strong class="text-dim small">Track Lọt (Miễn Phí • MP3)</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 d-none d-lg-flex justify-content-center">
+                <div class="position-relative text-center">
+                    <div class="p-4 rounded-circle d-inline-flex mb-3" style="background: radial-gradient(circle, rgba(0, 180, 216, 0.25) 0%, rgba(18, 19, 32, 0) 70%); border: 2px dashed rgba(0, 180, 216, 0.5);">
+                        <i class="fas fa-compact-disc fa-5x text-info fa-spin" style="animation-duration: 12s;"></i>
+                    </div>
+                    <div class="text-white fw-bold fs-5">@Model.TotalTracks Bản Track Sẵn Sàng</div>
+                    <span class="badge badge-shimmer-cyan mt-1">Gom Nhóm Theo @Model.DailyGroups.Count Ngày</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         THANH BỘ LỌC TÌM KIẾM THEO NGÀY & THỂ LOẠI
+         ========================================== -->
+    <div class="mb-5 p-3 rounded-4" style="background: rgba(18, 19, 32, 0.85); border: 1px solid rgba(255, 255, 255, 0.12); backdrop-filter: blur(20px); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+        <!-- Nút riêng biệt: Demo track Slot & Track Nhóm & Track Lọt -->
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3 pb-3 border-bottom border-secondary border-opacity-25">
+            <div class="d-flex flex-wrap align-items-center gap-2">
+                <span class="text-dim small fw-bold me-1"><i class="fas fa-layer-group text-info me-1"></i>Xem Nhanh:</span>
+                <a href="/Track" class="btn btn-sm btn-dark text-white rounded-pill px-3 py-1.5 fw-bold pill-all @(string.IsNullOrEmpty(Model.SelectedTier) || Model.SelectedTier == "all" ? "active" : "border-secondary")">
+                    <i class="fas fa-layer-group me-1 text-info"></i> Tất Cả
+                </a>
+                <a href="/Track?tier=nhom" id="pillBtnTrackNhom" class="btn btn-sm btn-dark rounded-pill px-3 py-1.5 fw-bold pill-nhom @(Model.SelectedTier == "nhom" ? "active" : "")">
+                    <i class="fas fa-certificate text-danger me-1"></i> 💎 <span id="pillTextTrackNhom">@(Model.IsVipUser ? "Track Nhóm" : "Demo track Nhóm")</span>
+                </a>
+                <a href="/Track?tier=slot" id="pillBtnTrackSlot" class="btn btn-sm btn-dark rounded-pill px-3 py-1.5 fw-bold pill-slot @(Model.SelectedTier == "slot" ? "active" : "")">
+                    <i class="fas fa-crown text-warning me-1"></i> <span id="pillTextTrackSlot">@(Model.IsPremiumUser ? "Track Slot" : "Demo track Slot")</span>
+                </a>
+                <a href="/Track?tier=lot" class="btn btn-sm btn-dark rounded-pill px-3 py-1.5 fw-bold pill-lot @(Model.SelectedTier == "lot" ? "active" : "")">
+                    <i class="fas fa-music text-info me-1"></i> 🎵 Track Lọt (Free)
+                </a>
+            </div>
+            <div>
+                @if (Model.SelectedTier == "slot")
+                {
+                    @if (!Model.IsPremiumUser)
+                    {
+                        <span id="badgeDemoSlotNotice" class="badge bg-warning text-dark fw-bold px-3 py-1.5 rounded-pill shadow">
+                            <i class="fas fa-headphones me-1"></i> Đang hiển thị kho Demo Track Slot (Nghe thử 30s)
+                        </span>
+                    }
+                    else
+                    {
+                        <span id="badgeDemoSlotNotice" class="d-none"></span>
+                    }
+                }
+                else if (Model.SelectedTier == "nhom")
+                {
+                    <span id="badgeNhomNotice" class="badge bg-danger text-white fw-bold px-3 py-1.5 rounded-pill shadow">
+                        <i class="fas fa-certificate me-1"></i> @(Model.IsVipUser ? "Đang hiển thị kho Track Nhóm Standard VIP" : "Đang hiển thị Demo kho Track Nhóm (Cần VIP để tải)")
+                    </span>
+                }
+                else if (Model.SelectedTier == "lot")
+                {
+                    <span class="badge bg-info text-dark fw-bold px-3 py-1.5 rounded-pill shadow">
+                        <i class="fas fa-music me-1"></i> Đang hiển thị kho Track Lọt (Miễn phí 100%)
+                    </span>
+                }
+            </div>
+        </div>
+
+        <form method="get" asp-controller="Track" asp-action="Index" class="row g-3 align-items-center">
+            <!-- Tìm kiếm -->
+            <div class="col-12 col-md-4">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-dark border-secondary text-dim"><i class="fas fa-search"></i></span>
+                    <input type="text" name="search" value="@Model.SearchQuery" class="form-control bg-dark text-white border-secondary" placeholder="Tìm theo tên bài, ca sĩ, remixer..." />
+                </div>
+            </div>
+
+            <!-- Lọc Thể loại -->
+            <div class="col-6 col-md-3">
+                <select name="genre" class="form-select form-select-sm bg-dark text-white border-secondary" onchange="this.form.submit()">
+                    <option value="">Tất cả thể loại</option>
+                    @foreach (var g in Model.AvailableGenres)
+                    {
+                        <option value="@g" selected="@(Model.SelectedGenre == g ? "selected" : null)">@g</option>
+                    }
+                </select>
+            </div>
+
+            <!-- Lọc Phân Loại Bài -->
+            <div class="col-6 col-md-3">
+                <select name="tier" class="form-select form-select-sm bg-dark text-white border-secondary" onchange="this.form.submit()">
+                    <option value="all" selected="@(Model.SelectedTier == "all" || string.IsNullOrEmpty(Model.SelectedTier) ? "selected" : null)">Tất cả phân loại</option>
+                    <option value="slot" selected="@(Model.SelectedTier == "slot" ? "selected" : null)">👑 Chỉ Track Slot (Viền Vàng)</option>
+                    <option value="nhom" selected="@(Model.SelectedTier == "nhom" ? "selected" : null)">💎 Chỉ Track Nhóm (Viền Đỏ)</option>
+                    <option value="lot" selected="@(Model.SelectedTier == "lot" ? "selected" : null)">🎵 Chỉ Track Lọt (Free)</option>
+                </select>
+            </div>
+
+            <!-- Nút Lọc & Reset -->
+            <div class="col-12 col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-sm btn-shimmer-ruby flex-grow-1 fw-bold">
+                    <i class="fas fa-filter me-1"></i> Lọc
+                </button>
+                <a href="/Track" class="btn btn-sm btn-outline-secondary px-3" title="Đặt lại bộ lọc">
+                    <i class="fas fa-rotate-left"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- ==========================================
+         DANH SÁCH BÀI HÁT THEO TỪNG NGÀY (DAILY GROUPS)
+         ========================================== -->
+    @if (!Model.DailyGroups.Any())
+    {
+        <div class="p-5 text-center rounded-4 border border-secondary border-opacity-25" style="background: rgba(18, 19, 32, 0.6);">
+            <i class="fas fa-music-slash fa-3x text-dim mb-3"></i>
+            <h4 class="text-white fw-bold">Không tìm thấy bài hát nào</h4>
+            <p class="text-dim small mb-4">Vui lòng thử tìm kiếm với từ khóa khác hoặc bỏ các bộ lọc.</p>
+            <a href="/Track" class="btn btn-sm btn-shimmer-ruby px-4 py-2 rounded-pill fw-bold">
+                <i class="fas fa-rotate-left me-1"></i> Xem Tất Cả Các Ngày
+            </a>
+        </div>
+    }
+    else
+    {
+        @foreach (var group in Model.DailyGroups)
+        {
+            <div class="daily-track-section mb-5" id="date-@group.Date.ToString("yyyy-MM-dd")">
+                <!-- HEADER KHỐI NGÀY -->
+                <div class="p-3 mb-3 rounded-4 d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3"
+                     style="background: linear-gradient(90deg, rgba(0, 180, 216, 0.15), rgba(18, 19, 32, 0.95)); border-left: 5px solid #00b4d8; border: 1px solid rgba(0, 180, 216, 0.35); box-shadow: 0 10px 30px rgba(0, 180, 216, 0.08);">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="p-3 rounded-circle" style="background: rgba(0, 180, 216, 0.2); color: #00b4d8;">
+                            <i class="fas fa-calendar-day fa-2x"></i>
+                        </div>
+                        <div>
+                            <div class="d-flex align-items-center gap-2">
+                                <h2 class="h5 text-white fw-bold mb-0">Ngày @group.FormattedDate</h2>
+                                <span class="badge bg-info text-dark fw-bold px-2 py-0.5" style="font-size: 0.72rem;">@group.DayOfWeekName</span>
+                            </div>
+                            <span class="text-dim small">Danh sách các bản Track Record Pool phát hành ngày @group.FormattedDate</span>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge badge-shimmer-cyan px-3 py-2 fw-bold font-monospace" style="font-size: 0.78rem;">
+                            <i class="fas fa-music me-1"></i> @group.Tracks.Count Bản Track
+                        </span>
+                    </div>
+                </div>
+
+                <!-- BẢNG BÀI HÁT TRONG NGÀY -->
+                <div class="crystal-table-wrapper table-responsive @(Model.SelectedTier == "nhom" ? "filter-active-nhom" : (Model.SelectedTier == "slot" ? "filter-active-slot" : (Model.SelectedTier == "lot" ? "filter-active-lot" : "")))">
+                    <table class="crystal-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 45px;"></th>
+                                <th>Tên Track / Tiêu Đề</th>
+                                <th>Thể Loại</th>
+                                <th>BPM</th>
+                                <th>Camelot Key</th>
+                                <th>Thời Lượng</th>
+                                <th>Chất Lượng</th>
+                                <th>Quyền Tải</th>
+                                <th class="text-end" style="width: 120px;">Hành Động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var track in group.Tracks)
+                            {
+                                var isTrackSlot = (track.CategoryCode != null && track.CategoryCode.Contains("Slot", StringComparison.OrdinalIgnoreCase))
+                                               || track.TierRequiredToDownload == TLongMusic.Models.RequiredTier.Premium
+                                               || track.Type == TLongMusic.Models.AudioType.TrackDat;
+                                var isTrackNhom = !isTrackSlot && ((track.CategoryCode != null && track.CategoryCode.Contains("Nhom", StringComparison.OrdinalIgnoreCase))
+                                               || track.TierRequiredToDownload == TLongMusic.Models.RequiredTier.Standard);
+                                var trackKind = isTrackSlot ? "slot" : (isTrackNhom ? "nhom" : "lot");
+
+                                var rowClass = "crystal-table-row track-row-" + trackKind;
+                                var coverImgClass = "rounded " + (isTrackSlot ? "track-cover-slot" : (isTrackNhom ? "track-cover-nhom" : ""));
+                                var coverImgStyle = "width: 42px; height: 42px; object-fit: cover;" + (!isTrackSlot && !isTrackNhom ? " border: 1px solid rgba(255, 255, 255, 0.15);" : "");
+                                var isWav = isTrackSlot || (track.QualityAvailable != null && track.QualityAvailable.ToUpperInvariant().Contains("WAV"));
+                                var cleanQuality = isWav ? "WAV" : "MP3";
+
+                                <tr class="@rowClass"
+                                    data-track-id="@track.Id"
+                                    data-track-type="@trackKind"
+                                    data-title="@track.Title"
+                                    data-artist="@track.Artist"
+                                    data-genre="@track.Genre"
+                                    data-bpm="@track.Bpm"
+                                    data-tier="@track.TierRequiredToDownload">
+                                    <td>
+                                        <button class="track-play-inline-btn"
+                                                onclick='playTrack({
+                                                    id: "@track.Id",
+                                                    title: "@track.Title.Replace("\"", "\\\"")",
+                                                    artist: "@track.Artist.Replace("\"", "\\\"")",
+                                                    coverUrl: "@track.CoverUrl",
+                                                    audioUrl: "@track.AudioUrl",
+                                                    bpm: @track.Bpm,
+                                                    key: "@track.MusicalKey",
+                                                    durationSeconds: @track.DurationSeconds,
+                                                    categoryCode: "@track.CategoryCode",
+                                                    trackType: "@trackKind",
+                                                    isDemo: @((track.IsDemoOnlyForFree || track.TierRequiredToDownload == RequiredTier.Premium || (track.CategoryCode != null && track.CategoryCode.Contains("Slot"))).ToString().ToLower()),
+                                                    demoLimit: @(track.DemoLimitSeconds > 0 ? track.DemoLimitSeconds : 30),
+                                                    quality: "@cleanQuality",
+                                                    tierRequired: "@track.TierRequiredToDownload"
+                                                })'
+                                                title="Phát bài này">
+                                            <i class="fas fa-play"></i>
+                                        </button>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <img src="@track.CoverUrl" alt="@track.Title" class="@coverImgClass" style="@coverImgStyle" />
+                                            <div>
+                                                <div class="track-title-wrapper d-inline-flex align-items-center flex-wrap">
+                                                    <span class="text-white font-weight-bold" style="font-size: 0.92rem;">@track.Title</span>
+                                                    @if (isTrackSlot)
+                                                    {
+                                                        <span class="badge badge-premium-gold ms-2 fw-bold" style="font-size: 0.65rem; border: 1px solid #ffd166;" title="Track Slot (Viền Vàng)"><i class="fas fa-crown me-1"></i>SLOT</span>
+                                                    }
+                                                    else if (isTrackNhom)
+                                                    {
+                                                        <span class="badge badge-standard-red ms-2 fw-bold" style="font-size: 0.65rem; border: 1px solid #ff134a;" title="Track Nhóm (Viền Đỏ)"><i class="fas fa-certificate me-1"></i>NHÓM</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-secondary ms-2" style="font-size: 0.65rem;" title="Track Lọt Miễn Phí">LỌT</span>
+                                                    }
+                                                </div>
+                                                <div class="text-dim small">@track.Artist</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: var(--text-silver); font-size: 0.72rem;">@track.Genre</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge-shimmer-ruby">@track.Bpm</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge-shimmer-cyan">@track.MusicalKey</span>
+                                    </td>
+                                    <td class="text-dim small font-monospace">
+                                        @track.FormattedDuration
+                                    </td>
+                                    <td>
+                                        @if (isWav)
+                                        {
+                                            <span class="badge badge-premium-gold font-monospace fw-bold" style="font-size: 0.72rem; padding: 2px 8px; letter-spacing: 0.5px;">WAV</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-standard-red font-monospace fw-bold" style="font-size: 0.72rem; padding: 2px 8px; letter-spacing: 0.5px;">MP3</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (track.TierRequiredToDownload == TLongMusic.Models.RequiredTier.Premium)
+                                        {
+                                            <span class="badge badge-premium-gold"><i class="fas fa-crown me-1"></i> Premium</span>
+                                        }
+                                        else if (track.TierRequiredToDownload == TLongMusic.Models.RequiredTier.Standard)
+                                        {
+                                            <span class="badge badge-standard-red"><i class="fas fa-certificate me-1"></i> Standard</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Free</span>
+                                        }
+                                    </td>
+                                    <td class="text-end">
+                                        <button class="btn btn-sm btn-link text-dim p-0 me-3" onclick="toggleFavorite('@track.Id', this)" title="Yêu thích">
+                                            <i class="far fa-heart"></i>
+                                        </button>
+                                        @if (track.TierRequiredToDownload == TLongMusic.Models.RequiredTier.Premium)
+                                        {
+                                            <button class="btn btn-sm btn-download-premium px-3 py-1"
+                                                    onclick="handleDownload('@track.Id', '@track.Title.Replace("'", "\\'")', '@track.TierRequiredToDownload')">
+                                                <i class="fas fa-crown me-1"></i> Tải WAV
+                                            </button>
+                                        }
+                                        else if (track.TierRequiredToDownload == TLongMusic.Models.RequiredTier.Standard)
+                                        {
+                                            <button class="btn btn-sm btn-download-standard px-3 py-1"
+                                                    onclick="handleDownload('@track.Id', '@track.Title.Replace("'", "\\'")', '@track.TierRequiredToDownload')">
+                                                <i class="fas fa-arrow-down-to-bracket me-1"></i> Tải MP3
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <button class="btn btn-sm btn-glass-crystal px-3 py-1"
+                                                    onclick="handleDownload('@track.Id', '@track.Title.Replace("'", "\\'")', '@track.TierRequiredToDownload')">
+                                                <i class="fas fa-arrow-down-to-bracket me-1"></i> Tải
+                                            </button>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+    }
+</div>

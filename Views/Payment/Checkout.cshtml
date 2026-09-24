@@ -1,0 +1,502 @@
+@{
+    ViewData["Title"] = "Thanh Toán Gia Hạn VIP - TLongMusic";
+    var selectedPackage = ViewBag.SelectedPackage as string ?? "Standard";
+}
+
+<div class="container-fluid px-3 px-xl-5 py-4" style="max-width: 1400px; min-height: 85vh;">
+    <!-- HEADER HERO -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4 pb-3 border-bottom border-secondary border-opacity-25">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <a href="/" class="btn btn-outline-light btn-sm rounded-pill px-3">
+                    <i class="fas fa-arrow-left me-1"></i> Trang Chủ
+                </a>
+                <span class="badge bg-danger text-white px-3 py-1 rounded-pill fw-bold text-uppercase" style="letter-spacing: 1px; font-size: 0.72rem;">
+                    <i class="fas fa-shield-halved me-1"></i> CỔNG THANH TOÁN VIETQR CHÍNH THỨC
+                </span>
+                <span class="badge bg-dark border border-secondary text-dim small">
+                    <i class="fas fa-bolt text-warning me-1"></i> Tự Động Kích Hoạt 24/7
+                </span>
+            </div>
+            <h2 class="text-white fw-bold mb-1 display-6">THANH TOÁN & GIA HẠN GÓI HỘI VIÊN VIP</h2>
+            <p class="text-dim mb-0 small">
+                Quét mã VietQR trên ứng dụng ngân hàng bất kỳ để tự động gia hạn gói cước và mở khóa đặc quyền âm nhạc tức thì.
+            </p>
+        </div>
+
+        <div class="d-flex align-items-center gap-2">
+            <div class="p-2 px-3 rounded-4 border border-secondary border-opacity-25 text-end" style="background: rgba(255, 255, 255, 0.03);">
+                <span class="text-dim small d-block">Tài khoản thanh toán:</span>
+                <span class="text-white fw-bold" id="checkoutUserDisplay">Đang tải...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN CHECKOUT CONTENT -->
+    <div class="row g-4">
+        <!-- CỘT TRÁI: CHỌN GÓI & QUYỀN LỢI -->
+        <div class="col-12 col-lg-5">
+            <div class="p-4 rounded-4 border border-secondary border-opacity-25 h-100 position-relative overflow-hidden"
+                 style="background: rgba(15, 16, 28, 0.94); backdrop-filter: blur(25px); box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);">
+                
+                <h5 class="text-white fw-bold mb-3 d-flex align-items-center gap-2">
+                    <i class="fas fa-gem text-danger"></i> 1. Chọn Gói Cước Gia Hạn
+                </h5>
+
+                <!-- PACKAGE SWITCHER TABS -->
+                <div class="d-flex gap-2 p-1 rounded-pill mb-4 border border-secondary border-opacity-25" style="background: rgba(0, 0, 0, 0.4);">
+                    <button class="btn w-50 rounded-pill py-2 fw-bold text-uppercase @(selectedPackage == "Standard" ? "btn-danger text-white shadow" : "text-dim")"
+                            id="btnSelectStandard" onclick="selectCheckoutPackage('Standard')">
+                        <i class="fas fa-certificate me-1"></i> Standard VIP (99K)
+                    </button>
+                    <button class="btn w-50 rounded-pill py-2 fw-bold text-uppercase @(selectedPackage == "Premium" ? "btn-warning text-dark fw-bold shadow" : "text-dim")"
+                            id="btnSelectPremium" onclick="selectCheckoutPackage('Premium')">
+                        <i class="fas fa-crown me-1"></i> Premium VIP (199K)
+                    </button>
+                </div>
+
+                <!-- CARD THÔNG TIN GÓI STANDARD -->
+                <div id="pkgDetailsStandard" class="@(selectedPackage == "Standard" ? "" : "d-none")">
+                    <div class="p-4 rounded-4 mb-3 border border-danger border-opacity-50 position-relative overflow-hidden"
+                         style="background: linear-gradient(135deg, rgba(255, 19, 74, 0.12) 0%, rgba(15, 16, 28, 0.95) 100%);">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <span class="badge badge-standard-red px-3 py-1 rounded-pill fw-bold">STANDARD VIP</span>
+                            <span class="text-dim small">+30 ngày sử dụng</span>
+                        </div>
+                        <div class="d-flex align-items-baseline gap-2 mb-2">
+                            <h2 class="text-danger fw-bold display-6 mb-0">99.000đ</h2>
+                            <span class="text-dim">/ 30 ngày</span>
+                        </div>
+                        <p class="text-light small mb-0">Lựa chọn phổ biến nhất cho DJ biểu diễn và nghe nhạc hàng ngày.</p>
+                    </div>
+
+                    <h6 class="text-white fw-bold mb-2 small text-uppercase" style="letter-spacing: 0.5px;">Đặc quyền bao gồm:</h6>
+                    <ul class="list-unstyled text-dim small mb-4" style="line-height: 2;">
+                        <li><i class="fas fa-check-circle text-danger me-2"></i> Nghe & TẢI KHÔNG GIỚI HẠN kho <strong>Track Nhóm & Nonstop Nhóm</strong></li>
+                        <li><i class="fas fa-check-circle text-danger me-2"></i> File MP3 chuẩn <strong>320kbps</strong> phòng thu chất lượng cao</li>
+                        <li><i class="fas fa-check-circle text-danger me-2"></i> Nghe thử Demo 30 giây kho Track Slot VIP độc quyền</li>
+                        <li><i class="fas fa-check-circle text-danger me-2"></i> Tra cứu chuẩn xác Tone Key Camelot (8A, 11B...) và BPM</li>
+                        <li><i class="fas fa-check-circle text-danger me-2"></i> Tự động cộng dồn hạn dùng nếu gói đang còn hạn</li>
+                    </ul>
+                </div>
+
+                <!-- CARD THÔNG TIN GÓI PREMIUM -->
+                <div id="pkgDetailsPremium" class="@(selectedPackage == "Premium" ? "" : "d-none")">
+                    <div class="p-4 rounded-4 mb-3 border border-warning border-opacity-50 position-relative overflow-hidden"
+                         style="background: linear-gradient(135deg, rgba(255, 209, 102, 0.12) 0%, rgba(15, 16, 28, 0.95) 100%);">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <span class="badge badge-premium-gold px-3 py-1 rounded-pill fw-bold text-dark"><i class="fas fa-crown me-1"></i> PREMIUM MASTER VIP</span>
+                            <span class="text-dim small">+30 ngày sử dụng</span>
+                        </div>
+                        <div class="d-flex align-items-baseline gap-2 mb-2">
+                            <h2 class="text-warning fw-bold display-6 mb-0">199.000đ</h2>
+                            <span class="text-dim">/ 30 ngày</span>
+                        </div>
+                        <p class="text-light small mb-0">Gói tối thượng độc quyền dành riêng cho DJ Bar Club & Pro Producer.</p>
+                    </div>
+
+                    <h6 class="text-white fw-bold mb-2 small text-uppercase" style="letter-spacing: 0.5px;">Đặc quyền tối thượng:</h6>
+                    <ul class="list-unstyled text-dim small mb-4" style="line-height: 2;">
+                        <li><i class="fas fa-crown text-warning me-2"></i> <strong>TOÀN QUYỀN KHO SLOT</strong>: Tải Full Track Slot & Nonstop Slot độc quyền</li>
+                        <li><i class="fas fa-crown text-warning me-2"></i> Định dạng âm thanh cao nhất: <strong>Master WAV Lossless 24-Bit / FLAC</strong></li>
+                        <li><i class="fas fa-crown text-warning me-2"></i> Toàn quyền nghe trọn vẹn 100% kho nhạc, không giới hạn demo</li>
+                        <li><i class="fas fa-crown text-warning me-2"></i> Tải không giới hạn số lượt bài hát mỗi ngày</li>
+                        <li><i class="fas fa-crown text-warning me-2"></i> Hỗ trợ kỹ thuật & âm thanh ưu tiên trực tiếp từ DJ TLong</li>
+                    </ul>
+                </div>
+
+                <!-- CAM KẾT AN TOÀN -->
+                <div class="p-3 rounded-3 border border-secondary border-opacity-25 mt-auto" style="background: rgba(255, 255, 255, 0.02);">
+                    <div class="d-flex align-items-center gap-2 text-dim small">
+                        <i class="fas fa-lock text-success fs-5"></i>
+                        <div>
+                            <strong class="text-white d-block">Bảo mật giao dịch tuyệt đối</strong>
+                            <span>Tiền chuyển trực tiếp vào tài khoản ngân hàng chính chủ Admin. Tự động kích hoạt sau 3-5 giây.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CỘT PHẢI: MÃ QR VIETQR & TRẠNG THÁI TỰ ĐỘNG XÁC NHẬN -->
+        <div class="col-12 col-lg-7">
+            <!-- KHỐI THANH TOÁN (KHI ĐANG CHỜ CHUYỂN KHOẢN) -->
+            <div id="checkoutPendingBox" class="p-4 p-md-5 rounded-4 border border-secondary border-opacity-25 position-relative overflow-hidden"
+                 style="background: rgba(15, 16, 28, 0.94); backdrop-filter: blur(25px); box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);">
+                
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4 pb-3 border-bottom border-secondary border-opacity-25">
+                    <div>
+                        <h5 class="text-white fw-bold mb-1">
+                            <i class="fas fa-qrcode text-danger me-2"></i> 2. Quét Mã QR Thanh Toán
+                        </h5>
+                        <span class="text-dim small">Mở App Ngân hàng hoặc Ví MoMo để quét mã VietQR bên dưới</span>
+                    </div>
+
+                    <!-- COUNTDOWN TIMER -->
+                    <div class="d-flex align-items-center gap-2 px-3 py-1 rounded-pill border border-warning border-opacity-50" style="background: rgba(255, 209, 102, 0.1);">
+                        <i class="fas fa-stopwatch text-warning fa-spin"></i>
+                        <span class="text-dim small">Thời gian giữ đơn:</span>
+                        <strong class="text-warning font-monospace" id="checkoutTimer">14:59</strong>
+                    </div>
+                </div>
+
+                <div class="row g-4 align-items-center">
+                    <!-- KHỐI MÃ QR -->
+                    <div class="col-12 col-md-5 text-center">
+                        <div class="p-3 rounded-4 bg-white d-inline-block shadow-lg position-relative" style="box-shadow: 0 0 35px rgba(255, 19, 74, 0.3) !important;">
+                            <img id="checkoutQrImage" src="" alt="Mã QR VietQR" class="img-fluid rounded-3" style="width: 220px; height: 220px; object-fit: contain;" />
+                            <div id="checkoutQrLoading" class="position-absolute top-0 start-0 w-100 h-100 d-flex flex-column justify-content-center align-items-center rounded-4 bg-dark bg-opacity-75">
+                                <i class="fas fa-spinner fa-spin fa-2x text-danger mb-2"></i>
+                                <span class="text-white small">Đang tạo mã VietQR...</span>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <span class="badge bg-dark border border-secondary text-dim small">
+                                <i class="fas fa-camera me-1"></i> Quét được bởi mọi App Bank
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- THÔNG TIN CHUYỂN KHOẢN CHI TIẾT -->
+                    <div class="col-12 col-md-7">
+                        <div class="d-flex flex-column gap-2">
+                            <!-- NGÂN HÀNG -->
+                            <div class="p-2 px-3 rounded-3 border border-secondary border-opacity-25 d-flex justify-content-between align-items-center" style="background: rgba(255, 255, 255, 0.03);">
+                                <div>
+                                    <span class="text-dim small d-block">Ngân hàng thụ hưởng:</span>
+                                    <strong class="text-white" id="infoBankName">Đang tải...</strong>
+                                </div>
+                                <i class="fas fa-building-columns text-secondary"></i>
+                            </div>
+
+                            <!-- SỐ TÀI KHOẢN -->
+                            <div class="p-2 px-3 rounded-3 border border-secondary border-opacity-25 d-flex justify-content-between align-items-center" style="background: rgba(255, 255, 255, 0.03);">
+                                <div>
+                                    <span class="text-dim small d-block">Số tài khoản:</span>
+                                    <strong class="text-danger fs-5 font-monospace" id="infoBankAccount">Đang tải...</strong>
+                                </div>
+                                <button class="btn btn-outline-light btn-sm rounded-pill px-3" onclick="copyText('infoBankAccount', 'Đã copy Số tài khoản!')">
+                                    <i class="far fa-copy me-1"></i> Copy
+                                </button>
+                            </div>
+
+                            <!-- CHỦ TÀI KHOẢN -->
+                            <div class="p-2 px-3 rounded-3 border border-secondary border-opacity-25 d-flex justify-content-between align-items-center" style="background: rgba(255, 255, 255, 0.03);">
+                                <div>
+                                    <span class="text-dim small d-block">Chủ tài khoản:</span>
+                                    <strong class="text-white text-uppercase" id="infoAccountHolder">Đang tải...</strong>
+                                </div>
+                                <i class="fas fa-circle-check text-success"></i>
+                            </div>
+
+                            <!-- SỐ TIỀN -->
+                            <div class="p-2 px-3 rounded-3 border border-secondary border-opacity-25 d-flex justify-content-between align-items-center" style="background: rgba(255, 255, 255, 0.03);">
+                                <div>
+                                    <span class="text-dim small d-block">Số tiền chuyển:</span>
+                                    <strong class="text-warning fs-5 font-monospace" id="infoAmount">0đ</strong>
+                                </div>
+                                <button class="btn btn-outline-light btn-sm rounded-pill px-3" onclick="copyAmount()">
+                                    <i class="far fa-copy me-1"></i> Copy
+                                </button>
+                            </div>
+
+                            <!-- NỘI DUNG CHUYỂN KHOẢN (QUAN TRỌNG) -->
+                            <div class="p-3 rounded-3 border border-danger border-opacity-75 d-flex justify-content-between align-items-center" style="background: rgba(255, 19, 74, 0.08);">
+                                <div>
+                                    <div class="d-flex align-items-center gap-1 mb-1">
+                                        <span class="badge bg-danger text-white text-uppercase" style="font-size: 0.65rem;">BẮT BUỘC ĐIỀN ĐÚNG</span>
+                                        <span class="text-light small">Nội dung chuyển khoản:</span>
+                                    </div>
+                                    <strong class="text-danger fs-4 font-monospace" id="infoOrderCode">TL......</strong>
+                                </div>
+                                <button class="btn btn-danger btn-sm rounded-pill px-3 fw-bold" onclick="copyText('infoOrderCode', 'Đã copy Mã nội dung chuyển khoản!')">
+                                    <i class="far fa-copy me-1"></i> Copy Mã
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RADAR QUÉT REALTIME -->
+                <div class="mt-4 p-3 rounded-4 border border-secondary border-opacity-25 d-flex flex-column flex-md-row justify-content-between align-items-center gap-3"
+                     style="background: rgba(0, 0, 0, 0.35);">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="spinner-grow text-danger spinner-grow-sm" role="status"></div>
+                        <div>
+                            <strong class="text-white small d-block" id="pollingStatusText">Đang chờ nhận tiền chuyển khoản...</strong>
+                            <span class="text-dim" style="font-size: 0.75rem;">Hệ thống tự động kiểm tra mỗi 2.5 giây. Gói sẽ kích hoạt ngay khi tiền vào.</span>
+                        </div>
+                    </div>
+
+                    <!-- NÚT MÔ PHỎNG DÀNH CHO TEST NHANH -->
+                    <button class="btn btn-outline-warning btn-sm rounded-pill px-3 fw-bold text-nowrap" onclick="triggerSimulateTransfer()">
+                        <i class="fas fa-bolt me-1"></i> ⚡ Giả Lập Tiền Vào (Test Nhanh)
+                    </button>
+                </div>
+            </div>
+
+            <!-- KHỐI THÀNH CÔNG (HIỆN LÊN TỰ ĐỘNG KHI CHUYỂN KHOẢN THÀNH CÔNG) -->
+            <div id="checkoutSuccessBox" class="p-4 p-md-5 rounded-4 border border-success border-opacity-50 text-center d-none position-relative overflow-hidden"
+                 style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(15, 16, 28, 0.96) 100%); backdrop-filter: blur(30px); box-shadow: 0 0 60px rgba(16, 185, 129, 0.35);">
+                
+                <div class="mb-4 d-inline-flex p-4 rounded-circle" style="background: rgba(16, 185, 129, 0.2); border: 2px solid rgba(16, 185, 129, 0.6); box-shadow: 0 0 40px rgba(16, 185, 129, 0.5);">
+                    <i class="fas fa-circle-check text-success fa-4x"></i>
+                </div>
+
+                <h2 class="text-white fw-bold mb-2 display-6">GIA HẠN THÀNH CÔNG!</h2>
+                <div class="badge bg-success text-white px-4 py-2 rounded-pill fs-6 fw-bold mb-3" id="successTierBadge">
+                    STANDARD VIP ĐÃ KÍCH HOẠT
+                </div>
+
+                <p class="text-light mb-2 fs-5" id="successMessageDetail">
+                    Hệ thống đã nhận diện chuyển khoản thành công.
+                </p>
+                <p class="text-dim small mb-4">
+                    Thời hạn sử dụng gói VIP của bạn đã được gia hạn đến: <strong class="text-warning fs-6" id="successExpiryDate">--/--/----</strong>
+                </p>
+
+                <div class="p-3 rounded-4 border border-secondary border-opacity-25 d-inline-block text-start mb-4" style="background: rgba(0, 0, 0, 0.4); min-width: 320px;">
+                    <div class="d-flex justify-content-between text-dim small mb-1">
+                        <span>Mã đơn hàng:</span>
+                        <strong class="text-white font-monospace" id="successOrderCode">TL......</strong>
+                    </div>
+                    <div class="d-flex justify-content-between text-dim small mb-1">
+                        <span>Số tiền đã thanh toán:</span>
+                        <strong class="text-success" id="successAmount">0đ</strong>
+                    </div>
+                    <div class="d-flex justify-content-between text-dim small">
+                        <span>Trạng thái:</span>
+                        <span class="badge bg-success text-white">Đã Thanh Toán Hoàn Tất</span>
+                    </div>
+                </div>
+
+                <div>
+                    <a href="/" class="btn btn-success rounded-pill px-5 py-3 fw-bold fs-6 shadow-lg">
+                        <i class="fas fa-play me-2"></i> Về Trang Chủ Thưởng Thức Nhạc Ngay
+                    </a>
+                    <div class="mt-2 text-dim small">
+                        Tự động quay về trang chủ sau <span id="autoRedirectCountdown" class="text-white fw-bold">6</span> giây...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentSelectedPackage = '@selectedPackage';
+    let currentOrderCode = '';
+    let currentOrderAmount = 0;
+    let pollingInterval = null;
+    let countdownSeconds = 900; // 15 phút
+    let countdownInterval = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        // Kiểm tra thông tin người dùng
+        const user = window.TLongPlayer?.currentUser;
+        const isStaff = user && (user.role === 'Admin' || user.primaryRole === 'Admin' || user.role === 'Producer' || user.primaryRole === 'Producer' || (user.roles && (user.roles.includes('Admin') || user.roles.includes('Producer'))));
+        if (user) {
+            if (isStaff) {
+                document.getElementById('checkoutUserDisplay').innerHTML = `
+                    <span class="badge ${user.role === 'Admin' || user.primaryRole === 'Admin' ? 'bg-danger' : 'bg-warning text-dark'} fw-bold px-3 py-1">
+                        <i class="fas fa-shield-check me-1"></i> ${user.primaryRole || user.role}: Toàn Quyền Hệ Thống
+                    </span>
+                `;
+            } else {
+                document.getElementById('checkoutUserDisplay').textContent = `${user.fullName} (${user.username})`;
+            }
+        } else {
+            document.getElementById('checkoutUserDisplay').innerHTML = `<span class="text-warning">Chưa đăng nhập (Vui lòng đăng nhập trước)</span>`;
+        }
+
+        // Tự động tạo đơn hàng theo gói ban đầu
+        await initOrder(currentSelectedPackage);
+        startTimer();
+    });
+
+    async function selectCheckoutPackage(pkg) {
+        if (currentSelectedPackage === pkg && currentOrderCode) return;
+        currentSelectedPackage = pkg;
+
+        // Update Button Active state
+        const btnStd = document.getElementById('btnSelectStandard');
+        const btnPre = document.getElementById('btnSelectPremium');
+        const detStd = document.getElementById('pkgDetailsStandard');
+        const detPre = document.getElementById('pkgDetailsPremium');
+
+        if (pkg === 'Standard') {
+            btnStd.className = 'btn w-50 rounded-pill py-2 fw-bold text-uppercase btn-danger text-white shadow';
+            btnPre.className = 'btn w-50 rounded-pill py-2 fw-bold text-uppercase text-dim';
+            detStd.classList.remove('d-none');
+            detPre.classList.add('d-none');
+        } else {
+            btnStd.className = 'btn w-50 rounded-pill py-2 fw-bold text-uppercase text-dim';
+            btnPre.className = 'btn w-50 rounded-pill py-2 fw-bold text-uppercase btn-warning text-dark fw-bold shadow';
+            detStd.classList.add('d-none');
+            detPre.classList.remove('d-none');
+        }
+
+        await initOrder(pkg);
+    }
+
+    async function initOrder(packageId) {
+        clearInterval(pollingInterval);
+        document.getElementById('checkoutQrLoading').classList.remove('d-none');
+        document.getElementById('pollingStatusText').textContent = "Đang tạo đơn hàng VietQR...";
+
+        try {
+            const res = await fetch('/Payment/CreateOrder', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ packageId: packageId })
+            });
+
+            const data = await res.json();
+            if (res.ok && data.success) {
+                currentOrderCode = data.orderCode;
+                currentOrderAmount = data.amount;
+
+                document.getElementById('infoBankName').textContent = data.bankName;
+                document.getElementById('infoBankAccount').textContent = data.bankAccount;
+                document.getElementById('infoAccountHolder').textContent = data.accountHolder;
+                document.getElementById('infoAmount').textContent = Number(data.amount).toLocaleString('vi-VN') + 'đ';
+                document.getElementById('infoOrderCode').textContent = data.orderCode;
+
+                // Load QR Image
+                const qrImg = document.getElementById('checkoutQrImage');
+                qrImg.onload = () => {
+                    document.getElementById('checkoutQrLoading').classList.add('d-none');
+                };
+                qrImg.src = data.qrUrl;
+
+                document.getElementById('pollingStatusText').textContent = `Đang chờ thanh toán mã ${data.orderCode}...`;
+
+                // Bắt đầu vòng lặp Polling kiểm tra trạng thái
+                startPolling(data.orderCode);
+            } else {
+                document.getElementById('checkoutQrLoading').classList.add('d-none');
+                showToastNotification("❌ " + (data.message || "Vui lòng đăng nhập để thanh toán!"));
+                if (res.status === 401) {
+                    new bootstrap.Modal(document.getElementById('loginModal')).show();
+                }
+            }
+        } catch (e) {
+            console.error("Create order error:", e);
+            document.getElementById('checkoutQrLoading').classList.add('d-none');
+            showToastNotification("❌ Lỗi kết nối khi tạo đơn thanh toán!");
+        }
+    }
+
+    function startPolling(orderCode) {
+        clearInterval(pollingInterval);
+        pollingInterval = setInterval(async () => {
+            try {
+                const res = await fetch(`/Payment/CheckStatus/${orderCode}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.isSuccess) {
+                        clearInterval(pollingInterval);
+                        clearInterval(countdownInterval);
+                        onPaymentSuccessful(data);
+                    }
+                }
+            } catch (err) {
+                console.warn("Polling note:", err);
+            }
+        }, 2500);
+    }
+
+    async function triggerSimulateTransfer() {
+        if (!currentOrderCode) return;
+        document.getElementById('pollingStatusText').textContent = "⚡ Đang xử lý chuyển khoản thử nghiệm...";
+        try {
+            const res = await fetch(`/Payment/SimulateTransferSuccess/${currentOrderCode}`, { method: 'POST' });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                clearInterval(pollingInterval);
+                clearInterval(countdownInterval);
+                const statusRes = await fetch(`/Payment/CheckStatus/${currentOrderCode}`);
+                const statusData = await statusRes.json();
+                onPaymentSuccessful(statusData);
+            } else {
+                showToastNotification("❌ " + (data.message || "Không thể mô phỏng!"));
+            }
+        } catch (e) {
+            console.error(e);
+            showToastNotification("❌ Lỗi kết nối!");
+        }
+    }
+
+    function onPaymentSuccessful(data) {
+        // Cập nhật State người dùng phía Client
+        if (window.TLongPlayer?.currentUser) {
+            window.TLongPlayer.currentUser.tier = data.tier;
+            window.TLongPlayer.userTier = data.tier.toLowerCase();
+            window.TLongPlayer.currentUser.tierExpiresAt = data.endDate;
+            window.TLongPlayer.currentUser.isVipActive = true;
+            localStorage.setItem('tlong_current_user', JSON.stringify(window.TLongPlayer.currentUser));
+            if (typeof updateAuthUI === 'function') updateAuthUI();
+            if (typeof updateTierUI === 'function') updateTierUI();
+        }
+
+        // Ẩn khối Pending, Hiện khối Thành Công
+        document.getElementById('checkoutPendingBox').classList.add('d-none');
+        const successBox = document.getElementById('checkoutSuccessBox');
+        successBox.classList.remove('d-none');
+
+        const tierName = data.tier === 'Premium' ? 'PREMIUM VIP HOÀNG GIA' : 'STANDARD VIP ĐỎ RUBY';
+        document.getElementById('successTierBadge').textContent = `🎉 ${tierName} ĐÃ ĐƯỢC GIA HẠN THÀNH CÔNG`;
+        document.getElementById('successOrderCode').textContent = data.orderCode;
+        document.getElementById('successAmount').textContent = Number(data.amount || currentOrderAmount).toLocaleString('vi-VN') + 'đ';
+        
+        if (data.endDate) {
+            const d = new Date(data.endDate);
+            document.getElementById('successExpiryDate').textContent = d.toLocaleDateString('vi-VN') + ' ' + d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // Tự động đếm ngược 6 giây rồi quay về trang chủ
+        let redirectSec = 6;
+        const countdownElem = document.getElementById('autoRedirectCountdown');
+        const redirectTimer = setInterval(() => {
+            redirectSec--;
+            if (countdownElem) countdownElem.textContent = redirectSec;
+            if (redirectSec <= 0) {
+                clearInterval(redirectTimer);
+                window.location.href = '/';
+            }
+        }, 1000);
+    }
+
+    function startTimer() {
+        clearInterval(countdownInterval);
+        countdownSeconds = 900;
+        countdownInterval = setInterval(() => {
+            countdownSeconds--;
+            if (countdownSeconds <= 0) {
+                clearInterval(countdownInterval);
+                clearInterval(pollingInterval);
+                document.getElementById('checkoutTimer').textContent = "HẾT HẠN";
+                showToastNotification("⚠️ Đơn hàng đã hết hạn thời gian giữ mã, vui lòng bấm đổi gói để tạo lại!");
+                return;
+            }
+            const m = Math.floor(countdownSeconds / 60);
+            const s = countdownSeconds % 60;
+            document.getElementById('checkoutTimer').textContent = `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+        }, 1000);
+    }
+
+    function copyText(elemId, successMsg) {
+        const text = document.getElementById(elemId)?.textContent;
+        if (text) {
+            navigator.clipboard.writeText(text.trim());
+            showToastNotification("📋 " + successMsg);
+        }
+    }
+
+    function copyAmount() {
+        if (currentOrderAmount > 0) {
+            navigator.clipboard.writeText(currentOrderAmount.toString());
+            showToastNotification("📋 Đã copy số tiền: " + Number(currentOrderAmount).toLocaleString('vi-VN') + "đ");
+        }
+    }
+</script>

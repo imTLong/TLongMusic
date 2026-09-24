@@ -627,6 +627,62 @@ body.tier-active-premium .seek-slider::-webkit-slider-thumb {
     background: var(--bg-card-hover);
 }
 
+/* VIỀN VÀNG CHO BÀI SLOT & VIỀN ĐỎ CHO BÀI NHÓM */
+.border-slot-gold {
+    border: 2px solid #ffd166 !important;
+    box-shadow: 0 0 18px rgba(255, 209, 102, 0.38), 0 10px 30px rgba(0, 0, 0, 0.6) !important;
+}
+.border-slot-gold:hover {
+    border-color: #ffe082 !important;
+    box-shadow: 0 0 30px rgba(255, 209, 102, 0.65), 0 20px 45px rgba(0, 0, 0, 0.8) !important;
+}
+
+.border-nhom-red {
+    border: 2px solid #ff134a !important;
+    box-shadow: 0 0 18px rgba(255, 19, 74, 0.38), 0 10px 30px rgba(0, 0, 0, 0.6) !important;
+}
+.border-nhom-red:hover {
+    border-color: #ff4d6d !important;
+    box-shadow: 0 0 30px rgba(255, 19, 74, 0.65), 0 20px 45px rgba(0, 0, 0, 0.8) !important;
+}
+
+.track-cover-slot {
+    border: 2px solid #ffd166 !important;
+    box-shadow: 0 0 10px rgba(255, 209, 102, 0.5) !important;
+}
+
+.track-cover-nhom {
+    border: 2px solid #ff134a !important;
+    box-shadow: 0 0 10px rgba(255, 19, 74, 0.5) !important;
+}
+
+.track-row-slot {
+    border-left: none !important;
+    border-right: none !important;
+    background: rgba(255, 209, 102, 0.035) !important;
+}
+.track-row-slot:hover td {
+    background: rgba(255, 209, 102, 0.08) !important;
+}
+
+.track-row-nhom {
+    border-left: none !important;
+    border-right: none !important;
+    background: rgba(255, 19, 74, 0.035) !important;
+}
+.track-row-nhom:hover td {
+    background: rgba(255, 19, 74, 0.08) !important;
+}
+
+.track-row-lot {
+    border-left: none !important;
+    border-right: none !important;
+    background: transparent !important;
+}
+.track-row-lot:hover td {
+    background: rgba(255, 255, 255, 0.04) !important;
+}
+
 .crystal-card::after {
     content: '';
     position: absolute;
@@ -743,47 +799,80 @@ body.tier-active-premium .seek-slider::-webkit-slider-thumb {
     letter-spacing: 1px;
     padding: 16px 20px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-left: none !important;
+    border-right: none !important;
 }
 
 .crystal-table td {
     padding: 16px 20px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-left: none !important;
+    border-right: none !important;
     vertical-align: middle;
     font-size: 0.92rem;
     transition: all 0.2s ease;
 }
 
+.crystal-table-row {
+    border-left: none !important;
+    border-right: none !important;
+    outline: none !important;
+}
+
 .crystal-table-row:hover td {
-    background: rgba(255, 19, 74, 0.06);
+    background: rgba(255, 255, 255, 0.04);
 }
 
-.crystal-table-row.active-track td {
-    background: rgba(255, 19, 74, 0.14);
-    border-left: 4px solid var(--ruby-primary);
+/* 1. Track Nhóm khi Active -> NỀN ĐỎ RUBY */
+.crystal-table-row.track-row-nhom.active-track td,
+body.playing-nhom .crystal-table-row.track-row-nhom.active-track td {
+    background: rgba(255, 19, 74, 0.18) !important;
+    border-left: none !important;
+    border-right: none !important;
+}
+.crystal-table-row.track-row-nhom.active-track .track-play-inline-btn,
+body.playing-nhom .crystal-table-row.track-row-nhom.active-track .track-play-inline-btn {
+    background: #ff134a !important;
+    color: #fff !important;
+    border-color: #fff !important;
+    box-shadow: 0 0 16px rgba(255, 19, 74, 0.85) !important;
 }
 
-/* Mini Equalizer Bar inside active row */
+/* 2. Track Slot khi Active -> NỀN VÀNG HOÀNG GIA */
+.crystal-table-row.track-row-slot.active-track td,
+body.playing-slot .crystal-table-row.track-row-slot.active-track td {
+    background: rgba(255, 209, 102, 0.18) !important;
+    border-left: none !important;
+    border-right: none !important;
+}
+.crystal-table-row.track-row-slot.active-track .track-play-inline-btn,
+body.playing-slot .crystal-table-row.track-row-slot.active-track .track-play-inline-btn {
+    background: #ffd166 !important;
+    color: #000 !important;
+    border-color: #fff !important;
+    box-shadow: 0 0 16px rgba(255, 209, 102, 0.85) !important;
+}
+
+/* 3. Track Lọt khi Active -> HOÀN TOÀN KHÔNG CÓ NỀN (transparent) */
+.crystal-table-row.track-row-lot.active-track td,
+.crystal-table-row:not(.track-row-slot):not(.track-row-nhom).active-track td,
+body.playing-lot .crystal-table-row.active-track td {
+    background: transparent !important;
+    border-left: none !important;
+    border-right: none !important;
+}
+.crystal-table-row.track-row-lot.active-track .track-play-inline-btn,
+.crystal-table-row:not(.track-row-slot):not(.track-row-nhom).active-track .track-play-inline-btn,
+body.playing-lot .crystal-table-row.active-track .track-play-inline-btn {
+    background: rgba(0, 180, 216, 0.25) !important;
+    color: #00b4d8 !important;
+    border-color: #00b4d8 !important;
+    box-shadow: 0 0 12px rgba(0, 180, 216, 0.6) !important;
+}
+
+/* Ẩn hoàn toàn các vạch sóng mini nhảy trong bảng để giữ giao diện sạch đẹp, không bị gạch dọc */
 .table-mini-wave {
-    display: inline-flex;
-    align-items: flex-end;
-    gap: 2px;
-    height: 14px;
-    margin-left: 6px;
-    vertical-align: middle;
-}
-.table-mini-wave span {
-    width: 2px;
-    background: var(--ruby-primary);
-    border-radius: 1px;
-    animation: miniWaveBounce 0.8s infinite ease-in-out alternate;
-}
-.table-mini-wave span:nth-child(1) { height: 40%; animation-delay: 0.1s; }
-.table-mini-wave span:nth-child(2) { height: 100%; animation-delay: 0.25s; }
-.table-mini-wave span:nth-child(3) { height: 70%; animation-delay: 0.05s; }
-
-@keyframes miniWaveBounce {
-    0% { height: 20%; }
-    100% { height: 100%; }
+    display: none !important;
 }
 
 .track-play-inline-btn {
@@ -1004,4 +1093,583 @@ body.tier-active-premium .seek-slider::-webkit-slider-thumb {
     padding: 16px;
     display: inline-block;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+}
+
+/* ==========================================
+   ĐỔI MÀU CON TRỎ KHI PHÁT BÀI (SLOT = VÀNG, NHÓM = ĐỎ)
+   ========================================== */
+
+/* 1. KHI PHÁT BÀI SLOT -> CON TRỎ VÀNG HOÀNG GIA */
+body.playing-slot .seek-slider::-webkit-slider-thumb {
+    background: #ffd166 !important;
+    border: 2px solid #ffffff !important;
+    box-shadow: 0 0 16px rgba(255, 209, 102, 0.95), 0 0 25px rgba(255, 209, 102, 0.6) !important;
+    transform: scale(1.2);
+}
+body.playing-slot .seek-slider::-moz-range-thumb {
+    background: #ffd166 !important;
+    border: 2px solid #ffffff !important;
+    box-shadow: 0 0 16px rgba(255, 209, 102, 0.95) !important;
+    transform: scale(1.2);
+}
+body.playing-slot .seek-slider {
+    accent-color: #ffd166 !important;
+}
+body.playing-slot .player-btn-main {
+    background: linear-gradient(135deg, #ffd166 0%, #ff9f1c 100%) !important;
+    color: #0b0c10 !important;
+    box-shadow: 0 0 25px rgba(255, 209, 102, 0.85) !important;
+}
+body.playing-slot .crystal-player-bar {
+    border-top: 1px solid rgba(255, 209, 102, 0.5) !important;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.85), 0 -1px 30px rgba(255, 209, 102, 0.3) !important;
+}
+
+/* 2. KHI PHÁT BÀI NHÓM -> CON TRỎ ĐỎ RUBY */
+body.playing-nhom .seek-slider::-webkit-slider-thumb {
+    background: #ff134a !important;
+    border: 2px solid #ffffff !important;
+    box-shadow: 0 0 16px rgba(255, 19, 74, 0.95), 0 0 25px rgba(255, 19, 74, 0.6) !important;
+    transform: scale(1.2);
+}
+body.playing-nhom .seek-slider::-moz-range-thumb {
+    background: #ff134a !important;
+    border: 2px solid #ffffff !important;
+    box-shadow: 0 0 16px rgba(255, 19, 74, 0.95) !important;
+    transform: scale(1.2);
+}
+body.playing-nhom .seek-slider {
+    accent-color: #ff134a !important;
+}
+body.playing-nhom .player-btn-main {
+    background: linear-gradient(135deg, #ff134a 0%, #b30029 100%) !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 25px rgba(255, 19, 74, 0.85) !important;
+}
+body.playing-nhom .crystal-player-bar {
+    border-top: 1px solid rgba(255, 19, 74, 0.5) !important;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.85), 0 -1px 30px rgba(255, 19, 74, 0.3) !important;
+}
+
+/* ==========================================
+   TAB PHÂN LOẠI: TRACK NHÓM (ĐỎ), DEMO SLOT (VÀNG), TRACK LỌT
+   ========================================== */
+
+/* 1. NÚT TAB TRACK NHÓM -> SÁNG ĐỎ RỰC RỠ KHI ACTIVE */
+.pill-nhom {
+    border: 1px solid rgba(255, 19, 74, 0.5) !important;
+    color: #ff6b8b !important;
+    transition: all 0.25s ease !important;
+}
+.pill-nhom:hover,
+.pill-nhom.active,
+#packageFilterPills button.pill-nhom.active {
+    background: linear-gradient(135deg, #ff134a 0%, #b30029 100%) !important;
+    color: #ffffff !important;
+    border-color: #ff134a !important;
+    box-shadow: 0 0 18px rgba(255, 19, 74, 0.8), 0 4px 15px rgba(0, 0, 0, 0.5) !important;
+    transform: translateY(-2px);
+}
+
+/* 2. NÚT TAB DEMO TRACK SLOT -> SÁNG VÀNG HOÀNG GIA KHI ACTIVE */
+.pill-slot {
+    border: 1px solid rgba(255, 209, 102, 0.5) !important;
+    color: #ffd166 !important;
+    transition: all 0.25s ease !important;
+}
+.pill-slot:hover,
+.pill-slot.active,
+#packageFilterPills button.pill-slot.active {
+    background: linear-gradient(135deg, #ffd166 0%, #ff9f1c 100%) !important;
+    color: #0b0c10 !important;
+    border-color: #ffd166 !important;
+    box-shadow: 0 0 18px rgba(255, 209, 102, 0.85), 0 4px 15px rgba(0, 0, 0, 0.5) !important;
+    transform: translateY(-2px);
+}
+
+/* 3. NÚT TAB TRACK LỌT -> TAB RIÊNG BIỆT (XANH NGỌC / BẠC) */
+.pill-lot {
+    border: 1px solid rgba(0, 180, 216, 0.5) !important;
+    color: #00b4d8 !important;
+    transition: all 0.25s ease !important;
+}
+.pill-lot:hover,
+.pill-lot.active,
+#packageFilterPills button.pill-lot.active {
+    background: linear-gradient(135deg, #00b4d8 0%, #0077b6 100%) !important;
+    color: #ffffff !important;
+    border-color: #00b4d8 !important;
+    box-shadow: 0 0 18px rgba(0, 180, 216, 0.8), 0 4px 15px rgba(0, 0, 0, 0.5) !important;
+    transform: translateY(-2px);
+}
+
+/* 4. NÚT TAB TẤT CẢ */
+.pill-all.active,
+#packageFilterPills button.pill-all.active {
+    background: rgba(255, 255, 255, 0.2) !important;
+    color: #ffffff !important;
+    border-color: rgba(255, 255, 255, 0.6) !important;
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Hiệu ứng viền bảng khi đang lọc Track Nhóm vs Track Slot vs Track Lọt */
+.crystal-table-wrapper.filter-active-nhom {
+    border: 1px solid rgba(255, 19, 74, 0.45) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(255, 19, 74, 0.15) !important;
+}
+.crystal-table-wrapper.filter-active-slot {
+    border: 1px solid rgba(255, 209, 102, 0.45) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(255, 209, 102, 0.15) !important;
+}
+.crystal-table-wrapper.filter-active-lot {
+    border: 1px solid rgba(0, 180, 216, 0.45) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 180, 216, 0.15) !important;
+}
+
+/* =========================================================
+   FORM ĐĂNG NHẬP ĐỘC ĐÁO: STUDIO CYBER GLASSMORPHISM MODAL
+   ========================================================= */
+.login-studio-modal .modal-dialog {
+    max-width: 880px;
+}
+
+.login-studio-modal .modal-content {
+    background: radial-gradient(circle at 10% 20%, rgba(255, 19, 74, 0.22) 0%, rgba(15, 16, 28, 0.98) 55%),
+                radial-gradient(circle at 90% 80%, rgba(255, 209, 102, 0.15) 0%, rgba(10, 11, 20, 0.98) 65%);
+    backdrop-filter: blur(40px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 28px;
+    box-shadow: 0 30px 90px rgba(0, 0, 0, 0.95), 0 0 70px rgba(255, 19, 74, 0.3);
+    overflow: hidden;
+    position: relative;
+}
+
+.login-studio-modal .modal-content::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #ff134a, #ffd166, #00b4d8, #ff134a);
+    background-size: 300% 100%;
+    animation: gradientShimmer 6s linear infinite;
+    z-index: 5;
+}
+
+/* Vinyl DJ Disc Showcase */
+.vinyl-stage {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 35px 25px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(0, 0, 0, 0.5) 100%);
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    height: 100%;
+}
+
+.vinyl-disc-container {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.vinyl-disc {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #2b2c3a 14%, #0e0f18 15%, #1a1b26 38%, #0e0f18 39%, #1a1b26 58%, #080910 100%);
+    border: 3px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.8), 0 0 30px rgba(255, 19, 74, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    animation: spinVinyl 12s linear infinite;
+}
+
+@keyframes spinVinyl {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.vinyl-center-label {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #ff134a 20%, #850020 100%);
+    border: 2px solid #ffd166;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 15px rgba(255, 209, 102, 0.6);
+}
+
+.vinyl-center-hole {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #080910;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.vinyl-needle {
+    position: absolute;
+    top: -10px;
+    right: -15px;
+    width: 50px;
+    height: 70px;
+    pointer-events: none;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6));
+    transform-origin: top right;
+    transform: rotate(-10deg);
+}
+
+/* Audio Visualizer Waves */
+.equalizer-wave {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    height: 24px;
+    margin-top: 15px;
+}
+
+.equalizer-bar {
+    width: 4px;
+    background: linear-gradient(180deg, #ffd166, #ff134a);
+    border-radius: 3px;
+    animation: eqPulse 1.2s ease-in-out infinite alternate;
+}
+.equalizer-bar:nth-child(1) { height: 35%; animation-delay: 0.1s; }
+.equalizer-bar:nth-child(2) { height: 80%; animation-delay: 0.3s; }
+.equalizer-bar:nth-child(3) { height: 100%; animation-delay: 0.5s; }
+.equalizer-bar:nth-child(4) { height: 55%; animation-delay: 0.2s; }
+.equalizer-bar:nth-child(5) { height: 90%; animation-delay: 0.4s; }
+.equalizer-bar:nth-child(6) { height: 40%; animation-delay: 0.6s; }
+
+@keyframes eqPulse {
+    0% { height: 20%; opacity: 0.4; }
+    50% { height: 100%; opacity: 1; }
+    100% { height: 35%; opacity: 0.5; }
+}
+
+/* Floating Studio Input styling */
+.studio-input-group {
+    position: relative;
+    border-radius: 14px;
+    background: rgba(18, 19, 32, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+    display: flex;
+    align-items: center;
+}
+
+.studio-input-group:focus-within {
+    border-color: #ff134a;
+    box-shadow: 0 0 20px rgba(255, 19, 74, 0.35);
+    background: rgba(25, 26, 42, 0.95);
+}
+
+.studio-input-group .form-control {
+    background: transparent !important;
+    border: none !important;
+    color: #fff !important;
+    box-shadow: none !important;
+    padding: 12px 14px;
+    font-size: 0.92rem;
+}
+
+.studio-input-group .input-group-text {
+    background: transparent !important;
+    border: none !important;
+    color: #8e9aaf;
+    padding-left: 14px;
+    padding-right: 4px;
+}
+
+.studio-input-group:focus-within .input-group-text {
+    color: #ff134a;
+}
+
+/* Eye Toggle Password Button */
+.btn-password-toggle {
+    background: transparent;
+    border: none;
+    color: #8e9aaf;
+    padding: 0 14px;
+    transition: color 0.2s ease;
+    cursor: pointer;
+}
+.btn-password-toggle:hover {
+    color: #ffd166;
+}
+
+/* Quick Actor Pills */
+.actor-pill-card {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 13px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #cfd2dc;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.165, 0.84, 0.44, 1);
+    user-select: none;
+    text-decoration: none;
+}
+.actor-pill-card:hover {
+    transform: translateY(-2px);
+    color: #fff;
+}
+.actor-pill-admin:hover {
+    border-color: #ff134a;
+    background: rgba(255, 19, 74, 0.18);
+    box-shadow: 0 0 14px rgba(255, 19, 74, 0.5);
+}
+.actor-pill-producer:hover {
+    border-color: #00b4d8;
+    background: rgba(0, 180, 216, 0.18);
+    box-shadow: 0 0 14px rgba(0, 180, 216, 0.5);
+}
+.actor-pill-standard:hover {
+    border-color: #ff4d6d;
+    background: rgba(255, 77, 109, 0.18);
+    box-shadow: 0 0 14px rgba(255, 77, 109, 0.5);
+}
+.actor-pill-premium:hover {
+    border-color: #ffd166;
+    background: rgba(255, 209, 102, 0.18);
+    box-shadow: 0 0 14px rgba(255, 209, 102, 0.5);
+}
+.actor-pill-free:hover {
+    border-color: #8e9aaf;
+    background: rgba(142, 154, 175, 0.18);
+}
+
+/* ========================================================
+   ADMIN VIP EXTEND MODAL STYLING
+   ======================================================== */
+.vip-select-card {
+    padding: 12px 14px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1.5px solid rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    user-select: none;
+    position: relative;
+}
+.vip-select-card:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.06);
+}
+.vip-select-card.active.card-standard {
+    border-color: #ff134a;
+    background: rgba(255, 19, 74, 0.12);
+    box-shadow: 0 0 20px rgba(255, 19, 74, 0.35);
+}
+.vip-select-card.active.card-premium {
+    border-color: #ffd166;
+    background: rgba(255, 209, 102, 0.12);
+    box-shadow: 0 0 20px rgba(255, 209, 102, 0.35);
+}
+.vip-select-card .vip-check-indicator {
+    opacity: 0.3;
+    transition: opacity 0.2s ease;
+    font-size: 1rem;
+}
+.vip-select-card.active .vip-check-indicator {
+    opacity: 1;
+}
+
+.day-chip-btn {
+    padding: 5px 11px;
+    border-radius: 20px;
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: #cfd2dc;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+.day-chip-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.25);
+    transform: translateY(-1px);
+}
+.day-chip-btn.active {
+    background: #ffd166 !important;
+    color: #121320 !important;
+    border-color: #ffd166 !important;
+    font-weight: 700;
+    box-shadow: 0 0 14px rgba(255, 209, 102, 0.5);
+}
+
+.reason-chip {
+    padding: 3px 9px;
+    border-radius: 16px;
+    font-size: 0.72rem;
+    color: #a0a6b5;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.reason-chip:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+.reason-chip.active {
+    color: #ffd166;
+    background: rgba(255, 209, 102, 0.12);
+    border-color: #ffd166;
+}
+
+/* ========================================================
+   ADMIN COMMAND CENTER 2.0 STYLING
+   ======================================================== */
+.admin-hero-banner {
+    background: linear-gradient(135deg, rgba(255, 19, 74, 0.14) 0%, rgba(18, 19, 32, 0.95) 50%, rgba(10, 11, 20, 0.98) 100%);
+    backdrop-filter: blur(30px);
+    border: 1px solid rgba(255, 19, 74, 0.35);
+    border-radius: 24px;
+    box-shadow: 0 0 50px rgba(255, 19, 74, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+.admin-hero-banner::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(255, 209, 102, 0.1) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.admin-nav-tabs {
+    background: rgba(18, 19, 32, 0.75);
+    backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    padding: 6px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.admin-nav-tabs .nav-link {
+    border-radius: 12px;
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: #a0a6b5;
+    padding: 9px 18px;
+    transition: all 0.25s cubic-bezier(0.165, 0.84, 0.44, 1);
+    border: 1px solid transparent;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+}
+.admin-nav-tabs .nav-link:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateY(-1px);
+}
+.admin-nav-tabs .nav-link.active {
+    color: #fff !important;
+    background: linear-gradient(135deg, rgba(255, 19, 74, 0.3) 0%, rgba(255, 19, 74, 0.15) 100%) !important;
+    border-color: rgba(255, 19, 74, 0.6) !important;
+    box-shadow: 0 0 18px rgba(255, 19, 74, 0.4);
+}
+
+.admin-mega-kpi {
+    padding: 24px;
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    border: 1.5px solid;
+    backdrop-filter: blur(20px);
+}
+.admin-mega-kpi:hover {
+    transform: translateY(-3px);
+}
+.admin-mega-revenue {
+    background: linear-gradient(135deg, rgba(0, 204, 136, 0.12) 0%, rgba(18, 19, 32, 0.95) 100%);
+    border-color: rgba(0, 204, 136, 0.4);
+    box-shadow: 0 0 30px rgba(0, 204, 136, 0.15);
+}
+.admin-mega-revenue:hover {
+    box-shadow: 0 0 45px rgba(0, 204, 136, 0.3);
+}
+.admin-mega-vip {
+    background: linear-gradient(135deg, rgba(255, 209, 102, 0.12) 0%, rgba(18, 19, 32, 0.95) 100%);
+    border-color: rgba(255, 209, 102, 0.4);
+    box-shadow: 0 0 30px rgba(255, 209, 102, 0.15);
+}
+.admin-mega-vip:hover {
+    box-shadow: 0 0 45px rgba(255, 209, 102, 0.3);
+}
+
+.admin-metric-card {
+    padding: 18px;
+    border-radius: 16px;
+    background: rgba(18, 19, 32, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(15px);
+    transition: all 0.25s ease;
+}
+.admin-metric-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+/* Metal Titanium Card for Bank */
+.metal-bank-card {
+    background: linear-gradient(135deg, #1f2233 0%, #0e101a 60%, #171926 100%);
+    border: 1px solid rgba(255, 209, 102, 0.4);
+    border-radius: 20px;
+    padding: 24px;
+    position: relative;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    overflow: hidden;
+}
+.metal-bank-card::after {
+    content: '';
+    position: absolute;
+    top: -40%;
+    right: -30%;
+    width: 250px;
+    height: 250px;
+    background: radial-gradient(circle, rgba(255, 209, 102, 0.12) 0%, transparent 70%);
+    pointer-events: none;
+}
+.metal-chip {
+    width: 44px;
+    height: 32px;
+    border-radius: 6px;
+    background: linear-gradient(135deg, #ffd166 0%, #b8860b 100%);
+    border: 1px solid #ffe699;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.3);
+    position: relative;
+}
+.metal-chip::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: rgba(0,0,0,0.3);
 }

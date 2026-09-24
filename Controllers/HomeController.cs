@@ -110,9 +110,7 @@ public class HomeController : Controller
             MusicalKey = m.MusicalKey,
             DurationSeconds = m.DurationSeconds,
             CoverUrl = m.CoverUrl ?? "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=600&auto=format&fit=crop&q=80",
-            AudioUrl = (!string.IsNullOrWhiteSpace(m.SourceUrl) && System.IO.File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "music", $"{Path.GetFileNameWithoutExtension(m.SourceUrl).Replace("_320k", "")}_320k.mp3")))
-                ? $"/uploads/music/{Path.GetFileNameWithoutExtension(m.SourceUrl).Replace("_320k", "")}_320k.mp3"
-                : m.SourceUrl,
+            AudioUrl = m.SourceUrl,
             SourceType = m.SourceType ?? "DirectFile",
             TierRequiredToDownload = requiredTier,
             IsDemoOnlyForFree = m.IsDemoOnlyForFree,
@@ -186,6 +184,14 @@ public class HomeController : Controller
     public IActionResult ProducerUpload()
     {
         return View("~/Views/Producer/Upload.cshtml");
+    }
+
+    [HttpGet("/Checkout")]
+    [HttpGet("/Payment/Checkout")]
+    public IActionResult Checkout(string? package)
+    {
+        ViewBag.SelectedPackage = !string.IsNullOrWhiteSpace(package) ? package : "Standard";
+        return View("~/Views/Payment/Checkout.cshtml");
     }
 
     public IActionResult Privacy()

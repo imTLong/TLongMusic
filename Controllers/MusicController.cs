@@ -96,22 +96,8 @@ namespace TLongMusic.Controllers
 
             await _context.SaveChangesAsync();
 
-            // Resolve best available high quality stream URL (320kbps)
+            // Stream URL uses the authentic uploaded file directly (MP3 stays MP3, WAV stays WAV)
             var streamUrl = music.SourceUrl;
-            if (!string.IsNullOrWhiteSpace(streamUrl) && streamUrl.StartsWith("/uploads/music/"))
-            {
-                var basePhysical = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", streamUrl.TrimStart('/'));
-                var baseDir = Path.GetDirectoryName(basePhysical);
-                var baseName = Path.GetFileNameWithoutExtension(basePhysical).Replace("_320k", "");
-                if (baseDir != null)
-                {
-                    var p320 = Path.Combine(baseDir, $"{baseName}_320k.mp3");
-                    if (System.IO.File.Exists(p320) && new FileInfo(p320).Length > 1000)
-                    {
-                        streamUrl = $"/uploads/music/{baseName}_320k.mp3";
-                    }
-                }
-            }
 
             return Ok(new
             {
@@ -293,49 +279,6 @@ namespace TLongMusic.Controllers
 
 
             var safeTitle = string.Concat(music.Title.Split(Path.GetInvalidFileNameChars())).Replace(" ", "_");
-
-            var baseRaw = Path.GetFileNameWithoutExtension(filePath).Replace("_320k", "").Replace("_master", "");
-
-            // 1. Premium VIP / Admin / Producer -> Deliver Studio Master WAV (PCM Lossless) unless explicitly requesting MP3
-            if ((isAdminOrProducer || userTier == "Premium") && format != "mp3")
-            {
-                var existingWav = Path.Combine(uploadsFolder, $"{baseRaw}_master.wav");
-                var musicIdWav = Path.Combine(uploadsFolder, $"{music.MusicId:N}_master.wav");
-                var wavPath = System.IO.File.Exists(existingWav) ? existingWav : musicIdWav;
-
-                if (!System.IO.File.Exists(wavPath) || new FileInfo(wavPath).Length < 1000)
-                {
-                    AudioProcessingService.ConvertToMasterWav(filePath, wavPath);
-                }
-                if (System.IO.File.Exists(wavPath) && new FileInfo(wavPath).Length > 1000)
-                {
-                    return PhysicalFile(wavPath, "audio/wav", $"{safeTitle}_Master_WAV_TLongMusic.wav", enableRangeProcessing: true);
-                }
-            }
-
-            // 2. Standard VIP (or Premium VIP requesting MP3) -> Deliver Authentic 320kbps MP3
-            if (isAdminOrProducer || userTier == "Premium" || userTier == "Standard")
-            {
-                if (filePath.EndsWith("_320k.mp3") && System.IO.File.Exists(filePath))
-                {
-                    return PhysicalFile(filePath, "audio/mpeg", $"{safeTitle}_320kbps_TLongMusic.mp3", enableRangeProcessing: true);
-                }
-
-                var existing320k = Path.Combine(uploadsFolder, $"{baseRaw}_320k.mp3");
-                var musicId320k = Path.Combine(uploadsFolder, $"{music.MusicId:N}_320k.mp3");
-                var mp3_320Path = System.IO.File.Exists(existing320k) ? existing320k : musicId320k;
-
-                if (!System.IO.File.Exists(mp3_320Path) || new FileInfo(mp3_320Path).Length < 1000)
-                {
-                    AudioProcessingService.ConvertTo320kbpsMp3(filePath, mp3_320Path);
-                }
-                if (System.IO.File.Exists(mp3_320Path) && new FileInfo(mp3_320Path).Length > 1000)
-                {
-                    return PhysicalFile(mp3_320Path, "audio/mpeg", $"{safeTitle}_320kbps_TLongMusic.mp3", enableRangeProcessing: true);
-                }
-            }
-
-            // 3. Fallback for Free Tier (Track Lọt / Nonstop Lọt)
             var downloadFileName = $"{safeTitle}_TLongMusic{fileExt}";
             return PhysicalFile(filePath, mimeType, downloadFileName, enableRangeProcessing: true);
         }

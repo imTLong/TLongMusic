@@ -87,27 +87,6 @@
                                     </button>
                                 </div>
                                 <audio id="dedicatedAudioPreviewElement" controls class="w-100 mt-3 d-none" style="border-radius: 12px;"></audio>
-
-                                <!-- AI BPM & Tone Key Detection Card -->
-                                <div id="dedicatedAudioAnalysisStatus" class="mt-3 p-3 rounded-3 border border-secondary border-opacity-50 text-start d-none" 
-                                     style="background: rgba(18, 19, 32, 0.9); box-shadow: 0 0 20px rgba(255, 209, 102, 0.2);">
-                                    <div class="d-flex align-items-center justify-content-between mb-2">
-                                        <span class="text-white small fw-bold">
-                                            <i class="fas fa-microchip text-warning me-2"></i>TRỢ LÝ TỰ ĐỘNG PHÂN TÍCH NHẠC
-                                        </span>
-                                        <span id="dedicatedAnalysisBadge" class="badge badge-shimmer-gold">
-                                            <i class="fas fa-spinner fa-spin me-1"></i> Đang đọc BPM & Key...
-                                        </span>
-                                    </div>
-                                    <div class="d-flex flex-wrap align-items-center gap-2" id="dedicatedAnalysisResultBadges">
-                                        <span class="badge badge-shimmer-ruby py-2 px-3" id="dedicatedDetectedBpmBadge" style="font-size: 0.95rem;">-- BPM</span>
-                                        <span class="badge badge-shimmer-cyan py-2 px-3" id="dedicatedDetectedKeyBadge" style="font-size: 0.95rem;">Key --</span>
-                                        <span class="badge bg-dark border border-secondary py-2 px-3 text-white font-monospace" id="dedicatedDetectedDurationBadge">Thời lượng: --:--</span>
-                                    </div>
-                                    <small class="text-dim d-block mt-2" style="font-size: 0.75rem;">
-                                        <i class="fas fa-wand-magic-sparkles text-info me-1"></i> Thông số BPM và Tone Key Camelot đã được điền tự động vào bảng bên dưới!
-                                    </small>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -137,7 +116,10 @@
                         <input type="hidden" name="type" id="dedicatedUploadProductTypeInput" value="Track" />
                     </div>
 
-                    <!-- THÔNG TIN CHI TIẾT BÀI HÁT -->
+                    <!-- Giá trị BPM & Key ngầm định cho backend, người dùng không cần quan tâm -->
+                    <input type="hidden" name="bpm" value="140" />
+                    <input type="hidden" name="musicalKey" value="8A" />
+
                     <div class="row g-3">
                         <div class="col-12 col-md-7">
                             <label class="form-label text-white small">Tiêu Đề Bản Thu / Tên Bài Hát: <span class="text-danger">*</span></label>
@@ -148,7 +130,7 @@
                             <input type="text" name="artist" id="dedicatedUploadArtistInput" class="form-control bg-dark text-white border-secondary" value="DJ TLong" required />
                         </div>
 
-                        <div class="col-6 col-md-4">
+                        <div class="col-12 col-md-4">
                             <label class="form-label text-white small">Thể Loại Âm Nhạc:</label>
                             <select name="genre" class="form-select bg-dark text-white border-secondary">
                                 <option value="Vinahouse" selected>Vinahouse</option>
@@ -160,53 +142,17 @@
                             </select>
                         </div>
 
-                        <div class="col-6 col-md-4">
-                            <label class="form-label text-white small">BPM (Nhịp đập):</label>
-                            <input type="number" name="bpm" id="dedicatedUploadBpmInput" class="form-control bg-dark text-white border-secondary" value="140" min="60" max="220" />
-                        </div>
-
                         <div class="col-12 col-md-4">
-                            <label class="form-label text-white small">Tone Key Camelot:</label>
-                            <input type="text" name="musicalKey" id="dedicatedUploadMusicalKeyInput" list="dedicatedCamelotKeyList" class="form-control bg-dark text-white border-secondary" value="8A" placeholder="VD: 8A, 11B..." />
-                            <datalist id="dedicatedCamelotKeyList">
-                                <option value="1A">1A (G#m)</option>
-                                <option value="2A">2A (D#m)</option>
-                                <option value="3A">3A (A#m)</option>
-                                <option value="4A">4A (Fm)</option>
-                                <option value="5A">5A (Cm)</option>
-                                <option value="6A">6A (Gm)</option>
-                                <option value="7A">7A (Dm)</option>
-                                <option value="8A">8A (Am)</option>
-                                <option value="9A">9A (Em)</option>
-                                <option value="10A">10A (Bm)</option>
-                                <option value="11A">11A (F#m)</option>
-                                <option value="12A">12A (C#m)</option>
-                                <option value="1B">1B (B)</option>
-                                <option value="2B">2B (F#)</option>
-                                <option value="3B">3B (C#)</option>
-                                <option value="4B">4B (G#)</option>
-                                <option value="5B">5B (D#)</option>
-                                <option value="6B">6B (A#)</option>
-                                <option value="7B">7B (F)</option>
-                                <option value="8B">8B (C)</option>
-                                <option value="9B">9B (G)</option>
-                                <option value="10B">10B (D)</option>
-                                <option value="11B">11B (A)</option>
-                                <option value="12B">12B (E)</option>
-                            </datalist>
-                        </div>
-
-                        <div class="col-12 col-md-6">
                             <label class="form-label text-white small" id="dedicatedUploadCategoryLabel">Phân Cấp Quyền Tải: <span class="text-danger">*</span></label>
                             <select name="categoryCode" id="dedicatedUploadCategorySelect" class="form-select bg-dark text-white border-secondary" required onchange="handleDedicatedCategoryChange(this.value)">
-                                <option value="TrackLot">Track Lọt (Khách nghe full, Free tải được)</option>
-                                <option value="TrackNhom" selected>Track Nhóm (Standard & Premium tải được)</option>
-                                <option value="TrackSlot">Track Slot VIP (Chỉ Premium tải, Demo 30s)</option>
+                                <option value="TrackLot">🎵 Track Lọt (Khách nghe full, Free tải được)</option>
+                                <option value="TrackNhom" selected>💎 Track Nhóm (Standard & Premium VIP tải được)</option>
+                                <option value="TrackSlot">👑 Track Slot VIP (Chỉ Premium tải, Demo 30s)</option>
                             </select>
                         </div>
 
-                        <div class="col-12 col-md-6">
-                            <label class="form-label text-white small">Chất Lượng Âm Thanh Công Bố:</label>
+                        <div class="col-12 col-md-4">
+                            <label class="form-label text-white small">Chất Lượng Âm Thanh:</label>
                             <select name="qualityAvailable" class="form-select bg-dark text-white border-secondary">
                                 <option value="MP3 320kbps">MP3 320kbps (Chuẩn phòng thu)</option>
                                 <option value="WAV Lossless 24-Bit">WAV Lossless 24-Bit (Master Club)</option>
@@ -376,9 +322,6 @@
         const objectUrl = URL.createObjectURL(file);
         previewAudio.src = objectUrl;
         previewAudio.classList.remove('d-none');
-
-        // AI Analyzer
-        runDedicatedAiAnalyzer(file);
     }
 
     function clearDedicatedSelectedAudioFile() {
@@ -390,50 +333,6 @@
         previewAudio.pause();
         previewAudio.src = '';
         previewAudio.classList.add('d-none');
-        document.getElementById('dedicatedAudioAnalysisStatus').classList.add('d-none');
-    }
-
-    function runDedicatedAiAnalyzer(file) {
-        const analysisCard = document.getElementById('dedicatedAudioAnalysisStatus');
-        analysisCard.classList.remove('d-none');
-        const badge = document.getElementById('dedicatedAnalysisBadge');
-        badge.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Đang đọc BPM & Key...';
-
-        setTimeout(() => {
-            let detectedBpm = 140;
-            let detectedKey = '8A';
-
-            // Heuristic from filename
-            const fn = file.name.toUpperCase();
-            const bpmMatch = fn.match(/(\d{2,3})\s*BPM/);
-            if (bpmMatch) {
-                detectedBpm = parseInt(bpmMatch[1]);
-            } else if (fn.includes('VINAHOUSE')) {
-                detectedBpm = 140;
-            } else if (fn.includes('ELECTRO')) {
-                detectedBpm = 132;
-            } else if (fn.includes('TRANCE')) {
-                detectedBpm = 138;
-            }
-
-            const keyMatch = fn.match(/(\d{1,2}[A|B])/);
-            if (keyMatch) {
-                detectedKey = keyMatch[1];
-            } else {
-                const keys = ['8A', '11B', '4A', '6A', '1A', '9A'];
-                detectedKey = keys[Math.floor(Math.random() * keys.length)];
-            }
-
-            document.getElementById('dedicatedDetectedBpmBadge').textContent = `${detectedBpm} BPM`;
-            document.getElementById('dedicatedDetectedKeyBadge').textContent = `Tone Key ${detectedKey}`;
-            badge.className = 'badge bg-success text-white';
-            badge.innerHTML = '<i class="fas fa-check-circle me-1"></i> Đã Phân Tích Xong!';
-
-            const bpmInput = document.getElementById('dedicatedUploadBpmInput');
-            const keyInput = document.getElementById('dedicatedUploadMusicalKeyInput');
-            if (bpmInput) bpmInput.value = detectedBpm;
-            if (keyInput) keyInput.value = detectedKey;
-        }, 800);
     }
 
     function onDedicatedProductTypeChanged(type) {
@@ -446,15 +345,16 @@
         if (type === 'Nonstop') {
             catLabel.innerHTML = 'Phân Cấp Nonstop (Theo Chuẩn SRS): <span class="text-danger">*</span>';
             catSelect.innerHTML = `
-                <option value="NonstopLot">Nonstop Lọt (Khách nghe full miễn phí, Tải Free)</option>
-                <option value="NonstopSlot" selected>Nonstop Đặt / VIP (Hội viên VIP tải được, Demo 30s)</option>
+                <option value="NonstopLot">🎵 Nonstop Lọt (Khách nghe full miễn phí, Tải Free)</option>
+                <option value="NonstopNhom" selected>💎 Nonstop Nhóm (Standard & Premium VIP tải được)</option>
+                <option value="NonstopSlot">👑 Nonstop Slot / Bản Đặt VIP (Chỉ Premium tải, Demo 30s)</option>
             `;
         } else {
             catLabel.innerHTML = 'Phân Cấp Track (Theo Chuẩn SRS): <span class="text-danger">*</span>';
             catSelect.innerHTML = `
-                <option value="TrackLot">Track Lọt (Khách nghe full, Free tải được)</option>
-                <option value="TrackNhom" selected>Track Nhóm (Standard & Premium tải được)</option>
-                <option value="TrackSlot">Track Slot VIP (Chỉ Premium tải, Demo 30s)</option>
+                <option value="TrackLot">🎵 Track Lọt (Khách nghe full, Free tải được)</option>
+                <option value="TrackNhom" selected>💎 Track Nhóm (Standard & Premium VIP tải được)</option>
+                <option value="TrackSlot">👑 Track Slot VIP (Chỉ Premium tải, Demo 30s)</option>
             `;
         }
     }

@@ -111,6 +111,7 @@ namespace TLongMusic.Controllers
             var payment = await _context.Payments
                 .Include(p => p.Package)
                 .Include(p => p.User)
+                .Include(p => p.Subscription)
                 .FirstOrDefaultAsync(p => p.OrderCode == model.OrderCode);
 
             if (payment == null)
@@ -124,35 +125,156 @@ namespace TLongMusic.Controllers
                 {
                     success = true,
                     message = "Giao dịch này đã được kích hoạt thành công từ trước!",
-                    tier = payment.PackageId
+                    tier = payment.PackageId,
+                    endDate = payment.Subscription?.EndDate
                 });
             }
 
-            // 1. Update Payment status
+            var newEndDate = await ActivatePaymentInternal(payment, $"TXN_{payment.OrderCode}_{DateTime.UtcNow.Ticks % 1000000}");
+
+            return Ok(new
+            {
+                success = true,
+                message = $"🎉 Kích hoạt thành công gói {payment.Package.Name}! Hạn dùng đến ngày {newEndDate:dd/MM/yyyy}.",
+                tier = payment.PackageId,
+                endDate = newEndDate
+            });
+        }
+
+        [HttpGet("CheckStatus/{orderCode}")]
+        public async Task<IActionResult> CheckStatus(string orderCode)
+        {
+            var payment = await _context.Payments
+                .Include(p => p.Package)
+                .Include(p => p.Subscription)
+                .FirstOrDefaultAsync(p => p.OrderCode.ToUpper() == orderCode.Trim().ToUpper());
+
+            if (payment == null)
+            {
+                return NotFound(new { success = false, message = "Không tìm thấy thông tin đơn hàng này!" });
+            }
+
+            bool isSuccess = payment.Status == "Success";
+            return Ok(new
+            {
+                success = true,
+                orderCode = payment.OrderCode,
+                status = payment.Status,
+                isSuccess = isSuccess,
+                amount = payment.Amount,
+                packageName = payment.Package?.Name ?? payment.PackageId,
+                tier = payment.PackageId,
+                endDate = payment.Subscription?.EndDate,
+                paidAt = payment.PaymentDate
+            });
+        }
+
+        [HttpPost("SimulateTransferSuccess/{orderCode}")]
+        public async Task<IActionResult> SimulateTransferSuccess(string orderCode)
+        {
+            var payment = await _context.Payments
+                .Include(p => p.Package)
+                .Include(p => p.User)
+                .Include(p => p.Subscription)
+                .FirstOrDefaultAsync(p => p.OrderCode.ToUpper() == orderCode.Trim().ToUpper());
+
+            if (payment == null)
+            {
+                return NotFound(new { success = false, message = "Không tìm thấy giao dịch!" });
+            }
+
+            if (payment.Status == "Success")
+            {
+                return Ok(new
+                {
+                    success = true,
+                    message = "Giao dịch này đã được xác nhận thanh toán từ trước!",
+                    tier = payment.PackageId,
+                    endDate = payment.Subscription?.EndDate
+                });
+            }
+
+            var newEndDate = await ActivatePaymentInternal(payment, $"SIM_TRANSFER_{DateTime.UtcNow.Ticks % 1000000}");
+            return Ok(new
+            {
+                success = true,
+                message = $"🎉 Hệ thống đã nhận diện chuyển khoản thành công! Gói {payment.Package.Name} đã được kích hoạt.",
+                tier = payment.PackageId,
+                endDate = newEndDate
+            });
+        }
+
+        [HttpPost("Webhook")]
+        public async Task<IActionResult> Webhook([FromBody] PaymentWebhookDto model)
+        {
+            string? code = model.OrderCode;
+            if (string.IsNullOrWhiteSpace(code) && !string.IsNullOrWhiteSpace(model.Content))
+            {
+                var match = System.Text.RegularExpressions.Regex.Match(model.Content, @"TL\d{6}", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                if (match.Success)
+                {
+                    code = match.Value.ToUpper();
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(code))
+            {
+                return BadRequest(new { success = false, message = "Không tìm thấy mã đơn hàng TLxxxxxx trong nội dung chuyển khoản!" });
+            }
+
+            var payment = await _context.Payments
+                .Include(p => p.Package)
+                .Include(p => p.User)
+                .Include(p => p.Subscription)
+                .FirstOrDefaultAsync(p => p.OrderCode.ToUpper() == code.ToUpper());
+
+            if (payment == null)
+            {
+                return NotFound(new { success = false, message = $"Không tìm thấy đơn hàng mã {code}!" });
+            }
+
+            if (payment.Status == "Success")
+            {
+                return Ok(new { success = true, message = "Đơn hàng này đã được xác nhận thành công trước đó!" });
+            }
+
+            var newEndDate = await ActivatePaymentInternal(payment, model.TransactionNumber ?? $"BANK_HOOK_{DateTime.UtcNow.Ticks % 1000000}");
+            return Ok(new
+            {
+                success = true,
+                message = "Đã tự động đối soát và kích hoạt gói cước thành công qua Webhook ngân hàng!",
+                orderCode = payment.OrderCode,
+                tier = payment.PackageId,
+                endDate = newEndDate
+            });
+        }
+
+        private async Task<DateTime> ActivatePaymentInternal(Payment payment, string transactionCode)
+        {
+            // 1. Cập nhật Payment
             payment.Status = "Success";
             payment.PaymentDate = DateTime.UtcNow;
-            payment.TransactionCode = $"TXN_{payment.OrderCode}_{DateTime.UtcNow.Ticks % 1000000}";
+            payment.TransactionCode = transactionCode;
 
-            // 2. Activate / Renew 30-Day Subscription (SRS BR-02, BR-03, 3.5)
+            // 2. Kích hoạt hoặc cộng dồn hạn dùng Subscription
             var currentSub = await _context.Subscriptions
                 .Where(s => s.UserId == payment.UserId && s.PackageId == payment.PackageId && s.Status == "Active" && s.EndDate >= DateTime.UtcNow)
                 .OrderByDescending(s => s.EndDate)
                 .FirstOrDefaultAsync();
 
+            int days = payment.Package?.DurationDays > 0 ? payment.Package.DurationDays : 30;
             DateTime newStartDate = DateTime.UtcNow;
-            DateTime newEndDate = DateTime.UtcNow.AddDays(payment.Package.DurationDays > 0 ? payment.Package.DurationDays : 30);
+            DateTime newEndDate = DateTime.UtcNow.AddDays(days);
 
             if (currentSub != null)
             {
-                // Extension
                 newStartDate = currentSub.StartDate;
-                newEndDate = currentSub.EndDate.AddDays(payment.Package.DurationDays > 0 ? payment.Package.DurationDays : 30);
+                newEndDate = currentSub.EndDate.AddDays(days);
                 currentSub.EndDate = newEndDate;
                 payment.SubscriptionId = currentSub.SubscriptionId;
             }
             else
             {
-                // New Subscription
                 var newSub = new Subscription
                 {
                     SubscriptionId = Guid.NewGuid(),
@@ -168,27 +290,20 @@ namespace TLongMusic.Controllers
                 payment.SubscriptionId = newSub.SubscriptionId;
             }
 
-            // 3. Create Notification
+            // 3. Tạo thông báo trong hệ thống
             _context.Notifications.Add(new Notification
             {
                 NotificationId = Guid.NewGuid(),
                 UserId = payment.UserId,
-                Title = $"Kích hoạt thành công gói {payment.Package.Name}!",
-                Content = $"Giao dịch {payment.OrderCode} ({payment.Amount:N0}đ) đã được xác nhận. Gói VIP của bạn có hiệu lực đến ngày {newEndDate:dd/MM/yyyy}.",
+                Title = $"Thanh toán thành công gói {payment.Package?.Name ?? payment.PackageId}!",
+                Content = $"Giao dịch {payment.OrderCode} ({payment.Amount:N0}đ) đã được xác nhận thành công. Gói VIP của bạn có hiệu lực đến ngày {newEndDate:dd/MM/yyyy HH:mm}.",
                 Type = "Payment",
                 IsRead = false,
                 CreatedAt = DateTime.UtcNow
             });
 
             await _context.SaveChangesAsync();
-
-            return Ok(new
-            {
-                success = true,
-                message = $"🎉 Kích hoạt thành công gói {payment.Package.Name}! Hạn dùng đến ngày {newEndDate:dd/MM/yyyy}.",
-                tier = payment.PackageId,
-                endDate = newEndDate
-            });
+            return newEndDate;
         }
         
         private static string GetVietQrBankCode(string bankName)
