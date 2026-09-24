@@ -54,8 +54,9 @@ public class NonstopController : Controller
 
             if (!musics.Any())
             {
-                // Fallback nếu chưa có bản Nonstop nào
-                LoadFallbackNonstops(viewModel);
+                // Không có bản Nonstop nào trong database: trả về danh sách rỗng để view hiển thị empty state trung thực
+                viewModel.DailyGroups = new List<DailyNonstopGroup>();
+                viewModel.TotalNonstops = 0;
                 return View(viewModel);
             }
 
@@ -172,7 +173,8 @@ public class NonstopController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "Lỗi khi nạp dữ liệu Kho Nonstop theo ngày");
-            LoadFallbackNonstops(viewModel);
+            viewModel.DailyGroups = new List<DailyNonstopGroup>();
+            viewModel.TotalNonstops = 0;
         }
 
         return View(viewModel);
@@ -200,14 +202,9 @@ public class NonstopController : Controller
 
     private static Track MapEntityToNonstop(Models.Entities.Music m)
     {
-        var requiredTier = RequiredTier.Free;
-        if (m.Category != null)
-        {
-            if (m.Category.RequiredTierToDownload == "Premium") requiredTier = RequiredTier.Premium;
-            else if (m.Category.RequiredTierToDownload == "Standard") requiredTier = RequiredTier.Standard;
-        }
-
-        var isSlot = (m.CategoryCode != null && m.CategoryCode.Contains("Slot", StringComparison.OrdinalIgnoreCase)) || requiredTier == RequiredTier.Premium;
+        var isSlot = (m.CategoryCode != null && m.CategoryCode.Contains("Slot", StringComparison.OrdinalIgnoreCase)) || (m.Category != null && m.Category.RequiredTierToDownload == "Premium");
+        var isNhom = !isSlot && ((m.CategoryCode != null && m.CategoryCode.Contains("Nhom", StringComparison.OrdinalIgnoreCase)) || (m.Category != null && m.Category.RequiredTierToDownload == "Standard"));
+        var requiredTier = isSlot ? RequiredTier.Premium : (isNhom ? RequiredTier.Standard : RequiredTier.Free);
         var cleanQuality = (isSlot || (m.QualityAvailable != null && m.QualityAvailable.ToUpperInvariant().Contains("WAV"))) ? "WAV" : "MP3";
 
         return new Track
@@ -216,17 +213,17 @@ public class NonstopController : Controller
             Title = m.Title,
             Artist = m.Artist,
             Genre = m.Genre,
-            Type = isSlot ? AudioType.NonstopDat : AudioType.NonstopLot,
-            CategoryCode = m.CategoryCode ?? "NonstopLot",
+            Type = isSlot ? AudioType.NonstopDat : (isNhom ? AudioType.NonstopLot : AudioType.NonstopLot),
+            CategoryCode = m.CategoryCode ?? (isSlot ? "NonstopSlot" : (isNhom ? "NonstopNhom" : "NonstopLot")),
             Bpm = m.Bpm,
-            MusicalKey = m.MusicalKey,
+            MusicalKey = "Nonstop",
             DurationSeconds = m.DurationSeconds > 0 ? m.DurationSeconds : 3600,
             CoverUrl = m.CoverUrl ?? "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600&auto=format&fit=crop&q=80",
             AudioUrl = m.SourceUrl,
             SourceType = m.SourceType ?? "DirectFile",
             TierRequiredToDownload = requiredTier,
-            IsDemoOnlyForFree = m.IsDemoOnlyForFree,
-            DemoLimitSeconds = m.DemoLimitSeconds > 0 ? m.DemoLimitSeconds : (isSlot ? 45 : 0),
+            IsDemoOnlyForFree = isSlot || isNhom || m.IsDemoOnlyForFree,
+            DemoLimitSeconds = 30,
             QualityAvailable = cleanQuality,
             PlaysCount = m.PlaysCount,
             DownloadsCount = m.DownloadsCount,
@@ -253,87 +250,8 @@ public class NonstopController : Controller
 
     private static void LoadFallbackNonstops(DailyNonstopsViewModel viewModel)
     {
-        var today = DateTime.Today;
-        var sampleNonstops = new List<Track>
-        {
-            new() { 
-                Id = "fb-ns1", 
-                Title = "[NONSTOP VIP] ĐẲNG CẤP DÂN CHƠI HÀ THÀNH (BẢN ĐẶT PHÒNG THU LOSSLESS)", 
-                Artist = "DJ TLong Private Exclusive", 
-                Genre = "Vinahouse Club", 
-                CategoryCode = "NonstopSlot", 
-                TierRequiredToDownload = RequiredTier.Premium, 
-                Bpm = 142, 
-                MusicalKey = "8A", 
-                DurationSeconds = 3420, 
-                CoverUrl = "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600&auto=format&fit=crop&q=80", 
-                AudioUrl = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", 
-                QualityAvailable = "WAV", 
-                IsDemoOnlyForFree = true,
-                DemoLimitSeconds = 45,
-                ReleaseDate = today 
-            },
-            new() { 
-                Id = "fb-ns2", 
-                Title = "[NONSTOP NHÓM] VINAHOUSE VIỆT MIX CỰC CĂNG - CHÀO HÈ RỰC RỠ 2026", 
-                Artist = "TLong Music x DJ Team", 
-                Genre = "Vinahouse Bass", 
-                CategoryCode = "NonstopNhom", 
-                TierRequiredToDownload = RequiredTier.Standard, 
-                Bpm = 140, 
-                MusicalKey = "11B", 
-                DurationSeconds = 2850, 
-                CoverUrl = "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=600&auto=format&fit=crop&q=80", 
-                AudioUrl = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3", 
-                QualityAvailable = "MP3", 
-                ReleaseDate = today 
-            },
-            new() { 
-                Id = "fb-ns3", 
-                Title = "[NONSTOP LỌT HOT] ĐÊM MÊ SAY - TỰ DO BAY PHÒNG (BẢN FULL MIỄN PHÍ)", 
-                Artist = "DJ TLong", 
-                Genre = "Electro House", 
-                CategoryCode = "NonstopLot", 
-                TierRequiredToDownload = RequiredTier.Free, 
-                Bpm = 138, 
-                MusicalKey = "5A", 
-                DurationSeconds = 3900, 
-                CoverUrl = "https://images.unsplash.com/photo-1506157786151-b8491531f063?w=600&auto=format&fit=crop&q=80", 
-                AudioUrl = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3", 
-                QualityAvailable = "MP3", 
-                ReleaseDate = today.AddDays(-1) 
-            },
-            new() { 
-                Id = "fb-ns4", 
-                Title = "[NONSTOP ĐẶT BAR CLUB] SHOW SÂN VẬN ĐỘNG - PRIVATE SET VIP", 
-                Artist = "TLong Sound Studio", 
-                Genre = "Festival Bounce", 
-                CategoryCode = "NonstopSlot", 
-                TierRequiredToDownload = RequiredTier.Premium, 
-                Bpm = 144, 
-                MusicalKey = "9B", 
-                DurationSeconds = 4200, 
-                CoverUrl = "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600&auto=format&fit=crop&q=80", 
-                AudioUrl = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3", 
-                QualityAvailable = "WAV", 
-                IsDemoOnlyForFree = true,
-                DemoLimitSeconds = 45,
-                ReleaseDate = today.AddDays(-1) 
-            }
-        };
-
-        viewModel.TotalNonstops = sampleNonstops.Count;
-        viewModel.DailyGroups = sampleNonstops
-            .GroupBy(t => t.ReleaseDate.Date)
-            .OrderByDescending(g => g.Key)
-            .Select(g => new DailyNonstopGroup
-            {
-                Date = g.Key,
-                FormattedDate = g.Key.ToString("dd/MM/yyyy"),
-                DayOfWeekName = GetVietnameseDayOfWeek(g.Key),
-                Nonstops = g.ToList()
-            })
-            .ToList();
+        viewModel.TotalNonstops = 0;
+        viewModel.DailyGroups = new List<DailyNonstopGroup>();
     }
 }
 

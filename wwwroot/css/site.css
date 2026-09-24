@@ -702,9 +702,10 @@ body.tier-active-premium .seek-slider::-webkit-slider-thumb {
 
 .crystal-card-img-wrapper {
     position: relative;
-    padding-top: 56.25%;
+    padding-top: 85%;
     overflow: hidden;
     background: #000;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .crystal-card-img {
@@ -719,6 +720,17 @@ body.tier-active-premium .seek-slider::-webkit-slider-thumb {
 
 .crystal-card:hover .crystal-card-img {
     transform: scale(1.08);
+}
+
+.track-title-link {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+.track-title-link:hover {
+    color: #ffd166 !important;
+    text-decoration: underline;
+    text-shadow: 0 0 10px rgba(255, 209, 102, 0.5);
 }
 
 .crystal-play-btn {
@@ -976,16 +988,6 @@ body.playing-lot .crystal-table-row.active-track .track-play-inline-btn {
     align-items: center;
 }
 
-@media (max-width: 767.98px) {
-    .tlong-player-bar {
-        height: auto;
-        min-height: 62px;
-        padding: 6px 12px;
-    }
-    body {
-        padding-bottom: 82px !important;
-    }
-}
 
 .player-track-cover {
     width: 38px;
@@ -1029,6 +1031,18 @@ body.playing-lot .crystal-table-row.active-track .track-play-inline-btn {
 
 .player-btn-ctrl:hover {
     color: #fff;
+}
+
+.player-btn-skip {
+    color: var(--text-dim);
+    transition: all 0.2s ease;
+    border-radius: 6px;
+}
+
+.player-btn-skip:hover {
+    color: #ffd166 !important;
+    background: rgba(255, 209, 102, 0.12);
+    transform: scale(1.08);
 }
 
 .seek-slider {
@@ -1272,7 +1286,12 @@ body.playing-nhom .crystal-player-bar {
 
 .vinyl-disc-container {
     position: relative;
-    margin-bottom: 20px;
+    width: 170px !important;
+    height: 170px !important;
+    margin: 10px auto 25px auto !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .vinyl-disc {
@@ -1287,6 +1306,8 @@ body.playing-nhom .crystal-player-bar {
     justify-content: center;
     position: relative;
     animation: spinVinyl 12s linear infinite;
+    z-index: 2;
+    margin: 0 auto;
 }
 
 @keyframes spinVinyl {
@@ -1316,14 +1337,15 @@ body.playing-nhom .crystal-player-bar {
 
 .vinyl-needle {
     position: absolute;
-    top: -10px;
-    right: -15px;
-    width: 50px;
-    height: 70px;
+    top: -6px;
+    right: 8px;
+    width: 48px;
+    height: 68px;
     pointer-events: none;
-    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6));
-    transform-origin: top right;
-    transform: rotate(-10deg);
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.7));
+    transform-origin: 45px 5px;
+    transform: rotate(0deg);
+    z-index: 4;
 }
 
 /* Audio Visualizer Waves */
@@ -1352,6 +1374,56 @@ body.playing-nhom .crystal-player-bar {
     0% { height: 20%; opacity: 0.4; }
     50% { height: 100%; opacity: 1; }
     100% { height: 35%; opacity: 0.5; }
+}
+
+/* Sound Wave Rings around Vinyl Turntable */
+.sound-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    border: 1px solid rgba(255, 19, 74, 0.4);
+    pointer-events: none;
+    box-shadow: 0 0 15px rgba(255, 19, 74, 0.2);
+    z-index: 1;
+}
+.sound-ring.ring-1 {
+    width: 160px;
+    height: 160px;
+    animation: soundRingPulse 3s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+.sound-ring.ring-2 {
+    width: 185px;
+    height: 185px;
+    border-color: rgba(255, 209, 102, 0.35);
+    animation: soundRingPulse 3s cubic-bezier(0.215, 0.61, 0.355, 1) infinite 1.5s;
+}
+
+@keyframes soundRingPulse {
+    0% {
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 0.85;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.35);
+        opacity: 0;
+    }
+}
+
+/* Pulsing Online Dot */
+.live-dot-pulse {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #2ed573;
+    box-shadow: 0 0 10px #2ed573;
+    animation: liveDotBlink 1.4s ease-in-out infinite alternate;
+}
+@keyframes liveDotBlink {
+    0% { opacity: 0.35; transform: scale(0.8); }
+    100% { opacity: 1; transform: scale(1.25); }
 }
 
 /* Floating Studio Input styling */
@@ -1672,4 +1744,533 @@ body.playing-nhom .crystal-player-bar {
     right: 0;
     height: 1px;
     background: rgba(0,0,0,0.3);
+}
+
+/* ZERO-LATENCY INSTANT TAB SWITCHING ACROSS ENTIRE PLATFORM */
+.tab-pane.fade {
+    transition: opacity 0.04s ease-out !important;
+}
+.tab-pane.fade:not(.show) {
+    display: none !important;
+}
+.nav-pills .nav-link, .nav-tabs .nav-link {
+    transition: background-color 0.05s ease, color 0.05s ease, border-color 0.05s ease !important;
+}
+
+/* ========================================================
+   COMPREHENSIVE MOBILE & SMARTPHONE RESPONSIVE OPTIMIZATION
+   ======================================================== */
+
+/* Prevent horizontal overflow on mobile devices */
+html, body {
+    overflow-x: hidden !important;
+    max-width: 100vw;
+}
+
+/* ==========================================
+   SEAMLESS SPA TOP PROGRESS BAR (TURBO GLOW)
+   ========================================== */
+.seamless-progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0%;
+    height: 3px;
+    background: linear-gradient(90deg, #ff134a 0%, #ffd166 50%, #00b4d8 100%);
+    background-size: 200% 100%;
+    z-index: 99999;
+    pointer-events: none;
+    transition: width 0.25s ease, opacity 0.2s ease;
+    opacity: 0;
+    box-shadow: 0 0 10px rgba(255, 19, 74, 0.9), 0 0 5px rgba(255, 209, 102, 0.9);
+}
+.seamless-progress-bar.loading {
+    opacity: 1;
+}
+
+/* Tablet & Mobile Breakpoint: max-width 991.98px */
+@media (max-width: 991.98px) {
+    /* Mobile Glassmorphic Navbar Dropdown */
+    .tlong-navbar .navbar-collapse {
+        background: rgba(14, 15, 25, 0.96) !important;
+        backdrop-filter: blur(30px) !important;
+        -webkit-backdrop-filter: blur(30px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        border-radius: 18px !important;
+        padding: 18px !important;
+        margin-top: 12px !important;
+        box-shadow: 0 16px 45px rgba(0, 0, 0, 0.85), 0 0 25px rgba(255, 19, 74, 0.18) !important;
+    }
+
+    .tlong-navbar .nav-link {
+        padding: 10px 14px !important;
+        border-radius: 10px !important;
+        font-size: 0.95rem !important;
+        margin-bottom: 4px !important;
+    }
+
+    .tlong-navbar .nav-link:hover,
+    .tlong-navbar .nav-link.active {
+        background: rgba(255, 19, 74, 0.15) !important;
+    }
+
+    /* Auth & User status on mobile menu */
+    .tlong-navbar .navbar-nav:last-child {
+        margin-top: 12px !important;
+        padding-top: 12px !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 8px !important;
+    }
+
+    .tlong-navbar .navbar-nav:last-child .btn,
+    .tlong-navbar .navbar-nav:last-child a.btn {
+        width: 100% !important;
+        text-align: center !important;
+        justify-content: center !important;
+    }
+}
+
+/* Smartphone Breakpoint: max-width 767.98px */
+@media (max-width: 767.98px) {
+    /* Safe viewport bottom padding for player */
+    body {
+        padding-bottom: 165px !important;
+    }
+
+    /* Compress standard spacing on mobile */
+    .mb-5 {
+        margin-bottom: 1.5rem !important;
+    }
+    .my-5 {
+        margin-top: 1.5rem !important;
+        margin-bottom: 1.5rem !important;
+    }
+    .py-5 {
+        padding-top: 1.5rem !important;
+        padding-bottom: 1.5rem !important;
+    }
+    .py-4 {
+        padding-top: 1rem !important;
+        padding-bottom: 1rem !important;
+    }
+
+    /* 1. HERO STAGE & HEADERS COMPRESSION */
+    .crystal-hero-stage,
+    .crystal-hero-banner {
+        padding: 16px 14px 18px 14px !important;
+        margin-top: 10px !important;
+        margin-bottom: 18px !important;
+        border-radius: 16px !important;
+    }
+
+    .hero-pill-badge {
+        padding: 3px 10px !important;
+        font-size: 0.66rem !important;
+        margin-bottom: 6px !important;
+        gap: 5px !important;
+    }
+
+    .crystal-hero-title {
+        font-size: 1.25rem !important;
+        line-height: 1.28 !important;
+        margin-top: 4px !important;
+        margin-bottom: 8px !important;
+        letter-spacing: -0.2px !important;
+    }
+
+    .crystal-hero-desc {
+        font-size: 0.78rem !important;
+        line-height: 1.45 !important;
+        margin-bottom: 12px !important;
+    }
+
+    /* Compact CTA Hero Buttons */
+    .crystal-hero-stage .btn-shimmer-ruby,
+    .crystal-hero-stage .btn-shimmer-gold,
+    .crystal-hero-stage .btn-glass-crystal,
+    .btn-shimmer-ruby,
+    .btn-shimmer-gold {
+        padding: 6px 13px !important;
+        font-size: 0.78rem !important;
+        border-radius: 20px !important;
+    }
+
+    /* Compact Glass Stat Pills */
+    .glass-stat-pill {
+        padding: 8px 4px !important;
+        border-radius: 10px !important;
+    }
+    .glass-stat-pill h4 {
+        font-size: 1rem !important;
+        margin-bottom: 1px !important;
+    }
+    .glass-stat-pill span {
+        font-size: 0.65rem !important;
+    }
+
+    /* 2. MASTER CATEGORY SELECTOR & SECTION BANNERS */
+    .master-type-selector {
+        padding: 10px 12px !important;
+        margin-bottom: 16px !important;
+        border-radius: 14px !important;
+    }
+
+    .master-type-selector h5 {
+        font-size: 0.9rem !important;
+    }
+    .master-type-selector small {
+        font-size: 0.72rem !important;
+    }
+
+    /* Scale down oversized header icons */
+    .master-category-container .fa-2x,
+    .master-type-selector .fa-lg {
+        font-size: 1.15rem !important;
+    }
+    .master-category-container .p-3.rounded-circle,
+    .master-type-selector .p-2.rounded-circle {
+        padding: 8px !important;
+    }
+
+    .master-category-container .h4 {
+        font-size: 1rem !important;
+        line-height: 1.3 !important;
+    }
+
+    /* Legend Pills on Track / Nonstop pages */
+    .crystal-hero-stage .rounded-pill.p-2.px-3 {
+        padding: 4px 8px !important;
+        gap: 6px !important;
+    }
+    .crystal-hero-stage .rounded-pill strong {
+        font-size: 0.72rem !important;
+    }
+    .crystal-hero-stage .rounded-pill .rounded-circle {
+        width: 10px !important;
+        height: 10px !important;
+    }
+
+    /* Horizontal swipeable pill buttons */
+    #packageFilterPills, #mainTypeTabs {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        scrollbar-width: none !important;
+        padding-bottom: 4px !important;
+        margin-bottom: 10px !important;
+        gap: 6px !important;
+    }
+
+    #packageFilterPills::-webkit-scrollbar,
+    #mainTypeTabs::-webkit-scrollbar {
+        display: none !important;
+    }
+
+    #packageFilterPills button,
+    #mainTypeTabs button {
+        flex-shrink: 0 !important;
+        white-space: nowrap !important;
+        font-size: 0.76rem !important;
+        padding: 5px 11px !important;
+        border-radius: 16px !important;
+    }
+
+    /* Filter Search Inputs on mobile */
+    #trackSearchInput, #genreFilterSelect, #bpmFilterSelect,
+    #nonstopSearchInput, #nonstopGenreFilterSelect {
+        font-size: 0.78rem !important;
+        padding: 5px 10px !important;
+        height: 32px !important;
+        max-width: 100% !important;
+    }
+
+    /* 3. CRYSTAL MUSIC TABLES COMPACT MODE */
+    .crystal-table-wrapper {
+        border-radius: 12px !important;
+        padding: 0 !important;
+        overflow-x: auto !important;
+    }
+
+    .crystal-table th,
+    .crystal-table td {
+        padding: 6px 4px !important;
+        font-size: 0.8rem !important;
+    }
+
+    .crystal-table th {
+        font-size: 0.72rem !important;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .crystal-table .track-title-wrapper a,
+    .crystal-table .track-title-wrapper span {
+        max-width: 155px !important;
+        display: inline-block !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        font-size: 0.82rem !important;
+        line-height: 1.25 !important;
+    }
+
+    .crystal-table .track-title-wrapper .badge {
+        font-size: 0.58rem !important;
+        padding: 1px 4px !important;
+    }
+
+    .crystal-table img,
+    .crystal-table .track-table-cover-img,
+    .crystal-table .track-cover-slot,
+    .crystal-table .track-cover-nhom {
+        width: 36px !important;
+        height: 36px !important;
+        border-radius: 6px !important;
+    }
+
+    .track-play-inline-btn {
+        width: 28px !important;
+        height: 28px !important;
+        font-size: 0.72rem !important;
+    }
+
+    /* 4. NONSTOP CARDS COMPACT WIDESCREEN RATIO */
+    .crystal-card {
+        border-radius: 14px !important;
+    }
+
+    .crystal-card-img-wrapper {
+        padding-top: 48% !important; /* Sleek 2:1 ratio instead of 85% bulky block */
+    }
+
+    .crystal-card-body {
+        padding: 10px 12px !important;
+    }
+
+    .crystal-card-title {
+        font-size: 0.88rem !important;
+        margin-bottom: 3px !important;
+        line-height: 1.3 !important;
+    }
+
+    .crystal-card-artist {
+        font-size: 0.74rem !important;
+        margin-bottom: 6px !important;
+    }
+
+    .crystal-play-btn {
+        width: 38px !important;
+        height: 38px !important;
+        font-size: 0.95rem !important;
+    }
+
+    /* 5. PRICING SECTION COMPACT */
+    #pricingSection {
+        padding: 16px 0 !important;
+        margin-bottom: 24px !important;
+    }
+
+    #pricingSection .crystal-hero-title {
+        font-size: 1.25rem !important;
+    }
+
+    .crystal-pricing-card {
+        padding: 18px 16px !important;
+        border-radius: 16px !important;
+        margin-bottom: 12px !important;
+    }
+
+    .crystal-price {
+        font-size: 1.55rem !important;
+        margin-bottom: 4px !important;
+    }
+
+    .crystal-pricing-card h3 {
+        font-size: 1.1rem !important;
+    }
+
+    .crystal-features-list {
+        padding-left: 0 !important;
+        margin-bottom: 12px !important;
+    }
+
+    .crystal-features-list li {
+        font-size: 0.78rem !important;
+        padding: 3px 0 !important;
+    }
+
+    /* 6. DETAIL PAGE SOUNDCLOUD PLAYER */
+    .soundcloud-hero-card {
+        padding: 12px 14px !important;
+        border-radius: 14px !important;
+    }
+
+    .soundcloud-big-play-btn {
+        width: 44px !important;
+        height: 44px !important;
+        font-size: 1.1rem !important;
+    }
+
+    .soundcloud-track-title {
+        font-size: 1.05rem !important;
+        line-height: 1.25 !important;
+        margin-bottom: 4px !important;
+    }
+
+    .soundcloud-waveform-wrapper {
+        height: 55px !important;
+    }
+
+    #detailWaveformCanvas {
+        height: 55px !important;
+    }
+
+    .soundcloud-cover-img {
+        width: 140px !important;
+        height: 140px !important;
+        border-radius: 10px !important;
+        margin: 0 auto !important;
+    }
+
+    /* 7. BOTTOM STICKY PLAYER BAR - KÉO LÊN CAO THÊM 1CM (KHOẢNG 38PX - 40PX) */
+    .tlong-player-bar {
+        height: auto !important;
+        min-height: 105px !important;
+        padding-top: 10px !important;
+        padding-left: 14px !important;
+        padding-right: 14px !important;
+        padding-bottom: 38px !important;
+        padding-bottom: calc(38px + env(safe-area-inset-bottom, 0px)) !important;
+        box-shadow: 0 -10px 35px rgba(0, 0, 0, 0.9), 0 -2px 16px rgba(255, 19, 74, 0.25) !important;
+    }
+
+    .player-ctrl-row {
+        gap: 12px !important;
+        margin-bottom: 6px !important;
+    }
+
+    .player-seek-row {
+        margin-top: 6px !important;
+        margin-bottom: 8px !important;
+        padding: 0 4px !important;
+    }
+
+    .player-track-cover {
+        width: 35px !important;
+        height: 35px !important;
+        border-radius: 6px !important;
+    }
+
+    #playerTrackTitle {
+        font-size: 0.78rem !important;
+        line-height: 1.25 !important;
+    }
+
+    #playerTrackArtist {
+        font-size: 0.66rem !important;
+    }
+
+    .player-btn-main {
+        width: 34px !important;
+        height: 34px !important;
+        font-size: 0.85rem !important;
+        margin: 0 3px !important;
+    }
+
+    .player-btn-ctrl {
+        padding: 4px 6px !important;
+        font-size: 0.82rem !important;
+    }
+
+    .player-btn-skip {
+        padding: 4px 7px !important;
+    }
+
+    .player-btn-skip span {
+        font-size: 0.68rem !important;
+    }
+
+    #playerCurrentTime,
+    #playerDuration {
+        font-size: 0.68rem !important;
+        min-width: 28px !important;
+    }
+
+    .seek-slider {
+        height: 4px !important;
+        margin: 4px 0 !important;
+        cursor: pointer;
+    }
+
+    .seek-slider::-webkit-slider-thumb {
+        width: 12px !important;
+        height: 12px !important;
+    }
+
+    /* 8. MODALS & POPUPS COMPACT SIZING */
+    .modal-dialog {
+        margin: 10px auto !important;
+        max-width: calc(100% - 20px) !important;
+    }
+
+    .login-studio-modal .vinyl-stage {
+        padding: 12px !important;
+        border-right: none !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+
+    .login-studio-modal .vinyl-disc-container {
+        width: 100px !important;
+        height: 100px !important;
+        margin: 0 auto 10px auto !important;
+    }
+
+    .login-studio-modal .vinyl-disc {
+        width: 90px !important;
+        height: 90px !important;
+    }
+
+    .login-studio-modal .vinyl-center-label {
+        width: 34px !important;
+        height: 34px !important;
+    }
+
+    .login-studio-modal .vinyl-needle {
+        display: none !important;
+    }
+
+    .login-studio-modal .sound-ring.ring-1 {
+        width: 95px !important;
+        height: 95px !important;
+    }
+
+    .login-studio-modal .sound-ring.ring-2 {
+        width: 110px !important;
+        height: 110px !important;
+    }
+
+    .login-studio-modal .modal-content {
+        border-radius: 18px !important;
+    }
+
+    .studio-input-group .form-control {
+        padding: 8px 10px !important;
+        font-size: 0.85rem !important;
+    }
+}
+
+/* Extra small devices (< 420px) */
+@media (max-width: 420px) {
+    .crystal-table .track-title-wrapper span,
+    .crystal-table .track-title-wrapper a {
+        max-width: 120px !important;
+    }
+
+    .tlong-player-bar .btn-sm {
+        padding: 2px 4px !important;
+        font-size: 0.72rem !important;
+    }
 }

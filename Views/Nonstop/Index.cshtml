@@ -62,16 +62,16 @@
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3 pb-3 border-bottom border-secondary border-opacity-25">
             <div class="d-flex flex-wrap align-items-center gap-2">
                 <span class="text-dim small fw-bold me-1"><i class="fas fa-layer-group text-warning me-1"></i>Xem Nhanh:</span>
-                <a href="/Nonstop" class="btn btn-sm btn-dark text-white rounded-pill px-3 py-1.5 fw-bold pill-all @(string.IsNullOrEmpty(Model.SelectedTier) || Model.SelectedTier == "all" ? "active" : "border-secondary")">
+                <a href="/Nonstop" onclick="return applyNonstopTierFilter('all', event);" class="btn btn-sm btn-dark text-white rounded-pill px-3 py-1.5 fw-bold pill-all @(string.IsNullOrEmpty(Model.SelectedTier) || Model.SelectedTier == "all" ? "active" : "border-secondary")">
                     <i class="fas fa-layer-group me-1 text-warning"></i> Tất Cả
                 </a>
-                <a href="/Nonstop?tier=nhom" id="pillBtnNonstopNhom" class="btn btn-sm btn-dark rounded-pill px-3 py-1.5 fw-bold pill-nhom @(Model.SelectedTier == "nhom" ? "active" : "")">
+                <a href="/Nonstop?tier=nhom" onclick="return applyNonstopTierFilter('nhom', event);" id="pillBtnNonstopNhom" class="btn btn-sm btn-dark rounded-pill px-3 py-1.5 fw-bold pill-nhom @(Model.SelectedTier == "nhom" ? "active" : "")">
                     <i class="fas fa-certificate text-danger me-1"></i> 💎 <span id="pillTextNonstopNhom">@(Model.IsVipUser ? "Nonstop Nhóm" : "Demo Nonstop Nhóm")</span>
                 </a>
-                <a href="/Nonstop?tier=slot" id="pillBtnNonstopSlot" class="btn btn-sm btn-dark rounded-pill px-3 py-1.5 fw-bold pill-slot @(Model.SelectedTier == "slot" ? "active" : "")">
+                <a href="/Nonstop?tier=slot" onclick="return applyNonstopTierFilter('slot', event);" id="pillBtnNonstopSlot" class="btn btn-sm btn-dark rounded-pill px-3 py-1.5 fw-bold pill-slot @(Model.SelectedTier == "slot" ? "active" : "")">
                     <i class="fas fa-crown text-warning me-1"></i> <span id="pillTextNonstopSlot">@(Model.IsPremiumUser ? "Nonstop Slot" : "Demo Nonstop Slot")</span>
                 </a>
-                <a href="/Nonstop?tier=lot" class="btn btn-sm btn-dark rounded-pill px-3 py-1.5 fw-bold pill-lot @(Model.SelectedTier == "lot" ? "active" : "")">
+                <a href="/Nonstop?tier=lot" onclick="return applyNonstopTierFilter('lot', event);" class="btn btn-sm btn-dark rounded-pill px-3 py-1.5 fw-bold pill-lot @(Model.SelectedTier == "lot" ? "active" : "")">
                     <i class="fas fa-fire-flame-curved text-info me-1"></i> 🎵 Nonstop Lọt (Free)
                 </a>
             </div>
@@ -81,7 +81,7 @@
                     @if (!Model.IsPremiumUser)
                     {
                         <span id="badgeDemoNonstopSlotNotice" class="badge bg-warning text-dark fw-bold px-3 py-1.5 rounded-pill shadow">
-                            <i class="fas fa-headphones me-1"></i> Đang hiển thị kho Demo Nonstop Slot (Nghe thử 45s)
+                            <i class="fas fa-headphones me-1"></i> Đang hiển thị kho Demo Nonstop Slot (Nghe thử 30s)
                         </span>
                     }
                     else
@@ -194,12 +194,12 @@
                             <tr>
                                 <th style="width: 45px;"></th>
                                 <th>Tên Nonstop / Tiêu Đề Bản Mix</th>
-                                <th>Thể Loại</th>
-                                <th>Thời Lượng</th>
+                                <th class="d-none d-md-table-cell">Thể Loại</th>
+                                <th class="d-none d-lg-table-cell">Thời Lượng</th>
                                 <th>Chất Lượng</th>
-                                <th>Quyền Tải</th>
-                                <th>Lượt Nghe</th>
-                                <th class="text-end" style="width: 130px;">Hành Động</th>
+                                <th class="d-none d-sm-table-cell">Quyền Tải</th>
+                                <th class="d-none d-md-table-cell">Lượt Nghe</th>
+                                <th class="text-end" style="width: 100px;">Tải / Lưu</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -211,6 +211,7 @@
                                 var isNonstopNhom = !isNonstopSlot && ((track.CategoryCode != null && track.CategoryCode.Contains("Nhom", StringComparison.OrdinalIgnoreCase))
                                                  || track.TierRequiredToDownload == TLongMusic.Models.RequiredTier.Standard);
                                 var trackKind = isNonstopSlot ? "slot" : (isNonstopNhom ? "nhom" : "lot");
+                                var shouldDemo = isNonstopSlot ? !Model.IsPremiumUser : (isNonstopNhom ? !Model.IsVipUser : false);
 
                                 var rowClass = "crystal-table-row track-row-" + trackKind;
                                 var coverImgClass = "rounded " + (isNonstopSlot ? "track-cover-slot" : (isNonstopNhom ? "track-cover-nhom" : ""));
@@ -239,8 +240,9 @@
                                                     durationSeconds: @track.DurationSeconds,
                                                     categoryCode: "@track.CategoryCode",
                                                     trackType: "@trackKind",
-                                                    isDemo: @((track.IsDemoOnlyForFree || track.TierRequiredToDownload == RequiredTier.Premium || (track.CategoryCode != null && track.CategoryCode.Contains("Slot"))).ToString().ToLower()),
-                                                    demoLimit: @(track.DemoLimitSeconds > 0 ? track.DemoLimitSeconds : 45),
+                                                    kind: "Nonstop",
+                                                    isDemo: @(shouldDemo.ToString().ToLower()),
+                                                    demoLimit: 30,
                                                     quality: "@cleanQuality",
                                                     tierRequired: "@track.TierRequiredToDownload"
                                                 })'
@@ -253,7 +255,9 @@
                                             <img src="@track.CoverUrl" alt="@track.Title" class="@coverImgClass" style="@coverImgStyle" />
                                             <div>
                                                 <div class="track-title-wrapper d-inline-flex align-items-center flex-wrap">
-                                                    <span class="text-white font-weight-bold" style="font-size: 0.92rem;">@track.Title</span>
+                                                    <a href="/Track/Detail/@track.Id" class="text-white font-weight-bold track-title-link" style="font-size: 0.92rem; text-decoration: none;" title="Bấm để xem trang chi tiết tác phẩm">
+                                                        @track.Title
+                                                    </a>
                                                     @if (isNonstopSlot)
                                                     {
                                                         <span class="badge badge-premium-gold ms-2 fw-bold" style="font-size: 0.65rem; border: 1px solid #ffd166;" title="Nonstop Slot (Viền Vàng)"><i class="fas fa-crown me-1"></i>SLOT</span>
@@ -271,10 +275,10 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td>
+                                    <td class="d-none d-md-table-cell">
                                         <span class="badge" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: var(--text-silver); font-size: 0.72rem;">@track.Genre</span>
                                     </td>
-                                    <td class="text-white small font-monospace">
+                                    <td class="d-none d-lg-table-cell text-white small font-monospace">
                                         <i class="far fa-clock text-warning me-1"></i> @track.FormattedDuration
                                     </td>
                                     <td>
@@ -287,7 +291,7 @@
                                             <span class="badge badge-standard-red font-monospace fw-bold" style="font-size: 0.72rem; padding: 2px 8px; letter-spacing: 0.5px;">MP3</span>
                                         }
                                     </td>
-                                    <td>
+                                    <td class="d-none d-sm-table-cell">
                                         @if (track.TierRequiredToDownload == TLongMusic.Models.RequiredTier.Premium)
                                         {
                                             <span class="badge badge-premium-gold"><i class="fas fa-crown me-1"></i> Premium</span>
@@ -301,7 +305,7 @@
                                             <span class="badge bg-secondary">Free</span>
                                         }
                                     </td>
-                                    <td class="text-dim small">
+                                    <td class="d-none d-md-table-cell text-dim small">
                                         <i class="fas fa-headphones-simple me-1 text-dim"></i> @track.PlaysCount.ToString("N0")
                                     </td>
                                     <td class="text-end">

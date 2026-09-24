@@ -59,16 +59,37 @@ namespace TLongMusic.Controllers
 
             bool isSlotTrack = music.CategoryCode == "TrackSlot" || 
                                music.CategoryCode == "NonstopSlot" || 
-                               (music.Category != null && music.Category.RequiredTierToDownload == "Premium");
+                               (music.Category != null && (music.Category.RequiredTierToDownload == "Premium" || music.Category.AccessLevel == "Slot")) ||
+                               (music.CategoryCode != null && music.CategoryCode.Contains("Slot", StringComparison.OrdinalIgnoreCase));
+
+            bool isNhomTrack = !isSlotTrack && (music.CategoryCode == "TrackNhom" || 
+                               music.CategoryCode == "NonstopNhom" || 
+                               (music.Category != null && (music.Category.RequiredTierToDownload == "Standard" || music.Category.AccessLevel == "Nhom")) ||
+                               (music.CategoryCode != null && music.CategoryCode.Contains("Nhom", StringComparison.OrdinalIgnoreCase)));
 
             bool isAdminOrProducer = User.IsInRole("Admin") || User.IsInRole("Producer");
 
             if (!isAdminOrProducer)
             {
+                bool isNonstop = music.CategoryCode == "NonstopSlot" || 
+                                 music.CategoryCode == "NonstopNhom" || 
+                                 music.Type == "Nonstop" || 
+                                 (music.CategoryCode != null && music.CategoryCode.StartsWith("Nonstop", StringComparison.OrdinalIgnoreCase)) ||
+                                 (!string.IsNullOrEmpty(music.Title) && music.Title.ToLower().Contains("nonstop"));
+
                 if (isSlotTrack)
                 {
                     // Kho Slot VIP: Chỉ duy nhất Premium được nghe full, Standard và Free chỉ được nghe Demo (30s)
                     if (userTier != "Premium")
+                    {
+                        isDemo = true;
+                        demoLimit = music.DemoLimitSeconds > 0 ? music.DemoLimitSeconds : 30;
+                    }
+                }
+                else if (isNhomTrack)
+                {
+                    // Kho Nhóm VIP: Standard và Premium được nghe full, Free chỉ được nghe Demo (30s)
+                    if (userTier == "Free")
                     {
                         isDemo = true;
                         demoLimit = music.DemoLimitSeconds > 0 ? music.DemoLimitSeconds : 30;
@@ -114,7 +135,7 @@ namespace TLongMusic.Controllers
                 isDemo = isDemo,
                 demoLimit = demoLimit,
                 qualityAvailable = music.QualityAvailable,
-                tierRequired = music.Category?.RequiredTierToDownload ?? "Free"
+                tierRequired = isSlotTrack ? "Premium" : (isNhomTrack ? "Standard" : (music.Category?.RequiredTierToDownload ?? "Free"))
             });
         }
 

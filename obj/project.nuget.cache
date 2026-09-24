@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "l2Tw7YegJmE=",
+  "dgSpecHash": "nDFuxmuQ9fQ=",
   "success": true,
-  "projectFilePath": "D:\\Code\\WEB NGHE NHẠC\\TLongMusic.csproj",
+  "projectFilePath": "C:\\Users\\Nguyen Thanh Long\\Documents\\GitHub\\TLongMusic\\TLongMusic.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Nguyen Thanh Long\\.nuget\\packages\\azure.core\\1.38.0\\azure.core.1.38.0.nupkg.sha512",
     "C:\\Users\\Nguyen Thanh Long\\.nuget\\packages\\azure.identity\\1.11.4\\azure.identity.1.11.4.nupkg.sha512",
@@ -67,8 +67,8 @@
     "C:\\Users\\Nguyen Thanh Long\\.nuget\\packages\\system.text.json\\4.7.2\\system.text.json.4.7.2.nupkg.sha512",
     "C:\\Users\\Nguyen Thanh Long\\.nuget\\packages\\system.threading.tasks.extensions\\4.5.4\\system.threading.tasks.extensions.4.5.4.nupkg.sha512",
     "C:\\Users\\Nguyen Thanh Long\\.nuget\\packages\\system.windows.extensions\\6.0.0\\system.windows.extensions.6.0.0.nupkg.sha512",
-    "C:\\Users\\Nguyen Thanh Long\\.nuget\\packages\\microsoft.netcore.app.ref\\8.0.30\\microsoft.netcore.app.ref.8.0.30.nupkg.sha512",
     "C:\\Users\\Nguyen Thanh Long\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\8.0.30\\microsoft.windowsdesktop.app.ref.8.0.30.nupkg.sha512",
+    "C:\\Users\\Nguyen Thanh Long\\.nuget\\packages\\microsoft.netcore.app.ref\\8.0.30\\microsoft.netcore.app.ref.8.0.30.nupkg.sha512",
     "C:\\Users\\Nguyen Thanh Long\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\8.0.30\\microsoft.aspnetcore.app.ref.8.0.30.nupkg.sha512",
     "C:\\Users\\Nguyen Thanh Long\\.nuget\\packages\\microsoft.netcore.app.host.win-x64\\8.0.30\\microsoft.netcore.app.host.win-x64.8.0.30.nupkg.sha512"
   ],

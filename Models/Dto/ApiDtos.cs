@@ -195,4 +195,10 @@ namespace TLongMusic.Models.Dto
         public decimal? Amount { get; set; }
         public string? TransactionNumber { get; set; }
     }
+
+    public class BulkDeleteMusicDto
+    {
+        [Required(ErrorMessage = "Danh sách ID bài hát không được để trống")]
+        public List<Guid> MusicIds { get; set; } = new List<Guid>();
+    }
 }

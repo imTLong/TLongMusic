@@ -61,9 +61,57 @@ namespace TLongMusic.Models
 
     public class HomeViewModel
     {
+        public List<Track> AllNonstops { get; set; } = new();
+        public List<Track> SlotNonstops { get; set; } = new();
+        public List<Track> NhomNonstops { get; set; } = new();
+        public List<Track> LotNonstops { get; set; } = new();
         public List<Track> HotNonstops { get; set; } = new();
         public List<Track> VipNonstops { get; set; } = new();
         public List<Track> LatestTracks { get; set; } = new();
         public List<SubscriptionPlan> Plans { get; set; } = new();
+
+        // Current User Permissions
+        public string? CurrentUserTier { get; set; }
+        public bool IsPremiumUser { get; set; }
+        public bool IsStandardUser { get; set; }
+        public bool IsAdminOrProducer { get; set; }
+    }
+
+    public class SongCommentItem
+    {
+        public string UserName { get; set; } = string.Empty;
+        public string UserAvatar { get; set; } = "/images/logo.png";
+        public string Content { get; set; } = string.Empty;
+        public string TimeAgo { get; set; } = "Vừa xong";
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    }
+
+    public class SongDetailViewModel
+    {
+        public Track Music { get; set; } = new();
+        public string TimeAgo { get; set; } = "Mới phát hành";
+        public string CleanQuality { get; set; } = "MP3";
+        public bool IsWav { get; set; }
+        public bool IsNonstop { get; set; }
+        public bool IsSlot { get; set; }
+        public bool IsNhom { get; set; }
+        public bool IsLot { get; set; }
+        public bool IsUnlocked { get; set; }
+        public bool IsDemo { get; set; }
+        public int DemoLimit { get; set; } = 30;
+        public int FavoritesCount { get; set; }
+        public bool IsFavorite { get; set; }
+        public Entities.Producer? Producer { get; set; }
+        public List<Track> RelatedMusics { get; set; } = new();
+        public List<SongCommentItem> Comments { get; set; } = new();
+
+        // User info
+        public string? CurrentUserTier { get; set; }
+        public bool IsPremiumUser { get; set; }
+        public bool IsStandardUser { get; set; }
+        public bool IsAdminOrProducer { get; set; }
+        public string CurrentUserAvatar { get; set; } = "/images/logo.png";
+        public string CurrentUserName { get; set; } = "Khách";
     }
 }
+

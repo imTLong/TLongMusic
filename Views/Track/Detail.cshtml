@@ -1,0 +1,871 @@
+@model TLongMusic.Models.SongDetailViewModel
+@{
+    ViewData["Title"] = Model.Music.Title + " - " + Model.Music.Artist;
+    var rawTitle = Model.Music.Title.Replace("\"", "\\\"").Replace("'", "\\'");
+    var rawArtist = Model.Music.Artist.Replace("\"", "\\\"").Replace("'", "\\'");
+    var isWav = Model.IsWav;
+    var cleanQuality = Model.CleanQuality;
+}
+
+<div class="container-fluid px-3 px-xl-5 py-4" style="max-width: 1480px;">
+    <!-- Breadcrumb -->
+    <div class="d-flex align-items-center gap-2 mb-3 text-dim small">
+        <a href="/" class="text-dim text-decoration-none hover-white"><i class="fas fa-house me-1"></i> Trang chủ</a>
+        <span>/</span>
+        <a href="@(Model.IsNonstop ? "/Nonstop" : "/Track")" class="text-dim text-decoration-none hover-white">@(Model.IsNonstop ? "Kho Nonstop" : "Kho Track")</a>
+        <span>/</span>
+        <span class="text-white text-truncate" style="max-width: 320px;">@Model.Music.Title</span>
+    </div>
+
+    <!-- ========================================================
+         HERO SOUNDCLOUD-STYLE PLAYER BANNER (CHÍNH XÁC THEO HÌNH ẢNH)
+         ======================================================== -->
+    <div class="soundcloud-hero-card mb-4" id="songHeroPlayer">
+        <div class="row g-4 align-items-center">
+            <!-- CỘT TRÁI: THÔNG TIN, WAVEFORM VÀ THANH CÔNG CỤ -->
+            <div class="col-12 col-lg-8 col-xl-9 d-flex flex-column justify-content-between" style="min-height: 270px;">
+                <!-- 1. HEADER ROW: PLAY BUTTON + TITLE + METADATA -->
+                <div class="d-flex align-items-start gap-3 mb-3">
+                    <button id="heroPlayBtn" class="soundcloud-big-play-btn flex-shrink-0" onclick="toggleDetailPlayback()" title="Phát bài này">
+                        <i id="heroPlayIcon" class="fas fa-play"></i>
+                    </button>
+                    <div style="min-width: 0; flex-grow: 1;">
+                        <h1 class="text-white fw-bold mb-1 soundcloud-track-title">
+                            @Model.Music.Title
+                        </h1>
+                        <div class="d-flex align-items-center gap-2 flex-wrap text-dim small" style="font-size: 0.85rem;">
+                            <span class="text-white fw-semibold">@Model.Music.Artist</span>
+                            <span class="opacity-50">•</span>
+                            <span>@Model.Music.Genre</span>
+                            <span class="opacity-50">•</span>
+                            <span>@Model.TimeAgo</span>
+                            <span class="opacity-50">•</span>
+                            @if (isWav)
+                            {
+                                <span class="badge badge-premium-gold font-monospace fw-bold" style="font-size: 0.68rem; padding: 2px 7px;">WAV</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-standard-red font-monospace fw-bold" style="font-size: 0.68rem; padding: 2px 7px;">MP3 HD</span>
+                            }
+                            <span class="opacity-50">•</span>
+                            <span class="badge bg-secondary bg-opacity-50 font-monospace">@Model.Music.Bpm BPM</span>
+                            <span class="badge bg-secondary bg-opacity-50 font-monospace">Tone @Model.Music.MusicalKey</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. MIDDLE ROW: INTERACTIVE SOUNDCLOUD AUDIO WAVEFORM -->
+                <div class="position-relative my-2 w-100" style="padding-right: 55px;">
+                    <div id="soundcloudWaveformContainer" class="soundcloud-waveform-wrapper" onclick="seekWaveform(event)" ontouchstart="seekWaveform(event)">
+                        <canvas id="detailWaveformCanvas" height="85" style="width: 100%; display: block;"></canvas>
+                        <!-- Playhead Pin / Avatar -->
+                        <div id="waveformPlayhead" class="waveform-playhead" style="left: 0%;">
+                            <img src="@Model.CurrentUserAvatar" alt="Playhead" class="waveform-playhead-avatar" onerror="this.src='/images/logo.png'" />
+                        </div>
+                    </div>
+
+                    <!-- Time markers on the right -->
+                    <div class="position-absolute end-0 top-0 d-flex flex-column justify-content-between h-100 text-end pe-1" style="width: 50px;">
+                        <span id="detailCurrentTime" class="font-monospace text-dim" style="font-size: 0.76rem;">0:00</span>
+                        <span id="detailTotalDuration" class="font-monospace text-dim" style="font-size: 0.76rem;">@Model.Music.FormattedDuration</span>
+                    </div>
+                </div>
+
+                <!-- 3. BOTTOM ACTION BAR: LIKE + ACTION BUTTONS -->
+                <div class="d-flex align-items-center justify-content-between gap-3 mt-3 pt-2 border-top border-secondary border-opacity-10 flex-wrap">
+                    <!-- Left: Like -->
+                    <div class="d-flex align-items-center gap-2">
+                        <button class="btn btn-sm btn-soundcloud-like @(Model.IsFavorite ? "active" : "")" onclick="toggleFavorite('@Model.Music.Id', this)" title="Yêu thích">
+                            <i class="@(Model.IsFavorite ? "fas" : "far") fa-heart text-danger me-1"></i>
+                            <span id="detailLikeCount">@Model.FavoritesCount</span>
+                        </button>
+                    </div>
+
+                    <!-- Right: Share, Copy link, Add to playlist, Download -->
+                    <div class="d-flex align-items-center gap-2">
+                        <button class="btn btn-sm btn-soundcloud-icon" onclick="shareCurrentTrack()" title="Chia sẻ">
+                            <i class="fas fa-arrow-up-from-bracket"></i>
+                        </button>
+                        <button class="btn btn-sm btn-soundcloud-icon" onclick="copyCurrentTrackLink()" title="Sao chép link">
+                            <i class="fas fa-link"></i>
+                        </button>
+                        <button class="btn btn-sm btn-soundcloud-icon" onclick="toggleFavorite('@Model.Music.Id', this)" title="Lưu bài hát">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        <button class="btn btn-sm btn-soundcloud-download px-3 fw-bold d-flex align-items-center gap-1"
+                                onclick="handleDownload('@Model.Music.Id', '@rawTitle', '@Model.Music.TierRequiredToDownload')">
+                            <i class="fas fa-arrow-down-to-bracket"></i>
+                            <span class="d-none d-sm-inline">Tải @Model.CleanQuality</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CỘT PHẢI: ẢNH BÌA LỚN (VUÔNG RỘNG ĐẸP CHUẨN) -->
+            <div class="col-12 col-lg-4 col-xl-3 text-center text-lg-end">
+                <div class="soundcloud-cover-wrapper d-inline-block">
+                    <img src="@Model.Music.CoverUrl" alt="@Model.Music.Title" class="soundcloud-cover-img" onerror="this.src='/images/logo.png'" />
+                    <div class="position-absolute top-0 end-0 p-2">
+                        @if (Model.IsSlot)
+                        {
+                            <span class="badge badge-premium-gold"><i class="fas fa-crown me-1"></i>SLOT VIP</span>
+                        }
+                        else if (Model.IsNhom)
+                        {
+                            <span class="badge badge-standard-red"><i class="fas fa-certificate me-1"></i>NHÓM VIP</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary"><i class="fas fa-unlock me-1"></i>LỌT FREE</span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================
+         NỘI DUNG CHI TIẾT: THÔNG SỐ KỸ THUẬT (KÈM PRODUCER) & BÀI HÁT LIÊN QUAN
+         ======================================================== -->
+    <div class="row g-4">
+        <!-- Cột trái: Tab Thông Số Kỹ Thuật & Tab Producer -->
+        <div class="col-12 col-lg-7">
+            <div class="crystal-card p-4">
+                <!-- Navigation Tabs -->
+                <ul class="nav nav-pills mb-3 gap-2 border-bottom border-secondary border-opacity-25 pb-3" id="detailTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active rounded-pill fw-bold px-3 py-2 text-white" id="specs-tab" data-bs-toggle="pill" data-bs-target="#specs-pane" type="button" role="tab" style="font-size: 0.88rem;">
+                            <i class="fas fa-sliders text-info me-2"></i>Thông Số Kỹ Thuật Studio
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link rounded-pill fw-bold px-3 py-2 text-white" id="producer-tab" data-bs-toggle="pill" data-bs-target="#producer-pane" type="button" role="tab" style="font-size: 0.88rem; background: rgba(255, 255, 255, 0.06);">
+                            <i class="fas fa-headphones-simple text-warning me-2"></i>Hồ Sơ Producer Tác Giả
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content pt-2" id="detailTabsContent">
+                    <!-- TAB 1: THÔNG SỐ KỸ THUẬT -->
+                    <div class="tab-pane fade show active" id="specs-pane" role="tabpanel" aria-labelledby="specs-tab">
+                        <div class="d-flex flex-column gap-2.5">
+                            <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary border-opacity-10">
+                                <span class="text-dim small"><i class="fas fa-gauge-high text-danger me-2"></i>Tốc Độ Nhịp (BPM)</span>
+                                <strong class="text-white font-monospace">@Model.Music.Bpm BPM</strong>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary border-opacity-10">
+                                <span class="text-dim small"><i class="fas fa-music text-info me-2"></i>Tone Camelot Key</span>
+                                <span class="badge badge-shimmer-cyan font-monospace">@Model.Music.MusicalKey</span>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary border-opacity-10">
+                                <span class="text-dim small"><i class="fas fa-clock text-warning me-2"></i>Thời Lượng Chuẩn</span>
+                                <strong class="text-white font-monospace">@Model.Music.FormattedDuration</strong>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary border-opacity-10">
+                                <span class="text-dim small"><i class="fas fa-file-audio text-success me-2"></i>Định Dạng Âm Thanh</span>
+                                <strong class="text-white font-monospace">@(isWav ? "Lossless Master 24-bit WAV" : "Stereo 320kbps MP3")</strong>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary border-opacity-10">
+                                <span class="text-dim small"><i class="fas fa-headphones text-primary me-2"></i>Lượt Nghe Trực Tuyến</span>
+                                <strong class="text-white font-monospace">@Model.Music.PlaysCount.ToString("N0") lượt</strong>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary border-opacity-10">
+                                <span class="text-dim small"><i class="fas fa-download text-secondary me-2"></i>Lượt Tải Về</span>
+                                <strong class="text-white font-monospace">@Model.Music.DownloadsCount.ToString("N0") lượt</strong>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center py-2">
+                                <span class="text-dim small"><i class="fas fa-shield-halved text-warning me-2"></i>Quyền Hạn Tải File</span>
+                                @if (Model.IsSlot)
+                                {
+                                    <span class="badge badge-premium-gold"><i class="fas fa-crown me-1"></i>Premium VIP</span>
+                                }
+                                else if (Model.IsNhom)
+                                {
+                                    <span class="badge badge-standard-red"><i class="fas fa-certificate me-1"></i>Standard VIP</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Miễn Phí 100%</span>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Box quyền hạn hiện tại của user -->
+                        <div class="mt-3 p-3 rounded-3 border @(Model.IsUnlocked ? "border-success border-opacity-40" : "border-warning border-opacity-40")"
+                             style="background: @(Model.IsUnlocked ? "rgba(46, 213, 115, 0.08)" : "rgba(255, 209, 102, 0.08)");">
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <i class="fas @(Model.IsUnlocked ? "fa-circle-check text-success" : "fa-lock text-warning")"></i>
+                                <strong class="text-white small">@(Model.IsUnlocked ? "Đặc Quyền Của Bạn: ĐÃ MỞ KHÓA" : "Chế Độ Nghe Thử Demo " + Model.DemoLimit + "s")</strong>
+                            </div>
+                            <p class="text-dim small mb-0" style="line-height: 1.45;">
+                                @if (Model.IsUnlocked)
+                                {
+                                    <span>Tài khoản của bạn đủ thẩm quyền để nghe full 100% không giới hạn và tải file gốc chuẩn phòng thu về thiết bị.</span>
+                                }
+                                else
+                                {
+                                    <span>Tác phẩm thuộc kho đặc quyền VIP. Khi nghe sẽ dừng sau <strong>@Model.DemoLimit giây</strong>. Hãy nâng cấp VIP để tải file Lossless!</span>
+                                }
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- TAB 2: PRODUCER TÁC GIẢ (ĐẨY VÀO TAB THEO YÊU CẦU) -->
+                    <div class="tab-pane fade" id="producer-pane" role="tabpanel" aria-labelledby="producer-tab">
+                        <div class="p-3 rounded-3 border border-warning border-opacity-30 mb-3" style="background: rgba(255, 209, 102, 0.05);">
+                            <div class="d-flex align-items-center gap-3">
+                                <img src="@Model.Music.CoverUrl" alt="@(Model.Producer?.StageName ?? Model.Music.Artist)" class="rounded-circle border border-warning shadow" style="width: 64px; height: 64px; object-fit: cover;" onerror="this.src='/images/logo.png'" />
+                                <div>
+                                    <h5 class="text-white fw-bold mb-1">@(Model.Producer?.StageName ?? Model.Music.Artist)</h5>
+                                    <span class="badge badge-premium-gold" style="font-size: 0.7rem;"><i class="fas fa-circle-check me-1"></i>PRODUCER CHÍNH THỨC</span>
+                                    <div class="text-dim small mt-1 font-monospace"><i class="fas fa-music text-danger me-1"></i> Tác phẩm: @Model.Music.Title</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <h6 class="text-white small fw-bold mb-1"><i class="fas fa-align-left text-info me-1"></i> Giới thiệu / Phong cách âm nhạc:</h6>
+                            <p class="text-light small p-3 rounded-3 border border-secondary border-opacity-20" style="background: rgba(255, 255, 255, 0.02); line-height: 1.6;">
+                                @(string.IsNullOrEmpty(Model.Producer?.Bio) 
+                                    ? "Producer chuyên nghiệp phát hành tác phẩm âm nhạc chuẩn Vinahouse & Bar Club trên hệ thống Record Pool TLongMusic." 
+                                    : Model.Producer.Bio)
+                            </p>
+                        </div>
+
+                        <div class="row g-2 text-dim small">
+                            <div class="col-6">
+                                <div class="p-2 rounded-2 border border-secondary border-opacity-20" style="background: rgba(255, 255, 255, 0.02);">
+                                    <span>Thể loại sở trường:</span>
+                                    <strong class="text-white d-block">@Model.Music.Genre</strong>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="p-2 rounded-2 border border-secondary border-opacity-20" style="background: rgba(255, 255, 255, 0.02);">
+                                    <span>Trạng thái phát hành:</span>
+                                    <strong class="text-success d-block"><i class="fas fa-check-circle me-1"></i>Đã kiểm duyệt Kho dữ liệu</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cột phải: Thao tác tải về & Bài hát đề xuất -->
+        <div class="col-12 col-lg-5">
+            <!-- Download & Actions Card -->
+            <div class="crystal-card p-4 mb-4">
+                <h5 class="text-white fw-bold mb-3 pb-2 border-bottom border-secondary border-opacity-25 d-flex align-items-center gap-2">
+                    <i class="fas fa-cloud-arrow-down text-danger"></i> Tải Xuống Bản Thu Gốc
+                </h5>
+                <p class="text-dim small mb-3">Tải trực tiếp file âm thanh chất lượng cao chuẩn phòng thu từ Kho dữ liệu.</p>
+                <div class="d-flex flex-column gap-2">
+                    <button class="btn btn-shimmer-ruby w-100 py-2.5 fw-bold d-flex align-items-center justify-content-center gap-2"
+                            onclick="handleDownload('@Model.Music.Id', '@rawTitle', '@Model.Music.TierRequiredToDownload')">
+                        <i class="fas fa-arrow-down-to-bracket"></i>
+                        <span>Tải Xuống Bản @Model.CleanQuality Ngay</span>
+                    </button>
+                    @if (!Model.IsUnlocked)
+                    {
+                        <a href="/Payment/Checkout?package=Standard" class="btn btn-shimmer-gold w-100 py-2 fw-bold text-center text-decoration-none small">
+                            <i class="fas fa-crown me-1"></i> Nâng Cấp Gói VIP Để Tải Full Lossless
+                        </a>
+                    }
+                </div>
+            </div>
+
+            <!-- Bài hát liên quan đề xuất -->
+            @if (Model.RelatedMusics.Any())
+            {
+                <div class="crystal-card p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary border-opacity-25">
+                        <h5 class="text-white fw-bold mb-0 d-flex align-items-center gap-2" style="font-size: 1rem;">
+                            <i class="fas fa-compact-disc text-warning"></i> Bài Hát Cùng Thể Loại
+                        </h5>
+                        <a href="@(Model.IsNonstop ? "/Nonstop" : "/Track")" class="text-dim small text-decoration-none hover-white">Tất cả <i class="fas fa-arrow-right ms-1"></i></a>
+                    </div>
+
+                    <div class="d-flex flex-column gap-2.5">
+                        @foreach (var item in Model.RelatedMusics.Take(5))
+                        {
+                            var itemQ = (item.QualityAvailable != null && item.QualityAvailable.ToUpperInvariant().Contains("WAV")) ? "WAV" : "MP3";
+
+                            <div class="p-2 rounded-3 border border-secondary border-opacity-20 d-flex align-items-center justify-content-between gap-2" style="background: rgba(255, 255, 255, 0.02);">
+                                <div class="d-flex align-items-center gap-2" style="min-width: 0;">
+                                    <img src="@item.CoverUrl" alt="@item.Title" class="rounded-2 flex-shrink-0" style="width: 42px; height: 42px; object-fit: cover;" onerror="this.src='/images/logo.png'" />
+                                    <div class="text-truncate">
+                                        <a href="/Track/Detail/@item.Id" class="text-white fw-bold d-block text-truncate text-decoration-none hover-gold" style="font-size: 0.85rem;">
+                                            @item.Title
+                                        </a>
+                                        <div class="text-dim small font-monospace" style="font-size: 0.72rem;">@item.Artist • @item.Bpm BPM</div>
+                                    </div>
+                                </div>
+                                <button class="btn btn-sm btn-outline-light rounded-circle p-1 flex-shrink-0" style="width: 30px; height: 30px;"
+                                        onclick='playTrack({
+                                            id: "@item.Id",
+                                            title: "@item.Title.Replace("\"", "\\\"")",
+                                            artist: "@item.Artist.Replace("\"", "\\\"")",
+                                            coverUrl: "@item.CoverUrl",
+                                            audioUrl: "@item.AudioUrl",
+                                            bpm: @item.Bpm,
+                                            key: "@item.MusicalKey",
+                                            durationSeconds: @item.DurationSeconds,
+                                            categoryCode: "@item.CategoryCode",
+                                            trackType: "@(item.CategoryCode.ToLower().Contains("nonstop") ? "nonstop" : "track")",
+                                            isDemo: false,
+                                            quality: "@itemQ",
+                                            tierRequired: "@item.TierRequiredToDownload"
+                                        })' title="Phát bài này">
+                                    <i class="fas fa-play" style="font-size: 0.7rem;"></i>
+                                </button>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+/* ========================================================
+   SOUNDCLOUD-STYLE HERO PLAYER STYLES
+   ======================================================== */
+.soundcloud-hero-card {
+    background: #181b19;
+    background: linear-gradient(135deg, rgba(24, 27, 25, 0.98), rgba(18, 20, 24, 0.98));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    padding: 24px 28px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65), 0 0 30px rgba(0, 0, 0, 0.4);
+    position: relative;
+    overflow: hidden;
+}
+
+.soundcloud-hero-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+}
+
+.soundcloud-big-play-btn {
+    width: 62px;
+    height: 62px;
+    border-radius: 50%;
+    background: #ffffff;
+    color: #121212;
+    font-size: 1.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+    transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.soundcloud-big-play-btn:hover {
+    transform: scale(1.08);
+    background: #ffd166;
+    box-shadow: 0 8px 25px rgba(255, 209, 102, 0.5);
+}
+
+.soundcloud-track-title {
+    font-size: 1.45rem;
+    line-height: 1.25;
+    word-break: break-word;
+}
+
+/* Waveform container */
+.soundcloud-waveform-wrapper {
+    width: 100%;
+    height: 85px;
+    cursor: pointer;
+    position: relative;
+    user-select: none;
+}
+
+.waveform-playhead {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    transition: left 0.1s linear;
+    z-index: 5;
+}
+
+.waveform-playhead-avatar {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid #ff134a;
+    box-shadow: 0 0 10px rgba(255, 19, 74, 0.8);
+    object-fit: cover;
+    background: #111;
+}
+
+/* Soundcloud Action Buttons */
+.btn-soundcloud-like {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #fff;
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 0.84rem;
+    transition: all 0.2s ease;
+}
+.btn-soundcloud-like:hover, .btn-soundcloud-like.active {
+    background: rgba(255, 19, 74, 0.2);
+    border-color: #ff134a;
+    color: #fff;
+}
+
+.btn-soundcloud-icon {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #ddd;
+    border-radius: 8px;
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+.btn-soundcloud-icon:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+.btn-soundcloud-download {
+    background: linear-gradient(135deg, #ff134a, #d90429);
+    border: 1px solid rgba(255, 19, 74, 0.6);
+    color: #fff;
+    border-radius: 8px;
+    height: 34px;
+    font-size: 0.82rem;
+    transition: all 0.2s ease;
+}
+.btn-soundcloud-download:hover {
+    background: linear-gradient(135deg, #ff2a5e, #e01e37);
+    color: #fff;
+    box-shadow: 0 0 15px rgba(255, 19, 74, 0.5);
+}
+
+/* Soundcloud cover image */
+.soundcloud-cover-wrapper {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+    background: #000;
+}
+.soundcloud-cover-img {
+    width: 260px;
+    height: 260px;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.5s ease;
+}
+.soundcloud-cover-wrapper:hover .soundcloud-cover-img {
+    transform: scale(1.05);
+}
+
+.hover-white:hover {
+    color: #fff !important;
+}
+.hover-gold:hover {
+    color: #ffd166 !important;
+}
+
+@@media (max-width: 767.98px) {
+    .soundcloud-hero-card {
+        padding: 14px 14px !important;
+    }
+    .soundcloud-big-play-btn {
+        width: 44px !important;
+        height: 44px !important;
+        font-size: 1.1rem !important;
+    }
+    .soundcloud-track-title {
+        font-size: 1.05rem !important;
+        line-height: 1.25 !important;
+    }
+    .soundcloud-waveform-wrapper {
+        height: 55px !important;
+    }
+    #detailWaveformCanvas {
+        height: 55px !important;
+    }
+    .soundcloud-cover-img {
+        width: 140px !important;
+        height: 140px !important;
+    }
+    .btn-soundcloud-like {
+        padding: 4px 10px !important;
+        font-size: 0.75rem !important;
+    }
+    .btn-soundcloud-icon {
+        width: 30px !important;
+        height: 30px !important;
+        font-size: 0.75rem !important;
+    }
+    .btn-soundcloud-download {
+        height: 30px !important;
+        font-size: 0.75rem !important;
+        padding: 0 10px !important;
+    }
+}
+</style>
+
+@section Scripts {
+<script>
+    // Dữ liệu bài hát hiện tại
+    const currentDetailTrack = {
+        id: "@Model.Music.Id",
+        title: "@rawTitle",
+        artist: "@rawArtist",
+        coverUrl: "@Model.Music.CoverUrl",
+        audioUrl: "@Model.Music.AudioUrl",
+        bpm: @Model.Music.Bpm,
+        key: "@Model.Music.MusicalKey",
+        durationSeconds: @Model.Music.DurationSeconds,
+        categoryCode: "@Model.Music.CategoryCode",
+        trackType: "@(Model.IsNonstop ? "nonstop" : "track")",
+        kind: "@(Model.IsNonstop ? "Nonstop" : "Track")",
+        isDemo: @(Model.IsDemo.ToString().ToLower()),
+        demoLimit: @Model.DemoLimit,
+        quality: "@cleanQuality",
+        tierRequired: "@Model.Music.TierRequiredToDownload"
+    };
+
+    let waveBars = [];
+    const totalBars = 160;
+
+    // Trích xuất biểu đồ sóng nhạc THỰC TẾ từ chính file âm thanh của bài hát
+    async function extractRealAudioWaveform(audioUrl, trackId) {
+        if (!audioUrl) return;
+
+        try {
+            const res = await fetch(audioUrl);
+            if (!res.ok) return;
+
+            const arrayBuffer = await res.arrayBuffer();
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContextClass) return;
+
+            const audioCtx = new AudioContextClass();
+            const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+            const rawData = audioBuffer.getChannelData(0); // Lấy kênh âm thanh đầu tiên (mono/left)
+
+            const sampleStep = Math.floor(rawData.length / totalBars);
+            const rawPeaks = [];
+            let maxAmplitude = 0;
+
+            // Lấy mẫu từng phân đoạn để tính toán Peak (đỉnh nhịp Kick/Snare) và RMS (năng lượng Bass)
+            for (let i = 0; i < totalBars; i++) {
+                const start = i * sampleStep;
+                const end = Math.min(start + sampleStep, rawData.length);
+                let peak = 0;
+                let sumSquares = 0;
+                let count = 0;
+
+                // Bước nhảy 4 mẫu để xử lý cực nhanh trong vài mili-giây
+                for (let j = start; j < end; j += 4) {
+                    const absVal = Math.abs(rawData[j]);
+                    if (absVal > peak) peak = absVal;
+                    sumSquares += absVal * absVal;
+                    count++;
+                }
+
+                const rms = count > 0 ? Math.sqrt(sumSquares / count) : 0;
+                // Kết hợp Peak và RMS để biểu diễn chuẩn xác âm thanh điện tử / Vinahouse
+                const combined = peak * 0.7 + rms * 0.3;
+                if (combined > maxAmplitude) maxAmplitude = combined;
+                rawPeaks.push(combined);
+            }
+
+            if (maxAmplitude > 0) {
+                // Chuẩn hóa và áp dụng nén dynamic range (perceptual scaling) để sóng nhạc nổi bật rõ các đoạn Drop và Build-up
+                const normalized = rawPeaks.map((val, idx) => {
+                    let norm = val / maxAmplitude;
+                    // Đường cong phi tuyến giúp các đoạn breakdown vẫn hiển thị thanh lịch
+                    norm = Math.pow(norm, 0.8);
+                    return Math.max(0.12, Math.min(0.96, norm));
+                });
+
+                waveBars = normalized;
+
+                // Lưu vào bộ nhớ cục bộ để các lần xem sau hiển thị ngay lập tức (0ms)
+                try {
+                    localStorage.setItem('tlong_real_wave_' + trackId, JSON.stringify(normalized));
+                } catch (e) {}
+
+                // Cập nhật lại canvas ngay lập tức theo tiến trình bài hát hiện tại
+                const audio = window.TLongPlayer?.audio;
+                const isCurrent = window.TLongPlayer?.currentTrack?.id === currentDetailTrack.id;
+                const cur = (isCurrent && audio) ? audio.currentTime : 0;
+                const dur = (isCurrent && audio?.duration) ? audio.duration : (currentDetailTrack.durationSeconds || 1);
+                renderWaveform(cur / dur);
+            }
+
+            audioCtx.close();
+        } catch (err) {
+            console.warn('Real audio waveform decoding fallback:', err);
+        }
+    }
+
+    // Khởi tạo waveform canvas
+    function initWaveform() {
+        const canvas = document.getElementById('detailWaveformCanvas');
+        if (!canvas) return;
+
+        // 1. Kiểm tra cache sóng thực tế trong localStorage
+        const cacheKey = 'tlong_real_wave_' + currentDetailTrack.id;
+        let loadedFromCache = false;
+        try {
+            const cached = localStorage.getItem(cacheKey);
+            if (cached) {
+                const parsed = JSON.parse(cached);
+                if (Array.isArray(parsed) && parsed.length === totalBars) {
+                    waveBars = parsed;
+                    loadedFromCache = true;
+                }
+            }
+        } catch (e) {}
+
+        // 2. Nếu chưa có cache, sinh sóng ban đầu tạm thời và tiến hành giải mã file nhạc thật
+        if (!loadedFromCache) {
+            waveBars = [];
+            let seed = 0;
+            for (let i = 0; i < currentDetailTrack.title.length; i++) {
+                seed = (seed + currentDetailTrack.title.charCodeAt(i) * 17) % 1000;
+            }
+
+            for (let i = 0; i < totalBars; i++) {
+                let baseH = 0.2 + 0.65 * Math.abs(Math.sin((i + seed) * 0.15)) * Math.cos(i * 0.05 + 1);
+                if (baseH < 0.12) baseH = 0.12 + (i % 5) * 0.04;
+                if (baseH > 0.95) baseH = 0.95;
+                waveBars.push(baseH);
+            }
+
+            // Giải mã âm thanh thật từ URL
+            if (currentDetailTrack.audioUrl) {
+                extractRealAudioWaveform(currentDetailTrack.audioUrl, currentDetailTrack.id);
+            }
+        }
+
+        const audio = window.TLongPlayer?.audio;
+        const isCurrent = window.TLongPlayer?.currentTrack?.id === currentDetailTrack.id;
+        const cur = (isCurrent && audio) ? audio.currentTime : 0;
+        const dur = (isCurrent && audio?.duration) ? audio.duration : (currentDetailTrack.durationSeconds || 1);
+        renderWaveform(cur / dur);
+    }
+
+    // Vẽ Waveform SoundCloud (phần đã phát màu trắng sáng, phần chưa phát màu xám mờ)
+    function renderWaveform(progressPercent) {
+        const canvas = document.getElementById('detailWaveformCanvas');
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d');
+        const dpr = window.devicePixelRatio || 1;
+        const rect = canvas.getBoundingClientRect();
+
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        ctx.scale(dpr, dpr);
+
+        const width = rect.width;
+        const height = rect.height;
+        const centerY = height / 2;
+
+        ctx.clearRect(0, 0, width, height);
+
+        const step = width / totalBars;
+        const barWidth = Math.max(1.6, Math.min(3.0, step * 0.72));
+        const playedCount = Math.floor(progressPercent * totalBars);
+
+        for (let i = 0; i < totalBars; i++) {
+            const x = i * step;
+            const barH = Math.max(2, (waveBars[i] || 0.15) * (height / 2 - 5));
+            const isPlayed = i <= playedCount;
+
+            // Nửa trên (Upper positive bars)
+            ctx.fillStyle = isPlayed ? '#ffffff' : 'rgba(255, 255, 255, 0.32)';
+            if (ctx.roundRect) {
+                ctx.beginPath();
+                ctx.roundRect(x, centerY - barH, barWidth, barH, [1.5, 1.5, 0, 0]);
+                ctx.fill();
+            } else {
+                ctx.fillRect(x, centerY - barH, barWidth, barH);
+            }
+
+            // Nửa dưới phản chiếu (Mirrored reflection 70%)
+            ctx.fillStyle = isPlayed ? 'rgba(255, 255, 255, 0.65)' : 'rgba(255, 255, 255, 0.14)';
+            const lowerH = barH * 0.7;
+            if (ctx.roundRect) {
+                ctx.beginPath();
+                ctx.roundRect(x, centerY + 1, barWidth, lowerH, [0, 0, 1.5, 1.5]);
+                ctx.fill();
+            } else {
+                ctx.fillRect(x, centerY + 1, barWidth, lowerH);
+            }
+        }
+
+        // Cập nhật vị trí playhead
+        const playhead = document.getElementById('waveformPlayhead');
+        if (playhead) {
+            playhead.style.left = (progressPercent * 100) + '%';
+        }
+    }
+
+    // Tua bài hát khi click vào waveform
+    function seekWaveform(e) {
+        const container = document.getElementById('soundcloudWaveformContainer');
+        if (!container) return;
+
+        const rect = container.getBoundingClientRect();
+        const clientX = (e.touches && e.touches.length > 0) ? e.touches[0].clientX : (e.clientX !== undefined ? e.clientX : 0);
+        const clickX = clientX - rect.left;
+        let percent = Math.max(0, Math.min(1, clickX / rect.width));
+
+        const audio = window.TLongPlayer?.audio;
+        const isCurrent = window.TLongPlayer?.currentTrack?.id === currentDetailTrack.id;
+
+        if (!isCurrent) {
+            playTrack(currentDetailTrack);
+        }
+
+        const duration = currentDetailTrack.durationSeconds || (audio?.duration || 0);
+        if (duration > 0 && audio) {
+            let targetTime = percent * duration;
+
+            if (isDemoPlayback(currentDetailTrack)) {
+                const limit = currentDetailTrack.demoLimit || 30;
+                if (targetTime >= limit) {
+                    window.TLongPlayer.currentTrack = currentDetailTrack;
+                    audio.currentTime = 0;
+                    pauseTrack();
+                    renderWaveform(0);
+                    const currentTimeElem = document.getElementById('playerCurrentTime');
+                    if (currentTimeElem) currentTimeElem.textContent = '0:00';
+                    const seekSlider = document.getElementById('playerSeekSlider');
+                    if (seekSlider) {
+                        seekSlider.value = 0;
+                        updateSeekSliderProgress(seekSlider);
+                    }
+                    const detailCurrentTime = document.getElementById('detailCurrentTime');
+                    if (detailCurrentTime) detailCurrentTime.textContent = '0:00';
+                    showDemoLimitModal();
+                    return;
+                }
+            }
+
+            audio.currentTime = targetTime;
+            renderWaveform(percent);
+        }
+    }
+
+    // Nút Play / Pause to
+    function toggleDetailPlayback() {
+        const isCurrent = window.TLongPlayer?.currentTrack?.id === currentDetailTrack.id;
+        if (!isCurrent) {
+            playTrack(currentDetailTrack);
+            updateHeroPlayButton(true);
+        } else {
+            togglePlayPause();
+            updateHeroPlayButton(window.TLongPlayer?.isPlaying);
+        }
+    }
+
+    function updateHeroPlayButton(isPlaying) {
+        const icon = document.getElementById('heroPlayIcon');
+        if (icon) {
+            icon.className = isPlaying ? 'fas fa-pause' : 'fas fa-play';
+        }
+    }
+
+    // Cập nhật waveform đồng bộ theo tiến độ bài đang phát
+    function syncDetailWaveWithAudio() {
+        const audio = window.TLongPlayer?.audio;
+        if (!audio) return;
+
+        audio.addEventListener('timeupdate', () => {
+            const isCurrent = window.TLongPlayer?.currentTrack?.id === currentDetailTrack.id;
+            if (!isCurrent) return;
+
+            const cur = audio.currentTime || 0;
+            const dur = (audio.duration && !isNaN(audio.duration) && audio.duration > 0) ? audio.duration : currentDetailTrack.durationSeconds;
+
+            const timeElem = document.getElementById('detailCurrentTime');
+            if (timeElem) timeElem.textContent = formatTime(cur);
+
+            if (dur > 0) {
+                renderWaveform(cur / dur);
+            }
+        });
+
+        audio.addEventListener('play', () => {
+            if (window.TLongPlayer?.currentTrack?.id === currentDetailTrack.id) {
+                updateHeroPlayButton(true);
+            }
+        });
+
+        audio.addEventListener('pause', () => {
+            if (window.TLongPlayer?.currentTrack?.id === currentDetailTrack.id) {
+                updateHeroPlayButton(false);
+            }
+        });
+    }
+
+    function copyCurrentTrackLink() {
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(window.location.href);
+            showToastNotification('🔗 Đã sao chép liên kết bài hát!');
+        }
+    }
+
+    function shareCurrentTrack() {
+        if (navigator.share) {
+            navigator.share({
+                title: currentDetailTrack.title,
+                text: `Nghe bài hát ${currentDetailTrack.title} trên TLongMusic`,
+                url: window.location.href
+            }).catch(() => {});
+        } else {
+            copyCurrentTrackLink();
+        }
+    }
+
+    function initTrackDetailPage() {
+        initWaveform();
+        syncDetailWaveWithAudio();
+
+        if (window.TLongPlayer?.currentTrack?.id === currentDetailTrack.id && window.TLongPlayer?.isPlaying) {
+            updateHeroPlayButton(true);
+        } else {
+            updateHeroPlayButton(false);
+        }
+    }
+    window.initTrackDetailPage = initTrackDetailPage;
+    window.syncDetailWaveWithAudio = syncDetailWaveWithAudio;
+
+    if (document.readyState === 'loading') {
+        window.addEventListener('DOMContentLoaded', initTrackDetailPage);
+    } else {
+        initTrackDetailPage();
+    }
+</script>
+}

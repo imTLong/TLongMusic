@@ -272,9 +272,157 @@ public class TrackController : Controller
                 Date = g.Key,
                 FormattedDate = g.Key.ToString("dd/MM/yyyy"),
                 DayOfWeekName = GetVietnameseDayOfWeek(g.Key),
-                Tracks = g.ToList()
             })
             .ToList();
+    }
+
+    [HttpGet("/Track/Detail/{id}")]
+    [HttpGet("/Music/Detail/{id}")]
+    [HttpGet("/Song/{id}")]
+    public async Task<IActionResult> Detail(string id)
+    {
+        if (string.IsNullOrEmpty(id)) return RedirectToAction("Index", "Home");
+
+        Guid musicGuid;
+        Models.Entities.Music? music = null;
+
+        if (Guid.TryParse(id, out musicGuid))
+        {
+            music = await _context.Musics
+                .Include(m => m.Category)
+                .Include(m => m.Producer)
+                .Include(m => m.Favorites)
+                .FirstOrDefaultAsync(m => m.MusicId == musicGuid && m.Status == "Published");
+        }
+
+        if (music == null)
+        {
+            music = await _context.Musics
+                .Include(m => m.Category)
+                .Include(m => m.Producer)
+                .Include(m => m.Favorites)
+                .FirstOrDefaultAsync(m => m.Status == "Published");
+
+            if (music == null) return RedirectToAction("Index", "Home");
+        }
+
+        // Determine permissions
+        string? currentUserTier = null;
+        bool isPremiumUser = false;
+        bool isStandardUser = false;
+        bool isAdminOrProducer = User.IsInRole("Admin") || User.IsInRole("Producer");
+        string currentUserName = User.Identity?.Name ?? "Khách";
+        string currentUserAvatar = "/images/logo.png";
+        Guid? currentUserId = null;
+
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (Guid.TryParse(userIdClaim, out var uGuid))
+            {
+                currentUserId = uGuid;
+                var dbUser = await _context.Users.FindAsync(uGuid);
+                if (dbUser != null)
+                {
+                    currentUserAvatar = !string.IsNullOrEmpty(dbUser.AvatarUrl) ? dbUser.AvatarUrl : "/images/logo.png";
+                    currentUserName = dbUser.FullName ?? dbUser.Username;
+                }
+
+                var activeSub = await _context.Subscriptions
+                    .Include(s => s.Package)
+                    .Where(s => s.UserId == uGuid && s.Status == "Active" && s.EndDate >= DateTime.UtcNow)
+                    .OrderByDescending(s => s.Package != null ? s.Package.Price : 0)
+                    .FirstOrDefaultAsync();
+
+                if (activeSub != null)
+                {
+                    currentUserTier = activeSub.PackageId;
+                }
+            }
+        }
+
+        if (isAdminOrProducer)
+        {
+            isPremiumUser = true;
+            isStandardUser = true;
+        }
+        else if (currentUserTier == "Premium")
+        {
+            isPremiumUser = true;
+            isStandardUser = true;
+        }
+        else if (currentUserTier == "Standard")
+        {
+            isStandardUser = true;
+        }
+
+        var trackModel = MapEntityToTrack(music);
+        var cleanQuality = (music.QualityAvailable != null && music.QualityAvailable.ToUpperInvariant().Contains("WAV")) ? "WAV" : "MP3";
+        bool isWav = cleanQuality == "WAV";
+
+        bool isSlot = music.CategoryCode == "TrackSlot" || music.CategoryCode == "NonstopSlot" || (music.Category != null && music.Category.RequiredTierToDownload == "Premium");
+        bool isNhom = music.CategoryCode == "TrackNhom" || music.CategoryCode == "NonstopNhom" || (music.Category != null && music.Category.RequiredTierToDownload == "Standard");
+        bool isLot = !isSlot && !isNhom;
+
+        bool isUnlocked = isAdminOrProducer || (isSlot && isPremiumUser) || (isNhom && isStandardUser) || isLot;
+        bool isNonstop = music.Type == "Nonstop" || (music.CategoryCode != null && music.CategoryCode.ToLower().Contains("nonstop"));
+
+        bool isDemo = !isUnlocked;
+        int demoLimit = 30;
+        if (music.DemoLimitSeconds > 0) demoLimit = music.DemoLimitSeconds;
+
+        // Calculate time ago
+        var span = DateTime.UtcNow - music.CreatedAt;
+        string timeAgo = span.TotalDays >= 30 ? $"{(int)(span.TotalDays / 30)} tháng trước" :
+                         span.TotalDays >= 1 ? $"{(int)span.TotalDays} ngày trước" :
+                         span.TotalHours >= 1 ? $"{(int)span.TotalHours} giờ trước" :
+                         span.TotalMinutes >= 1 ? $"{(int)span.TotalMinutes} phút trước" : "Vừa xong";
+
+        // Related Tracks/Nonstops
+        var relatedEntities = await _context.Musics
+            .Include(m => m.Category)
+            .Where(m => m.MusicId != music.MusicId && m.Status == "Published" && (m.Genre == music.Genre || m.ProducerId == music.ProducerId || m.Type == music.Type))
+            .OrderByDescending(m => m.PlaysCount)
+            .Take(6)
+            .ToListAsync();
+
+        var relatedTracks = relatedEntities.Select(MapEntityToTrack).ToList();
+
+        // Sample initial comments
+        var comments = new List<SongCommentItem>
+        {
+            new() { UserName = "DJ Hoàng Bass", UserAvatar = "/images/logo.png", Content = "Bản mix đánh căng đét, bass drop cực uy lực! 🔥", TimeAgo = "2 giờ trước" },
+            new() { UserName = "Minh Tuấn Club", UserAvatar = "/images/logo.png", Content = "Tone key và BPM quá chuẩn để xếp set nhạc tối nay.", TimeAgo = "5 giờ trước" },
+            new() { UserName = "TLong Fan Club", UserAvatar = "/images/logo.png", Content = "Nhạc của Producer TLong chưa bao giờ làm anh em thất vọng!", TimeAgo = "1 ngày trước" }
+        };
+
+        var vm = new SongDetailViewModel
+        {
+            Music = trackModel,
+            CleanQuality = cleanQuality,
+            IsWav = isWav,
+            IsNonstop = isNonstop,
+            IsSlot = isSlot,
+            IsNhom = isNhom,
+            IsLot = isLot,
+            IsUnlocked = isUnlocked,
+            IsDemo = isDemo,
+            DemoLimit = demoLimit,
+            TimeAgo = timeAgo,
+            FavoritesCount = music.Favorites?.Count ?? 0,
+            IsFavorite = currentUserId.HasValue && (music.Favorites?.Any(f => f.UserId == currentUserId.Value) == true),
+            Producer = music.Producer,
+            RelatedMusics = relatedTracks,
+            Comments = comments,
+            CurrentUserTier = currentUserTier,
+            IsPremiumUser = isPremiumUser,
+            IsStandardUser = isStandardUser,
+            IsAdminOrProducer = isAdminOrProducer,
+            CurrentUserAvatar = currentUserAvatar,
+            CurrentUserName = currentUserName
+        };
+
+        return View("~/Views/Track/Detail.cshtml", vm);
     }
 }
 

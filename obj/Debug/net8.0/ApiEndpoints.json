@@ -43,6 +43,22 @@
   },
   {
     "ContainingType": "TLongMusic.Controllers.AdminController",
+    "Method": "DeleteMusicsBatch",
+    "RelativePath": "Admin/DeleteMusicsBatch",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "TLongMusic.Models.Dto.BulkDeleteMusicDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TLongMusic.Controllers.AdminController",
     "Method": "DeleteProducer",
     "RelativePath": "Admin/DeleteProducer/{id}",
     "HttpMethod": "POST",
@@ -415,7 +431,13 @@
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
-    "Parameters": [],
+    "Parameters": [
+      {
+        "Name": "type",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
     "ReturnTypes": []
   },
   {
@@ -432,6 +454,26 @@
     "ContainingType": "TLongMusic.Controllers.ProducerController",
     "Method": "Upload",
     "RelativePath": "Producer/Upload",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TLongMusic.Controllers.ProducerController",
+    "Method": "UploadNonstop",
+    "RelativePath": "Producer/UploadNonstop",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TLongMusic.Controllers.ProducerController",
+    "Method": "UploadTrack",
+    "RelativePath": "Producer/UploadTrack",
     "HttpMethod": "POST",
     "IsController": true,
     "Order": 0,

@@ -5,32 +5,26 @@
 <div class="container-fluid px-3 px-xl-5 py-4" style="max-width: 1720px;">
     <!-- HEADER HERO COMMAND CENTER -->
     <div class="admin-hero-banner p-4 p-md-5 mb-4">
-        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center gap-3 position-relative" style="z-index: 2;">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center gap-4 position-relative" style="z-index: 2;">
             <div>
                 <!-- System Status Bar -->
-                <div class="d-flex flex-wrap align-items-center gap-2 mb-2.5">
-                    <span class="badge bg-danger text-white px-3 py-1 rounded-pill fw-bold text-uppercase d-flex align-items-center gap-1.5" style="letter-spacing: 0.8px; font-size: 0.75rem;">
+                <div class="d-flex align-items-center mb-2.5">
+                    <span class="badge bg-danger text-white px-3 py-1.5 rounded-pill fw-bold text-uppercase d-flex align-items-center gap-2 shadow-sm" style="letter-spacing: 0.8px; font-size: 0.75rem;">
                         <i class="fas fa-shield-halved"></i> SUPER ADMIN CONTROL PANEL
                     </span>
-                    <span class="badge bg-dark border border-success border-opacity-50 text-success small font-monospace">
-                        <i class="fas fa-circle text-success me-1" style="font-size: 0.55rem;"></i> SQL Server Online (v16.0)
-                    </span>
-                    <span class="badge bg-dark border border-warning border-opacity-50 text-warning small font-monospace">
-                        <i class="fas fa-bolt me-1"></i> VietQR Gateway Active
-                    </span>
                 </div>
-                <h2 class="text-white fw-bold mb-1 display-6">TRUNG TÂM ĐIỀU HÀNH HỆ THỐNG</h2>
-                <p class="text-dim mb-0" style="max-width: 800px; font-size: 0.92rem; line-height: 1.5;">
-                    Trang điều khiển trung tâm dành riêng cho <strong>Quản Trị Viên (Admin)</strong>: Theo dõi biến động doanh thu VietQR toàn sàn, quản lý phân quyền Producer, kiểm duyệt kho bài hát & gia hạn linh hoạt gói hội viên VIP.
+                <h2 class="text-white fw-bold mb-2 display-6">TRUNG TÂM ĐIỀU HÀNH HỆ THỐNG</h2>
+                <p class="text-dim mb-0" style="max-width: 820px; font-size: 0.95rem; line-height: 1.6;">
+                    Trang điều khiển trung tâm dành riêng cho <strong>Quản Trị Viên (Admin)</strong>: Quản lý kho Track & Nonstop, kiểm duyệt phân quyền Producer, theo dõi biến động doanh thu VietQR và cấu hình thanh toán VIP.
                 </p>
             </div>
 
             <!-- Quick Action Toolbar -->
-            <div class="d-flex flex-wrap align-items-center gap-2">
-                <button class="btn btn-outline-light rounded-pill px-3 py-2 fw-bold d-flex align-items-center gap-2 shadow-sm" onclick="refreshAdminData()">
+            <div class="d-flex flex-wrap align-items-center gap-2.5">
+                <button class="btn btn-outline-light rounded-pill px-3.5 py-2 fw-bold d-flex align-items-center gap-2 shadow-sm" onclick="refreshAdminData()">
                     <i class="fas fa-rotate"></i> <span>Làm Mới</span>
                 </button>
-                <button class="btn btn-outline-warning rounded-pill px-3 py-2 fw-bold d-flex align-items-center gap-2 shadow-sm" onclick="document.getElementById('adm-settings-tab').click()">
+                <button class="btn btn-outline-warning rounded-pill px-3.5 py-2 fw-bold d-flex align-items-center gap-2 shadow-sm" onclick="document.getElementById('adm-settings-tab').click()">
                     <i class="fas fa-building-columns"></i> <span>STK Nhận Tiền VIP</span>
                 </button>
                 <a href="/" class="btn btn-glass-crystal rounded-pill px-3.5 py-2 text-white d-flex align-items-center gap-2">
@@ -53,21 +47,21 @@
                 </button>
             </li>
             <li class="nav-item">
-                <button class="nav-link" id="adm-producers-tab" data-bs-toggle="pill" data-bs-target="#adm-producers-pane" type="button" role="tab" onclick="loadAdminProducers()">
+                <button class="nav-link" id="adm-producers-tab" data-bs-toggle="pill" data-bs-target="#adm-producers-pane" type="button" role="tab">
                     <i class="fas fa-headphones text-warning"></i>
                     <span>2. Quản Lý Producers</span>
                     <span class="badge bg-dark border border-secondary text-warning font-monospace" id="badgeAdmProducerCount">...</span>
                 </button>
             </li>
             <li class="nav-item">
-                <button class="nav-link" id="adm-musics-tab" data-bs-toggle="pill" data-bs-target="#adm-musics-pane" type="button" role="tab" onclick="loadAdminMusics()">
-                    <i class="fas fa-sliders text-danger"></i>
-                    <span>3. Kiểm Duyệt Kho Nhạc</span>
+                <button class="nav-link" id="adm-musics-tab" data-bs-toggle="pill" data-bs-target="#adm-musics-pane" type="button" role="tab">
+                    <i class="fas fa-music text-danger"></i>
+                    <span>3. Quản Lý Nhạc</span>
                     <span class="badge bg-dark border border-secondary text-danger font-monospace" id="badgeAdmMusicCount">...</span>
                 </button>
             </li>
             <li class="nav-item">
-                <button class="nav-link" id="adm-users-tab" data-bs-toggle="pill" data-bs-target="#adm-users-pane" type="button" role="tab" onclick="loadAdminUsers()">
+                <button class="nav-link" id="adm-users-tab" data-bs-toggle="pill" data-bs-target="#adm-users-pane" type="button" role="tab">
                     <i class="fas fa-users-gear text-info"></i>
                     <span>4. Thành Viên & Gói VIP</span>
                     <span class="badge bg-dark border border-secondary text-info font-monospace" id="badgeAdmUserCount">...</span>
@@ -94,7 +88,7 @@
                 <div class="row g-3 mb-4" id="adminStatsGrid">
                     <div class="col-12 text-center py-5 text-dim">
                         <i class="fas fa-spinner fa-spin fa-2x mb-2 text-danger"></i>
-                        <br />Đang tổng hợp dữ liệu thống kê từ SQL Server...
+                        <br />Đang tổng hợp dữ liệu thống kê từ Kho dữ liệu...
                     </div>
                 </div>
 
@@ -121,7 +115,7 @@
                                 <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50">100% HOẠT ĐỘNG</span>
                             </div>
                             <div class="p-2.5 rounded-3 bg-dark border border-secondary border-opacity-25 mb-2 d-flex justify-content-between align-items-center small font-monospace">
-                                <span class="text-dim"><i class="fas fa-database text-info me-2"></i>Cơ sở dữ liệu SQL Server:</span>
+                                <span class="text-dim"><i class="fas fa-database text-info me-2"></i>Kho dữ liệu:</span>
                                 <span class="text-success fw-bold">ONLINE (v16.0)</span>
                             </div>
                             <div class="p-2.5 rounded-3 bg-dark border border-secondary border-opacity-25 mb-2 d-flex justify-content-between align-items-center small font-monospace">
@@ -160,7 +154,7 @@
                             <option value="active">🟢 Đang hoạt động</option>
                             <option value="locked">🔴 Đã khóa</option>
                         </select>
-                        <button class="btn btn-outline-light btn-sm rounded-pill px-3" onclick="loadAdminProducers()" title="Tải lại danh sách">
+                        <button class="btn btn-outline-light btn-sm rounded-pill px-3" onclick="loadAdminProducers(true)" title="Tải lại danh sách">
                             <i class="fas fa-rotate"></i>
                         </button>
                         <button class="btn btn-shimmer-ruby btn-sm px-3.5 py-1.5 fw-bold rounded-pill" onclick="openAdminCreateProducerModal()">
@@ -174,41 +168,145 @@
                 </div>
             </div>
 
-            <!-- TAB 3: KIỂM DUYỆT TOÀN BỘ KHO NHẠC -->
+            <!-- TAB 3: QUẢN LÝ NHẠC (GỒM 2 TAB CON: TRACK & NONSTOP) -->
             <div class="tab-pane fade" id="adm-musics-pane" role="tabpanel">
-                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4 pb-3 border-bottom border-secondary border-opacity-25">
                     <div>
-                        <h5 class="text-white fw-bold mb-1"><i class="fas fa-sliders text-danger me-2"></i>Kiểm Duyệt Kho Âm Nhạc Toàn Sàn</h5>
-                        <p class="text-dim small mb-0">Quản trị toàn bộ bài hát từ tất cả Producers: Lọc theo phân cấp (Slot/Nhóm/Lọt), ẩn hoặc xóa vĩnh viễn.</p>
+                        <h4 class="text-white fw-bold mb-1 d-flex align-items-center gap-2">
+                            <i class="fas fa-sliders text-danger"></i>
+                            <span>Trung Tâm Quản Lý Âm Nhạc Toàn Hệ Thống</span>
+                        </h4>
+                        <p class="text-dim small mb-0">
+                            Kiểm duyệt, nghe thử, bật/tắt hiển thị hoặc xóa vĩnh viễn các bản nhạc đơn lẻ (Track) và các bản mix (Nonstop) từ tất cả Producers.
+                        </p>
                     </div>
-                    <div class="d-flex flex-wrap align-items-center gap-2">
-                        <!-- Search Music -->
-                        <div class="input-group input-group-sm rounded-pill border border-secondary border-opacity-50 overflow-hidden" style="max-width: 260px; background: rgba(0,0,0,0.4);">
-                            <span class="input-group-text bg-transparent border-0 text-dim"><i class="fas fa-search"></i></span>
-                            <input type="text" id="adminMusicSearchInput" class="form-control bg-transparent border-0 text-white" placeholder="Tìm tên bài hát, nghệ sĩ..." oninput="filterAdminMusicsTable()" />
-                        </div>
-                        <!-- Category Filter -->
-                        <select id="adminMusicCategoryFilter" class="form-select form-select-sm rounded-pill bg-dark text-white border-secondary" style="max-width: 170px;" onchange="filterAdminMusicsTable()">
-                            <option value="all">Tất cả phân cấp</option>
-                            <option value="Slot">👑 Track Slot</option>
-                            <option value="Nhom">💎 Track Nhóm</option>
-                            <option value="Lot">🎵 Track Lọt</option>
-                            <option value="Nonstop">🔥 Nonstop Mix</option>
-                        </select>
-                        <!-- Status Filter -->
-                        <select id="adminMusicStatusFilter" class="form-select form-select-sm rounded-pill bg-dark text-white border-secondary" style="max-width: 160px;" onchange="filterAdminMusicsTable()">
-                            <option value="all">Tất cả trạng thái</option>
-                            <option value="Published">🟢 Đang hiển thị</option>
-                            <option value="Hidden">🔴 Đang ẩn</option>
-                        </select>
-                        <button class="btn btn-outline-light btn-sm rounded-pill px-3" onclick="loadAdminMusics()" title="Tải lại kho nhạc">
-                            <i class="fas fa-rotate"></i>
-                        </button>
-                    </div>
+
+                    <!-- 2 TAB CON: TRACK (LỌT/NHÓM/SLOT) VÀ NONSTOP (LỌT/NHÓM/SLOT) -->
+                    <ul class="nav nav-pills p-1.5 rounded-pill border border-secondary border-opacity-40 shadow-lg flex-shrink-0" style="background: rgba(0, 0, 0, 0.55);" id="adminMusicSubTabs" role="tablist">
+                        <li class="nav-item">
+                            <button class="nav-link active music-subtab-btn rounded-pill fw-bold px-4 py-2 d-flex align-items-center gap-2" id="subtab-track-btn" data-bs-toggle="pill" data-bs-target="#subtab-track-pane" type="button" role="tab">
+                                <i class="fas fa-compact-disc"></i>
+                                <span>Track (Lọt/Nhóm/Slot)</span>
+                                <span class="badge rounded-pill font-monospace" id="badgeAdmTrackCount">0</span>
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link music-subtab-btn rounded-pill fw-bold px-4 py-2 d-flex align-items-center gap-2" id="subtab-nonstop-btn" data-bs-toggle="pill" data-bs-target="#subtab-nonstop-pane" type="button" role="tab">
+                                <i class="fas fa-fire-flame-curved"></i>
+                                <span>Nonstop (Lọt/Nhóm/Slot)</span>
+                                <span class="badge rounded-pill font-monospace" id="badgeAdmNonstopCount">0</span>
+                            </button>
+                        </li>
+                    </ul>
                 </div>
 
-                <div class="table-responsive rounded-4 border border-secondary border-opacity-25" id="adminMusicsTableContainer">
-                    <div class="p-5 text-center text-dim">Đang tải toàn bộ kho bài hát...</div>
+                <!-- NỘI DUNG 2 TAB CON -->
+                <div class="tab-content" id="adminMusicSubTabContent">
+                    <!-- TAB CON 1: TRACK (LỌT / NHÓM / SLOT) -->
+                    <div class="tab-pane fade show active" id="subtab-track-pane" role="tabpanel">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+                            <div>
+                                <h6 class="text-white fw-bold mb-0 text-uppercase d-flex align-items-center gap-2">
+                                    <i class="fas fa-compact-disc text-danger"></i>
+                                    <span>Danh Sách Track (Nhạc Lẻ)</span>
+                                </h6>
+                                <small class="text-dim">Toàn bộ bản thu đơn lẻ được phân loại rõ ràng theo từng phân cấp truy cập.</small>
+                            </div>
+                            <div class="d-flex flex-wrap align-items-center gap-2">
+                                <!-- Bulk Delete Track Button -->
+                                <button id="btnBulkDeleteTracks" class="btn btn-outline-danger btn-sm rounded-pill px-3 fw-bold d-none shadow" onclick="confirmBulkDelete('Track')">
+                                    <i class="fas fa-trash-can me-1"></i> Xóa Track Đã Chọn (<span id="countSelectedTracks">0</span>)
+                                </button>
+                                <!-- Search Track -->
+                                <div class="input-group input-group-sm rounded-pill border border-secondary border-opacity-50 overflow-hidden" style="max-width: 250px; background: rgba(0,0,0,0.4);">
+                                    <span class="input-group-text bg-transparent border-0 text-dim"><i class="fas fa-search"></i></span>
+                                    <input type="text" id="adminTrackSearchInput" class="form-control bg-transparent border-0 text-white" placeholder="Tìm tên track, nghệ sĩ..." oninput="filterAdminTracksTable()" />
+                                </div>
+                                <!-- Status Filter -->
+                                <select id="adminTrackStatusFilter" class="form-select form-select-sm rounded-pill bg-dark text-white border-secondary" style="max-width: 155px;" onchange="filterAdminTracksTable()">
+                                    <option value="all">Tất cả trạng thái</option>
+                                    <option value="Published">🟢 Đang hiển thị</option>
+                                    <option value="Hidden">🔴 Đang ẩn</option>
+                                </select>
+                                <button class="btn btn-outline-light btn-sm rounded-pill px-3" onclick="loadAdminMusics(true)" title="Tải lại danh sách Track">
+                                    <i class="fas fa-rotate"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- SUB-CATEGORY FILTER PILLS: TRACK (LỌT / NHÓM / SLOT) -->
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            <button type="button" class="btn btn-sm subfilter-btn active" id="btnFilterTrackAll" onclick="setTrackSubFilter('all')">
+                                <i class="fas fa-list me-1"></i> Tất Cả Track <span class="badge bg-secondary ms-1 font-monospace" id="badgeTrackCountAll">0</span>
+                            </button>
+                            <button type="button" class="btn btn-sm subfilter-btn text-warning" id="btnFilterTrackSlot" onclick="setTrackSubFilter('Slot')">
+                                <i class="fas fa-crown me-1"></i> 👑 Track Slot (VIP) <span class="badge bg-warning text-dark ms-1 font-monospace" id="badgeTrackCountSlot">0</span>
+                            </button>
+                            <button type="button" class="btn btn-sm subfilter-btn text-danger" id="btnFilterTrackNhom" onclick="setTrackSubFilter('Nhom')">
+                                <i class="fas fa-certificate me-1"></i> 💎 Track Nhóm <span class="badge bg-danger ms-1 font-monospace" id="badgeTrackCountNhom">0</span>
+                            </button>
+                            <button type="button" class="btn btn-sm subfilter-btn text-info" id="btnFilterTrackLot" onclick="setTrackSubFilter('Lot')">
+                                <i class="fas fa-compact-disc me-1"></i> 🎵 Track Lọt (Free) <span class="badge bg-info bg-opacity-25 text-info ms-1 font-monospace" id="badgeTrackCountLot">0</span>
+                            </button>
+                        </div>
+
+                        <div class="table-responsive rounded-4 border border-secondary border-opacity-25" id="adminTracksTableContainer">
+                            <div class="p-5 text-center text-dim">Đang tải toàn bộ kho Track...</div>
+                        </div>
+                    </div>
+
+                    <!-- TAB CON 2: NONSTOP (LỌT / NHÓM / SLOT) -->
+                    <div class="tab-pane fade" id="subtab-nonstop-pane" role="tabpanel">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+                            <div>
+                                <h6 class="text-white fw-bold mb-0 text-uppercase d-flex align-items-center gap-2">
+                                    <i class="fas fa-fire-flame-curved text-warning"></i>
+                                    <span>Danh Sách Nonstop (Bản Mix Dài)</span>
+                                </h6>
+                                <small class="text-dim">Toàn bộ các set nhạc Nonstop Mix thời lượng dài từ các DJ & Producer Studio.</small>
+                            </div>
+                            <div class="d-flex flex-wrap align-items-center gap-2">
+                                <!-- Bulk Delete Nonstop Button -->
+                                <button id="btnBulkDeleteNonstops" class="btn btn-outline-danger btn-sm rounded-pill px-3 fw-bold d-none shadow" onclick="confirmBulkDelete('Nonstop')">
+                                    <i class="fas fa-trash-can me-1"></i> Xóa Nonstop Đã Chọn (<span id="countSelectedNonstops">0</span>)
+                                </button>
+                                <!-- Search Nonstop -->
+                                <div class="input-group input-group-sm rounded-pill border border-secondary border-opacity-50 overflow-hidden" style="max-width: 250px; background: rgba(0,0,0,0.4);">
+                                    <span class="input-group-text bg-transparent border-0 text-dim"><i class="fas fa-search"></i></span>
+                                    <input type="text" id="adminNonstopSearchInput" class="form-control bg-transparent border-0 text-white" placeholder="Tìm tên nonstop, DJ..." oninput="filterAdminNonstopsTable()" />
+                                </div>
+                                <!-- Status Filter -->
+                                <select id="adminNonstopStatusFilter" class="form-select form-select-sm rounded-pill bg-dark text-white border-secondary" style="max-width: 155px;" onchange="filterAdminNonstopsTable()">
+                                    <option value="all">Tất cả trạng thái</option>
+                                    <option value="Published">🟢 Đang hiển thị</option>
+                                    <option value="Hidden">🔴 Đang ẩn</option>
+                                </select>
+                                <button class="btn btn-outline-light btn-sm rounded-pill px-3" onclick="loadAdminMusics(true)" title="Tải lại danh sách Nonstop">
+                                    <i class="fas fa-rotate"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- SUB-CATEGORY FILTER PILLS: NONSTOP (LỌT / NHÓM / SLOT) -->
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            <button type="button" class="btn btn-sm subfilter-btn active" id="btnFilterNonstopAll" onclick="setNonstopSubFilter('all')">
+                                <i class="fas fa-list me-1"></i> Tất Cả Nonstop <span class="badge bg-secondary ms-1 font-monospace" id="badgeNonstopCountAll">0</span>
+                            </button>
+                            <button type="button" class="btn btn-sm subfilter-btn text-warning" id="btnFilterNonstopSlot" onclick="setNonstopSubFilter('Slot')">
+                                <i class="fas fa-crown me-1"></i> 👑 Nonstop Slot (VIP) <span class="badge bg-warning text-dark ms-1 font-monospace" id="badgeNonstopCountSlot">0</span>
+                            </button>
+                            <button type="button" class="btn btn-sm subfilter-btn text-danger" id="btnFilterNonstopNhom" onclick="setNonstopSubFilter('Nhom')">
+                                <i class="fas fa-certificate me-1"></i> 💎 Nonstop Nhóm <span class="badge bg-danger ms-1 font-monospace" id="badgeNonstopCountNhom">0</span>
+                            </button>
+                            <button type="button" class="btn btn-sm subfilter-btn text-info" id="btnFilterNonstopLot" onclick="setNonstopSubFilter('Lot')">
+                                <i class="fas fa-bolt me-1"></i> 🔥 Nonstop Lọt (Free) <span class="badge bg-info bg-opacity-25 text-info ms-1 font-monospace" id="badgeNonstopCountLot">0</span>
+                            </button>
+                        </div>
+
+                        <div class="table-responsive rounded-4 border border-secondary border-opacity-25" id="adminNonstopsTableContainer">
+                            <div class="p-5 text-center text-dim">Đang tải toàn bộ kho Nonstop...</div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -238,7 +336,7 @@
                             <option value="expired">Đã hết hạn VIP</option>
                             <option value="locked">Bị khóa</option>
                         </select>
-                        <button class="btn btn-outline-light btn-sm rounded-pill px-3" onclick="loadAdminUsers()">
+                        <button class="btn btn-outline-light btn-sm rounded-pill px-3" onclick="loadAdminUsers(true)">
                             <i class="fas fa-rotate me-1"></i> Tải Lại
                         </button>
                     </div>
@@ -780,13 +878,169 @@
     </div>
 </div>
 
+<!-- MODAL XÁC NHẬN XÓA TỪNG BÀI (TRACK / NONSTOP) -->
+<div class="modal fade" id="adminMusicDeleteModal" tabindex="-1" aria-hidden="true" style="z-index: 1080;">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="background: rgba(18, 19, 32, 0.98); backdrop-filter: blur(30px); border: 1px solid rgba(255, 19, 74, 0.8); border-radius: 24px; box-shadow: 0 0 60px rgba(255, 19, 74, 0.5);">
+            <div class="modal-header border-bottom border-secondary border-opacity-25 pb-3">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-danger p-2 fs-6 rounded-circle"><i class="fas fa-triangle-exclamation"></i></span>
+                    <div>
+                        <h5 class="modal-title text-white fw-bold mb-0">XÁC NHẬN XÓA BẢN THU (ADMIN)</h5>
+                        <small class="text-dim">Cảnh báo: Hành động này sẽ xóa vĩnh viễn và không thể khôi phục</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <div class="p-3 rounded-4 mb-3 border border-danger border-opacity-50 text-start" style="background: rgba(255, 19, 74, 0.08);">
+                    <div class="d-flex align-items-center gap-3">
+                        <img id="delModalCover" src="/images/logo.png" class="rounded-3 border border-secondary" style="width: 58px; height: 58px; object-fit: cover;" onerror="this.src='/images/logo.png';" />
+                        <div class="overflow-hidden">
+                            <span id="delModalTypeBadge" class="badge bg-danger mb-1 font-monospace">Track</span>
+                            <span id="delModalTierBadge" class="badge bg-dark border border-warning text-warning mb-1 font-monospace">Track Slot</span>
+                            <h6 id="delModalTitle" class="text-white fw-bold mb-0 text-truncate">Tiêu đề bài hát</h6>
+                            <small id="delModalArtist" class="text-dim text-truncate d-block">Nghệ sĩ • Producer</small>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-white small mb-2">
+                    Bạn có chắc chắn muốn xóa vĩnh viễn <strong id="delModalTargetName" class="text-danger">bản thu này</strong> khỏi toàn bộ hệ thống sàn nhạc TLongMusic?
+                </p>
+                <div class="text-dim small font-monospace p-2.5 rounded-3 bg-dark border border-secondary border-opacity-25 text-start" style="font-size: 0.74rem; line-height: 1.6;">
+                    <span class="text-danger fw-bold"><i class="fas fa-trash-can me-1"></i>Dữ liệu bị xóa sạch:</span>
+                    <br />• Toàn bộ bản ghi trong Kho dữ liệu (lịch sử nghe, tải, playlist, yêu thích, báo cáo)
+                    <br />• Tệp tin MP3, WAV Master, Lossless FLAC và ảnh bìa trên ổ cứng server.
+                </div>
+            </div>
+            <div class="modal-footer border-top border-secondary border-opacity-25 pt-3 d-flex justify-content-between">
+                <button type="button" class="btn btn-outline-secondary px-4 rounded-pill" data-bs-dismiss="modal">Hủy Bỏ</button>
+                <button type="button" id="btnConfirmExecuteDelete" class="btn btn-danger px-4 py-2 rounded-pill fw-bold d-flex align-items-center gap-2 shadow">
+                    <i class="fas fa-trash"></i>
+                    <span>Xác Nhận Xóa Vĩnh Viễn</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL XÁC NHẬN XÓA HÀNG LOẠT (BULK DELETE) -->
+<div class="modal fade" id="adminBulkDeleteModal" tabindex="-1" aria-hidden="true" style="z-index: 1080;">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="background: rgba(18, 19, 32, 0.98); backdrop-filter: blur(30px); border: 1px solid rgba(255, 19, 74, 0.8); border-radius: 24px; box-shadow: 0 0 60px rgba(255, 19, 74, 0.5);">
+            <div class="modal-header border-bottom border-secondary border-opacity-25 pb-3">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-danger p-2 fs-6 rounded-circle"><i class="fas fa-trash-can"></i></span>
+                    <div>
+                        <h5 class="modal-title text-white fw-bold mb-0">XÓA HÀNG LOẠT BẢN THU ĐÃ CHỌN</h5>
+                        <small class="text-dim">Cảnh báo: Hành động không thể hoàn tác</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <div class="text-danger display-4 mb-2"><i class="fas fa-triangle-exclamation"></i></div>
+                <h5 class="text-white fw-bold mb-2">Bạn đang chuẩn bị xóa <span id="bulkDelCount" class="text-danger fw-bold font-monospace">0</span> <span id="bulkDelTypeName">Track</span></h5>
+                <p class="text-dim small mb-3">Tất cả các bản thu đã được tick chọn sẽ bị xóa vĩnh viễn khỏi Kho dữ liệu và tệp tin trên server.</p>
+                <div class="p-2.5 rounded-3 bg-dark border border-secondary border-opacity-25 text-start font-monospace text-dim small" style="font-size: 0.74rem;">
+                    🔴 Quản trị viên chịu trách nhiệm kiểm tra kỹ danh sách trước khi thực hiện thao tác xóa diện rộng này.
+                </div>
+            </div>
+            <div class="modal-footer border-top border-secondary border-opacity-25 pt-3 d-flex justify-content-between">
+                <button type="button" class="btn btn-outline-secondary px-4 rounded-pill" data-bs-dismiss="modal">Hủy Bỏ</button>
+                <button type="button" id="btnConfirmExecuteBulkDelete" class="btn btn-danger px-4 py-2 rounded-pill fw-bold shadow">
+                    <i class="fas fa-trash-can me-1"></i> Đồng Ý Xóa Tất Cả
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <style>
     /* Đảm bảo modal quản trị luôn nổi lên trên backdrop */
-    #adminExtendModal, #adminCreateProducerModal {
-        z-index: 1060 !important;
+    #adminExtendModal, #adminCreateProducerModal, #adminMusicDeleteModal, #adminBulkDeleteModal {
+        z-index: 1080 !important;
     }
     .modal-backdrop {
-        z-index: 1050 !important;
+        z-index: 1070 !important;
+    }
+    .subfilter-btn {
+        border-radius: 50rem;
+        padding: 0.35rem 0.85rem;
+        font-weight: 600;
+        font-size: 0.82rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: #a0a5b8;
+        transition: all 0.2s ease;
+    }
+    .subfilter-btn:hover {
+        background: rgba(255, 255, 255, 0.12);
+        color: #fff;
+    }
+    .subfilter-btn.active {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.4);
+        color: #fff !important;
+        box-shadow: 0 0 12px rgba(255, 255, 255, 0.15);
+    }
+    .subfilter-btn.text-warning.active {
+        background: rgba(255, 209, 102, 0.18);
+        border-color: rgba(255, 209, 102, 0.6);
+        color: #ffd166 !important;
+        box-shadow: 0 0 15px rgba(255, 209, 102, 0.25);
+    }
+    .subfilter-btn.text-danger.active {
+        background: rgba(255, 19, 74, 0.18);
+        border-color: rgba(255, 19, 74, 0.6);
+        color: #ff134a !important;
+        box-shadow: 0 0 15px rgba(255, 19, 74, 0.25);
+    }
+    .subfilter-btn.text-info.active {
+        background: rgba(0, 180, 216, 0.18);
+        border-color: rgba(0, 180, 216, 0.6);
+        color: #00b4d8 !important;
+        box-shadow: 0 0 15px rgba(0, 180, 216, 0.25);
+    }
+
+    /* Sub-tabs chuyển đổi giữa Track và Nonstop trong tab Quản Lý Nhạc */
+    .music-subtab-btn {
+        color: #a0a5b8 !important;
+        transition: all 0.25s ease;
+        border: 1px solid transparent;
+        background: transparent;
+    }
+    .music-subtab-btn:hover {
+        color: #fff !important;
+        background: rgba(255, 255, 255, 0.08);
+    }
+    .music-subtab-btn#subtab-track-btn.active {
+        background: linear-gradient(135deg, #ff134a, #d90429) !important;
+        color: #ffffff !important;
+        box-shadow: 0 0 20px rgba(255, 19, 74, 0.5) !important;
+        border-color: rgba(255, 19, 74, 0.8) !important;
+    }
+    .music-subtab-btn#subtab-track-btn.active .badge {
+        background: #ffffff !important;
+        color: #ff134a !important;
+    }
+    .music-subtab-btn#subtab-track-btn:not(.active) .badge {
+        background: rgba(255, 19, 74, 0.2) !important;
+        color: #ff134a !important;
+    }
+    .music-subtab-btn#subtab-nonstop-btn.active {
+        background: linear-gradient(135deg, #ffd166, #ff9f1c) !important;
+        color: #121320 !important;
+        box-shadow: 0 0 20px rgba(255, 209, 102, 0.5) !important;
+        border-color: rgba(255, 209, 102, 0.8) !important;
+    }
+    .music-subtab-btn#subtab-nonstop-btn.active .badge {
+        background: #121320 !important;
+        color: #ffd166 !important;
+    }
+    .music-subtab-btn#subtab-nonstop-btn:not(.active) .badge {
+        background: rgba(255, 209, 102, 0.2) !important;
+        color: #ffd166 !important;
     }
 </style>
 
@@ -794,7 +1048,7 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Tự động di chuyển các modal ra ngoài <body> để thoát khỏi stacking context của <main>
-        ['adminExtendModal', 'adminCreateProducerModal'].forEach(function(id) {
+        ['adminExtendModal', 'adminCreateProducerModal', 'adminMusicDeleteModal', 'adminBulkDeleteModal'].forEach(function(id) {
             const el = document.getElementById(id);
             if (el && el.parentElement !== document.body) {
                 document.body.appendChild(el);
@@ -849,9 +1103,9 @@
     function refreshAdminData() {
         showToastNotification("🔄 Đang làm mới toàn bộ dữ liệu quản trị...");
         loadAdminStats();
-        loadAdminProducers();
-        loadAdminMusics();
-        loadAdminUsers();
+        loadAdminProducers(true);
+        loadAdminMusics(true);
+        loadAdminUsers(true);
     }
 
     /* ========================================================

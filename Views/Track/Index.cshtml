@@ -62,16 +62,16 @@
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3 pb-3 border-bottom border-secondary border-opacity-25">
             <div class="d-flex flex-wrap align-items-center gap-2">
                 <span class="text-dim small fw-bold me-1"><i class="fas fa-layer-group text-info me-1"></i>Xem Nhanh:</span>
-                <a href="/Track" class="btn btn-sm btn-dark text-white rounded-pill px-3 py-1.5 fw-bold pill-all @(string.IsNullOrEmpty(Model.SelectedTier) || Model.SelectedTier == "all" ? "active" : "border-secondary")">
+                <a href="/Track" onclick="return applyTrackTierFilter('all', event);" class="btn btn-sm btn-dark text-white rounded-pill px-3 py-1.5 fw-bold pill-all @(string.IsNullOrEmpty(Model.SelectedTier) || Model.SelectedTier == "all" ? "active" : "border-secondary")">
                     <i class="fas fa-layer-group me-1 text-info"></i> Tất Cả
                 </a>
-                <a href="/Track?tier=nhom" id="pillBtnTrackNhom" class="btn btn-sm btn-dark rounded-pill px-3 py-1.5 fw-bold pill-nhom @(Model.SelectedTier == "nhom" ? "active" : "")">
+                <a href="/Track?tier=nhom" onclick="return applyTrackTierFilter('nhom', event);" id="pillBtnTrackNhom" class="btn btn-sm btn-dark rounded-pill px-3 py-1.5 fw-bold pill-nhom @(Model.SelectedTier == "nhom" ? "active" : "")">
                     <i class="fas fa-certificate text-danger me-1"></i> 💎 <span id="pillTextTrackNhom">@(Model.IsVipUser ? "Track Nhóm" : "Demo track Nhóm")</span>
                 </a>
-                <a href="/Track?tier=slot" id="pillBtnTrackSlot" class="btn btn-sm btn-dark rounded-pill px-3 py-1.5 fw-bold pill-slot @(Model.SelectedTier == "slot" ? "active" : "")">
+                <a href="/Track?tier=slot" onclick="return applyTrackTierFilter('slot', event);" id="pillBtnTrackSlot" class="btn btn-sm btn-dark rounded-pill px-3 py-1.5 fw-bold pill-slot @(Model.SelectedTier == "slot" ? "active" : "")">
                     <i class="fas fa-crown text-warning me-1"></i> <span id="pillTextTrackSlot">@(Model.IsPremiumUser ? "Track Slot" : "Demo track Slot")</span>
                 </a>
-                <a href="/Track?tier=lot" class="btn btn-sm btn-dark rounded-pill px-3 py-1.5 fw-bold pill-lot @(Model.SelectedTier == "lot" ? "active" : "")">
+                <a href="/Track?tier=lot" onclick="return applyTrackTierFilter('lot', event);" class="btn btn-sm btn-dark rounded-pill px-3 py-1.5 fw-bold pill-lot @(Model.SelectedTier == "lot" ? "active" : "")">
                     <i class="fas fa-music text-info me-1"></i> 🎵 Track Lọt (Free)
                 </a>
             </div>
@@ -194,12 +194,12 @@
                             <tr>
                                 <th style="width: 45px;"></th>
                                 <th>Tên Track / Tiêu Đề</th>
-                                <th>Thể Loại</th>
+                                <th class="d-none d-md-table-cell">Thể Loại</th>
                                 <th>BPM</th>
-                                <th>Camelot Key</th>
-                                <th>Thời Lượng</th>
+                                <th class="d-none d-sm-table-cell">Camelot Key</th>
+                                <th class="d-none d-lg-table-cell">Thời Lượng</th>
                                 <th>Chất Lượng</th>
-                                <th>Quyền Tải</th>
+                                <th class="d-none d-md-table-cell">Quyền Tải</th>
                                 <th class="text-end" style="width: 120px;">Hành Động</th>
                             </tr>
                         </thead>
@@ -254,7 +254,9 @@
                                             <img src="@track.CoverUrl" alt="@track.Title" class="@coverImgClass" style="@coverImgStyle" />
                                             <div>
                                                 <div class="track-title-wrapper d-inline-flex align-items-center flex-wrap">
-                                                    <span class="text-white font-weight-bold" style="font-size: 0.92rem;">@track.Title</span>
+                                                    <a href="/Track/Detail/@track.Id" class="text-white font-weight-bold track-title-link" style="font-size: 0.92rem; text-decoration: none;" title="Bấm để xem trang chi tiết tác phẩm">
+                                                        @track.Title
+                                                    </a>
                                                     @if (isTrackSlot)
                                                     {
                                                         <span class="badge badge-premium-gold ms-2 fw-bold" style="font-size: 0.65rem; border: 1px solid #ffd166;" title="Track Slot (Viền Vàng)"><i class="fas fa-crown me-1"></i>SLOT</span>
@@ -272,16 +274,16 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td>
+                                    <td class="d-none d-md-table-cell">
                                         <span class="badge" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: var(--text-silver); font-size: 0.72rem;">@track.Genre</span>
                                     </td>
                                     <td>
                                         <span class="badge-shimmer-ruby">@track.Bpm</span>
                                     </td>
-                                    <td>
+                                    <td class="d-none d-sm-table-cell">
                                         <span class="badge-shimmer-cyan">@track.MusicalKey</span>
                                     </td>
-                                    <td class="text-dim small font-monospace">
+                                    <td class="d-none d-lg-table-cell text-dim small font-monospace">
                                         @track.FormattedDuration
                                     </td>
                                     <td>
@@ -294,7 +296,7 @@
                                             <span class="badge badge-standard-red font-monospace fw-bold" style="font-size: 0.72rem; padding: 2px 8px; letter-spacing: 0.5px;">MP3</span>
                                         }
                                     </td>
-                                    <td>
+                                    <td class="d-none d-md-table-cell">
                                         @if (track.TierRequiredToDownload == TLongMusic.Models.RequiredTier.Premium)
                                         {
                                             <span class="badge badge-premium-gold"><i class="fas fa-crown me-1"></i> Premium</span>

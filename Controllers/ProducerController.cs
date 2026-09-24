@@ -21,11 +21,34 @@ namespace TLongMusic.Controllers
             _env = env;
         }
 
-        // FR-PRO-01: UPLOAD MUSIC (Supports File Upload)
+        // FR-PRO-01A: DEDICATED UPLOAD TRACK (Strictly Type = "Track", BPM & Musical Key required)
+        [HttpPost("UploadTrack")]
+        [DisableRequestSizeLimit]
+        [RequestFormLimits(MultipartBodyLengthLimit = 524288000, ValueLengthLimit = int.MaxValue)]
+        public async Task<IActionResult> UploadTrack()
+        {
+            return await ProcessUploadInternal(isNonstopUpload: false);
+        }
+
+        // FR-PRO-01B: DEDICATED UPLOAD NONSTOP (Strictly Type = "Nonstop", No BPM / No Key)
+        [HttpPost("UploadNonstop")]
+        [DisableRequestSizeLimit]
+        [RequestFormLimits(MultipartBodyLengthLimit = 524288000, ValueLengthLimit = int.MaxValue)]
+        public async Task<IActionResult> UploadNonstop()
+        {
+            return await ProcessUploadInternal(isNonstopUpload: true);
+        }
+
+        // FR-PRO-01: UPLOAD MUSIC (Legacy Fallback with strict routing)
         [HttpPost("Upload")]
         [DisableRequestSizeLimit]
         [RequestFormLimits(MultipartBodyLengthLimit = 524288000, ValueLengthLimit = int.MaxValue)]
         public async Task<IActionResult> Upload()
+        {
+            return await ProcessUploadInternal(isNonstopUpload: null);
+        }
+
+        private async Task<IActionResult> ProcessUploadInternal(bool? isNonstopUpload)
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
@@ -95,15 +118,50 @@ namespace TLongMusic.Controllers
 
             if (string.IsNullOrWhiteSpace(formModel.Title))
             {
-                return BadRequest(new { success = false, message = "Vui lòng nhập tiêu đề bài hát!" });
+                return BadRequest(new { success = false, message = "Vui lòng nhập tiêu đề bản thu!" });
             }
 
-            // Validate Category
-            var categoryCode = string.IsNullOrWhiteSpace(formModel.CategoryCode) ? "TrackLot" : formModel.CategoryCode;
+            // XÁC ĐỊNH LOẠI SẢN PHẨM RÕ RÀNG (ISOLATION)
+            bool isNonstop;
+            if (isNonstopUpload.HasValue)
+            {
+                isNonstop = isNonstopUpload.Value;
+            }
+            else
+            {
+                isNonstop = string.Equals(formModel.Type, "Nonstop", StringComparison.OrdinalIgnoreCase)
+                    || (!string.IsNullOrEmpty(formModel.CategoryCode) && formModel.CategoryCode.StartsWith("Nonstop", StringComparison.OrdinalIgnoreCase));
+            }
+
+            // CHUẨN HÓA CATEGORY CODE THEO ĐÚNG LOẠI ĐÃ CHỌN
+            string categoryCode = formModel.CategoryCode?.Trim() ?? "";
+            if (isNonstop)
+            {
+                var validNonstopCats = new[] { "NonstopLot", "NonstopNhom", "NonstopSlot" };
+                if (!validNonstopCats.Contains(categoryCode))
+                {
+                    categoryCode = "NonstopNhom"; // Default safe Nonstop category
+                }
+            }
+            else
+            {
+                var validTrackCats = new[] { "TrackLot", "TrackNhom", "TrackSlot" };
+                if (!validTrackCats.Contains(categoryCode))
+                {
+                    categoryCode = "TrackNhom"; // Default safe Track category
+                }
+            }
+
             var category = await _context.TrackCategories.FindAsync(categoryCode);
             if (category == null)
             {
-                return BadRequest(new { success = false, message = "Phân loại nhạc không hợp lệ!" });
+                // Fallback nếu chưa có trong DB
+                category = await _context.TrackCategories.FirstOrDefaultAsync(c => c.CategoryCode == categoryCode);
+                if (category == null)
+                {
+                    categoryCode = isNonstop ? "NonstopNhom" : "TrackNhom";
+                    category = await _context.TrackCategories.FindAsync(categoryCode);
+                }
             }
 
             // Determine SourceType & URLs
@@ -138,14 +196,12 @@ namespace TLongMusic.Controllers
                 else quality = "MP3 320kbps";
 
                 sourceType = "DirectFile";
-                // no SoundCloud support
             }
             // 2. Fallback to SourceUrl text field
             else if (!string.IsNullOrWhiteSpace(formModel.SourceUrl))
             {
                 sourceUrl = formModel.SourceUrl.Trim();
                 sourceType = "DirectFile";
-                // no SoundCloud support
             }
             else
             {
@@ -153,7 +209,10 @@ namespace TLongMusic.Controllers
             }
 
             // Handle optional Cover Image upload
-            string coverUrl = "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=600&auto=format&fit=crop&q=80";
+            string coverUrl = isNonstop 
+                ? "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600&auto=format&fit=crop&q=80"
+                : "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=600&auto=format&fit=crop&q=80";
+
             if (formModel.CoverFile != null && formModel.CoverFile.Length > 0)
             {
                 var coverFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "covers");
@@ -173,8 +232,6 @@ namespace TLongMusic.Controllers
                 coverUrl = formModel.CoverUrl.Trim();
             }
 
-            var isNonstop = formModel.Type == "Nonstop" || categoryCode.StartsWith("Nonstop");
-
             var newMusic = new Music
             {
                 MusicId = Guid.NewGuid(),
@@ -184,13 +241,13 @@ namespace TLongMusic.Controllers
                 Genre = string.IsNullOrWhiteSpace(formModel.Genre) ? "Vinahouse" : formModel.Genre.Trim(),
                 CategoryCode = categoryCode,
                 Type = isNonstop ? "Nonstop" : "Track",
-                Bpm = formModel.Bpm > 0 ? formModel.Bpm : 140,
-                MusicalKey = string.IsNullOrWhiteSpace(formModel.MusicalKey) ? "8A" : formModel.MusicalKey.Trim().ToUpper(),
+                // NONSTOP: Luôn luôn Bpm = 0, MusicalKey = "Nonstop"
+                Bpm = isNonstop ? 0 : (formModel.Bpm > 0 ? formModel.Bpm : 140),
+                MusicalKey = isNonstop ? "Nonstop" : (string.IsNullOrWhiteSpace(formModel.MusicalKey) ? "8A" : formModel.MusicalKey.Trim().ToUpper()),
                 DurationSeconds = formModel.DurationSeconds > 0 ? formModel.DurationSeconds : (isNonstop ? 3600 : 240),
                 CoverUrl = coverUrl,
                 SourceType = sourceType,
                 SourceUrl = sourceUrl,
-                // SoundCloudUrl removed
                 QualityAvailable = quality,
                 IsDemoOnlyForFree = formModel.IsDemoOnlyForFree || categoryCode.Contains("Slot") || categoryCode.Contains("Nhom"),
                 DemoLimitSeconds = formModel.DemoLimitSeconds > 0 ? formModel.DemoLimitSeconds : 30,
@@ -202,19 +259,24 @@ namespace TLongMusic.Controllers
             _context.Musics.Add(newMusic);
             await _context.SaveChangesAsync();
 
+            var categoryName = category?.Name ?? categoryCode;
+            var typeLabel = isNonstop ? "bản Nonstop" : "bản Track";
+
             return Ok(new
             {
                 success = true,
-                message = $"🎧 Đã đăng tải thành công bản thu '{newMusic.Title}' ({newMusic.SourceType}) vào danh mục {category.Name}!",
+                message = $"🎧 Đã đăng tải thành công {typeLabel} '{newMusic.Title}' vào danh mục {categoryName}!",
                 musicId = newMusic.MusicId,
+                type = newMusic.Type,
+                categoryCode = newMusic.CategoryCode,
                 sourceType = newMusic.SourceType,
                 sourceUrl = newMusic.SourceUrl
             });
         }
 
-        // FR-PRO-02: VIEW OWN MUSIC (Strictly Own Producer Tracks Only)
+        // FR-PRO-02: VIEW OWN MUSIC (Strictly Own Producer Tracks Only, Supports Filtering by Type)
         [HttpGet("MyTracks")]
-        public async Task<IActionResult> MyTracks()
+        public async Task<IActionResult> MyTracks([FromQuery] string? type = null)
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
@@ -229,9 +291,16 @@ namespace TLongMusic.Controllers
                 return Ok(new { success = true, data = new List<object>(), message = "Chưa có hồ sơ Producer." });
             }
 
-            var list = await _context.Musics
+            var query = _context.Musics
                 .Include(m => m.Category)
-                .Where(m => m.ProducerId == producer.ProducerId) // STRICT ISOLATION
+                .Where(m => m.ProducerId == producer.ProducerId); // STRICT ISOLATION
+
+            if (!string.IsNullOrWhiteSpace(type))
+            {
+                query = query.Where(m => m.Type == type);
+            }
+
+            var list = await query
                 .OrderByDescending(m => m.CreatedAt)
                 .Select(m => new
                 {

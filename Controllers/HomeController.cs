@@ -31,25 +31,65 @@ public class HomeController : Controller
                 .OrderByDescending(m => m.CreatedAt)
                 .ToListAsync();
 
-            // Hot Nonstops (Nonstop Lọt)
-            model.HotNonstops = allMusics
-                .Where(m => m.CategoryCode == "NonstopLot" || (m.Type == "Nonstop" && m.Category?.AccessLevel == "Lot"))
-                .Select(MapEntityToViewModel)
-                .ToList();
-
-            // VIP Nonstops (Nonstop Slot / Nonstop Nhóm)
-            model.VipNonstops = allMusics
-                .Where(m => m.CategoryCode == "NonstopSlot" || (m.Type == "Nonstop" && m.Category?.AccessLevel == "Slot"))
-                .Select(MapEntityToViewModel)
-                .ToList();
-
-            // Latest Tracks (Track Lọt, Track Nhóm, Track Slot)
+            // Kho Track DJ: (Type == "Track" hoặc CategoryCode bắt đầu bằng Track)
             model.LatestTracks = allMusics
-                .Where(m => m.Type == "Track")
+                .Where(m => m.Type == "Track" || (m.CategoryCode != null && m.CategoryCode.StartsWith("Track")))
                 .Select(MapEntityToViewModel)
                 .ToList();
 
-            // 2. Load Packages from Database
+            // Kho Nonstop Dài: (Type == "Nonstop" hoặc CategoryCode bắt đầu bằng Nonstop)
+            var allNonstops = allMusics
+                .Where(m => m.Type == "Nonstop" || (m.CategoryCode != null && m.CategoryCode.StartsWith("Nonstop")))
+                .Select(MapEntityToViewModel)
+                .ToList();
+
+            model.AllNonstops = allNonstops;
+            model.SlotNonstops = allNonstops.Where(IsMusicSlot).ToList();
+            model.NhomNonstops = allNonstops.Where(IsMusicNhom).ToList();
+            model.LotNonstops = allNonstops.Where(IsMusicLot).ToList();
+
+            // Tương thích các danh sách cũ
+            model.HotNonstops = model.LotNonstops;
+            model.VipNonstops = model.SlotNonstops.Concat(model.NhomNonstops).ToList();
+
+            // 2. Identify Current User Subscription & Privileges
+            string? currentUserTier = null;
+            bool isPremiumUser = false;
+            bool isStandardUser = false;
+            bool isAdminOrProducer = User.IsInRole("Admin") || User.IsInRole("Producer");
+
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                if (Guid.TryParse(userIdClaim, out var userId))
+                {
+                    var activeSub = await _context.Subscriptions
+                        .Include(s => s.Package)
+                        .Where(s => s.UserId == userId && s.Status == "Active" && s.EndDate >= DateTime.UtcNow)
+                        .OrderByDescending(s => s.Package != null ? s.Package.Price : (s.PackageId == "Premium" ? 199000 : s.PackageId == "Standard" ? 99000 : 0))
+                        .ThenByDescending(s => s.EndDate)
+                        .FirstOrDefaultAsync();
+
+                    currentUserTier = activeSub?.PackageId?.ToLower();
+                }
+            }
+
+            if (isAdminOrProducer || currentUserTier == "premium")
+            {
+                isPremiumUser = true;
+                isStandardUser = true;
+            }
+            else if (currentUserTier == "standard")
+            {
+                isStandardUser = true;
+            }
+
+            model.CurrentUserTier = currentUserTier;
+            model.IsPremiumUser = isPremiumUser;
+            model.IsStandardUser = isStandardUser;
+            model.IsAdminOrProducer = isAdminOrProducer;
+
+            // 3. Load Packages from Database
             var dbPackages = await _context.Packages
                 .Where(p => p.Status == "Active")
                 .OrderBy(p => p.Price)
@@ -76,7 +116,7 @@ public class HomeController : Controller
         }
 
         // Fallback if database is not reachable yet
-        if (!model.HotNonstops.Any() && !model.LatestTracks.Any())
+        if (!model.AllNonstops.Any() && !model.LatestTracks.Any())
         {
             LoadFallbackData(model);
         }
@@ -84,19 +124,50 @@ public class HomeController : Controller
         return View(model);
     }
 
+    public static bool IsMusicSlot(Track t)
+    {
+        return (t.CategoryCode != null && t.CategoryCode.Contains("Slot", StringComparison.OrdinalIgnoreCase))
+            || t.TierRequiredToDownload == RequiredTier.Premium
+            || t.Type == AudioType.NonstopDat
+            || t.Type == AudioType.TrackDat;
+    }
+
+    public static bool IsMusicNhom(Track t)
+    {
+        return !IsMusicSlot(t) && (
+            (t.CategoryCode != null && t.CategoryCode.Contains("Nhom", StringComparison.OrdinalIgnoreCase))
+            || t.TierRequiredToDownload == RequiredTier.Standard
+        );
+    }
+
+    public static bool IsMusicLot(Track t)
+    {
+        return !IsMusicSlot(t) && !IsMusicNhom(t);
+    }
+
     private static Track MapEntityToViewModel(Models.Entities.Music m)
     {
         var requiredTier = RequiredTier.Free;
         if (m.Category != null)
         {
-            if (m.Category.RequiredTierToDownload == "Premium") requiredTier = RequiredTier.Premium;
-            else if (m.Category.RequiredTierToDownload == "Standard") requiredTier = RequiredTier.Standard;
+            if (m.Category.RequiredTierToDownload == "Premium" || m.Category.AccessLevel == "Slot") requiredTier = RequiredTier.Premium;
+            else if (m.Category.RequiredTierToDownload == "Standard" || m.Category.AccessLevel == "Nhom") requiredTier = RequiredTier.Standard;
+        }
+        else if (!string.IsNullOrEmpty(m.CategoryCode))
+        {
+            if (m.CategoryCode.Contains("Slot", StringComparison.OrdinalIgnoreCase)) requiredTier = RequiredTier.Premium;
+            else if (m.CategoryCode.Contains("Nhom", StringComparison.OrdinalIgnoreCase)) requiredTier = RequiredTier.Standard;
         }
 
-        var audioType = AudioType.TrackLe;
-        if (m.CategoryCode == "NonstopLot") audioType = AudioType.NonstopLot;
-        else if (m.CategoryCode == "NonstopSlot") audioType = AudioType.NonstopDat;
-        else if (m.CategoryCode == "TrackSlot") audioType = AudioType.TrackDat;
+        var isSlot = (m.CategoryCode != null && m.CategoryCode.Contains("Slot", StringComparison.OrdinalIgnoreCase)) || requiredTier == RequiredTier.Premium;
+        var isNhom = !isSlot && ((m.CategoryCode != null && m.CategoryCode.Contains("Nhom", StringComparison.OrdinalIgnoreCase)) || requiredTier == RequiredTier.Standard);
+        var isNonstop = m.Type == "Nonstop" || (m.CategoryCode != null && m.CategoryCode.StartsWith("Nonstop", StringComparison.OrdinalIgnoreCase));
+
+        var audioType = isNonstop
+            ? (isSlot ? AudioType.NonstopDat : AudioType.NonstopLot)
+            : (isSlot ? AudioType.TrackDat : AudioType.TrackLe);
+
+        var cleanQuality = (isSlot || (m.QualityAvailable != null && m.QualityAvailable.ToUpperInvariant().Contains("WAV"))) ? "WAV" : "MP3";
 
         return new Track
         {
@@ -105,17 +176,17 @@ public class HomeController : Controller
             Artist = m.Artist,
             Genre = m.Genre,
             Type = audioType,
-            CategoryCode = m.CategoryCode ?? "TrackLot",
+            CategoryCode = m.CategoryCode ?? (isNonstop ? (isSlot ? "NonstopSlot" : (isNhom ? "NonstopNhom" : "NonstopLot")) : (isSlot ? "TrackSlot" : (isNhom ? "TrackNhom" : "TrackLot"))),
             Bpm = m.Bpm,
-            MusicalKey = m.MusicalKey,
+            MusicalKey = isNonstop ? "Nonstop" : m.MusicalKey,
             DurationSeconds = m.DurationSeconds,
-            CoverUrl = m.CoverUrl ?? "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=600&auto=format&fit=crop&q=80",
+            CoverUrl = m.CoverUrl ?? (isNonstop ? "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600&auto=format&fit=crop&q=80" : "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=600&auto=format&fit=crop&q=80"),
             AudioUrl = m.SourceUrl,
             SourceType = m.SourceType ?? "DirectFile",
             TierRequiredToDownload = requiredTier,
-            IsDemoOnlyForFree = m.IsDemoOnlyForFree,
-            DemoLimitSeconds = m.DemoLimitSeconds,
-            QualityAvailable = m.QualityAvailable,
+            IsDemoOnlyForFree = isSlot || isNhom || m.IsDemoOnlyForFree,
+            DemoLimitSeconds = m.DemoLimitSeconds > 0 ? m.DemoLimitSeconds : ((isSlot || isNhom) ? 30 : 0),
+            QualityAvailable = cleanQuality,
             PlaysCount = m.PlaysCount,
             DownloadsCount = m.DownloadsCount,
             ReleaseDate = m.CreatedAt
@@ -178,12 +249,26 @@ public class HomeController : Controller
         return View("~/Views/Admin/Index.cshtml");
     }
 
+    [HttpGet("/Producer/UploadTrack")]
+    [HttpGet("/UploadTrack")]
+    public IActionResult ProducerUploadTrack()
+    {
+        return View("~/Views/Producer/UploadTrack.cshtml");
+    }
+
+    [HttpGet("/Producer/UploadNonstop")]
+    [HttpGet("/UploadNonstop")]
+    public IActionResult ProducerUploadNonstop()
+    {
+        return View("~/Views/Producer/UploadNonstop.cshtml");
+    }
+
     [HttpGet("/Producer/Upload")]
     [HttpGet("/Upload")]
     [HttpGet("/Producer/Index")]
     public IActionResult ProducerUpload()
     {
-        return View("~/Views/Producer/Upload.cshtml");
+        return Redirect("/Producer/UploadTrack");
     }
 
     [HttpGet("/Checkout")]

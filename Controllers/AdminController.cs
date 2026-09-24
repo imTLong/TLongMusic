@@ -391,27 +391,36 @@ namespace TLongMusic.Controllers
                 return StatusCode(StatusCodes.Status403Forbidden, new { success = false, message = "Chỉ Quản Trị Viên (Admin) mới có quyền truy cập kho nhạc hệ thống!" });
             }
 
-            var list = await _context.Musics
+            var rawList = await _context.Musics
                 .Include(m => m.Producer)
                 .Include(m => m.Category)
                 .OrderByDescending(m => m.CreatedAt)
-                .Select(m => new
-                {
-                    m.MusicId,
-                    m.Title,
-                    m.Artist,
-                    ProducerName = m.Producer.StageName,
-                    m.CategoryCode,
-                    CategoryName = m.Category.Name,
-                    m.Type,
-                    m.QualityAvailable,
-                    m.PlaysCount,
-                    m.DownloadsCount,
-                    m.Status,
-                    m.CreatedAt
-                })
-
                 .ToListAsync();
+
+            var list = rawList.Select(m => new
+            {
+                m.MusicId,
+                m.Title,
+                m.Artist,
+                ProducerName = m.Producer != null ? m.Producer.StageName : "DJ TLong",
+                m.CategoryCode,
+                CategoryName = m.Category != null ? m.Category.Name : m.CategoryCode,
+                AccessLevel = m.Category != null ? m.Category.AccessLevel : (m.CategoryCode.Contains("Slot") ? "Slot" : (m.CategoryCode.Contains("Nhom") ? "Nhom" : "Lot")),
+                m.Type, // 'Track' hoặc 'Nonstop'
+                m.Genre,
+                m.Bpm,
+                m.MusicalKey,
+                m.DurationSeconds,
+                FormattedDuration = m.FormattedDuration,
+                m.CoverUrl,
+                m.SourceUrl,
+                AudioUrl = m.SourceUrl,
+                m.QualityAvailable,
+                m.PlaysCount,
+                m.DownloadsCount,
+                m.Status,
+                m.CreatedAt
+            }).ToList();
 
             return Ok(new { success = true, data = list });
         }
@@ -469,6 +478,76 @@ namespace TLongMusic.Controllers
                 {
                     success = false,
                     message = $"Không thể xóa bài hát: {ex.Message}"
+                });
+            }
+        }
+
+        // FR-ADM-06B: BULK DELETE MUSICS AS ADMIN
+        [HttpPost("DeleteMusicsBatch")]
+        public async Task<IActionResult> DeleteMusicsBatch([FromBody] BulkDeleteMusicDto request)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !User.IsInRole("Admin"))
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new { success = false, message = "Chỉ Quản Trị Viên (Admin) mới có quyền thực hiện thao tác này!" });
+            }
+
+            if (request == null || request.MusicIds == null || !request.MusicIds.Any())
+            {
+                return BadRequest(new { success = false, message = "Vui lòng chọn ít nhất một bản thu để xóa!" });
+            }
+
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                var musics = await _context.Musics
+                    .Where(m => request.MusicIds.Contains(m.MusicId))
+                    .ToListAsync();
+
+                if (!musics.Any())
+                {
+                    return NotFound(new { success = false, message = "Không tìm thấy bài hát nào tương ứng với danh sách đã chọn!" });
+                }
+
+                var musicIds = musics.Select(m => m.MusicId).ToList();
+
+                // 1. Remove all foreign key references
+                var favorites = _context.Favorites.Where(f => musicIds.Contains(f.MusicId));
+                _context.Favorites.RemoveRange(favorites);
+
+                var playlistTracks = _context.PlaylistTracks.Where(pt => musicIds.Contains(pt.MusicId));
+                _context.PlaylistTracks.RemoveRange(playlistTracks);
+
+                var listeningHistories = _context.ListeningHistories.Where(lh => musicIds.Contains(lh.MusicId));
+                _context.ListeningHistories.RemoveRange(listeningHistories);
+
+                var downloadHistories = _context.DownloadHistories.Where(dh => musicIds.Contains(dh.MusicId));
+                _context.DownloadHistories.RemoveRange(downloadHistories);
+
+                var reports = _context.Reports.Where(r => musicIds.Contains(r.MusicId));
+                _context.Reports.RemoveRange(reports);
+
+                // 2. Remove musics
+                _context.Musics.RemoveRange(musics);
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                // 3. Clean up physical audio files
+                foreach (var music in musics)
+                {
+                    AudioProcessingService.DeletePhysicalAudioAndRelatedFiles(_env.WebRootPath, music.SourceUrl, music.CoverUrl, music.DemoFilePath);
+                }
+
+                return Ok(new { success = true, count = musics.Count, message = $"Admin đã xóa thành công {musics.Count} bản thu được chọn khỏi hệ thống!" });
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                return StatusCode(StatusCodes.Status500InternalServerError, new
+                {
+                    success = false,
+                    message = $"Không thể xóa danh sách bài hát: {ex.Message}"
                 });
             }
         }

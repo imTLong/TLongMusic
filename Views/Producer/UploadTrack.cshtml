@@ -1,0 +1,900 @@
+@{
+    ViewData["Title"] = "Đăng Tải Track Lẻ (Record Pool) - Studio Producer - TLongMusic";
+}
+
+<div class="container-fluid px-3 px-xl-5 py-4" style="max-width: 1720px;">
+    <!-- HEADER HERO PRODUCER STUDIO -->
+    <div class="p-4 p-md-5 rounded-4 mb-4 position-relative overflow-hidden border border-info border-opacity-50"
+         style="background: linear-gradient(135deg, rgba(0, 180, 216, 0.12) 0%, rgba(15, 16, 28, 0.96) 100%); backdrop-filter: blur(25px); box-shadow: 0 0 50px rgba(0, 180, 216, 0.2);">
+        
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center gap-3 position-relative" style="z-index: 2;">
+            <div>
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="badge bg-info text-dark px-3 py-1 rounded-pill fw-bold text-uppercase" style="letter-spacing: 1px; font-size: 0.75rem;">
+                        <i class="fas fa-compact-disc me-1"></i> NGHIỆP VỤ 1: ĐĂNG TẢI TRACK BÀI LẺ (3 - 6 PHÚT)
+                    </span>
+                    <span class="badge bg-dark border border-secondary text-info small" id="producerStudioRoleBadge">
+                        <i class="fas fa-certificate text-warning me-1"></i> Nghệ Sĩ Đã Xác Thực
+                    </span>
+                </div>
+                <h2 class="text-white fw-bold mb-1 display-6">STUDIO ĐĂNG TẢI TRACK BẢN THU RECORD POOL</h2>
+                <p class="text-dim mb-2" style="max-width: 820px;">
+                    Dành riêng cho <strong>Track đơn (Bài lẻ 3 - 6 phút)</strong>: Tự động quét và đọc BPM, Tone Key Camelot chuẩn xác 100% qua sóng âm DSP & thẻ ID3, kèm bộ chọn 24 phím Camelot trực quan cho DJ.
+                </p>
+                <div class="d-flex flex-wrap align-items-center gap-3 text-dim small" id="producerHeaderInfo">
+                    <span id="producerStudioStageName"><i class="fas fa-user-tie text-info me-1"></i> DJ / Producer: <strong>Đang nạp...</strong></span>
+                    <span id="producerStudioBankSnippet"><i class="fas fa-wallet text-warning me-1"></i> STK nhận tiền: <strong>Đang nạp...</strong></span>
+                </div>
+            </div>
+
+            <!-- NÚT CHUYỂN NHANH QUA TRANG NONSTOP -->
+            <div class="d-flex flex-wrap align-items-center gap-2">
+                <a href="/Producer/UploadNonstop" class="btn btn-outline-warning rounded-pill px-3 py-2 fw-bold shadow" style="border-width: 2px;">
+                    <i class="fas fa-fire-flame-curved me-1 text-warning"></i> 👉 Chuyển Sang Trang Đăng Nonstop Dài
+                </a>
+                <a href="/Profile" class="btn btn-outline-light rounded-pill px-3 py-2">
+                    <i class="fas fa-pen-to-square me-1"></i> Đổi STK
+                </a>
+                <a href="/" class="btn btn-glass-crystal rounded-pill px-3 py-2 text-white">
+                    <i class="fas fa-arrow-left me-1"></i> Về Trang Chủ
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN TWO COLUMNS LAYOUT -->
+    <div class="row g-4 mb-5">
+        <!-- CỘT 1: FORM ĐĂNG TẢI TRACK MỚI -->
+        <div class="col-xl-6 col-lg-6">
+            <div class="p-4 rounded-4 border border-info border-opacity-25 h-100"
+                 style="background: rgba(18, 19, 32, 0.95); backdrop-filter: blur(25px); box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);">
+                
+                <div class="d-flex align-items-center gap-3 mb-3 pb-3 border-bottom border-secondary border-opacity-25">
+                    <span class="badge p-2 fs-5 rounded-circle" style="background: #00b4d8; color: #000; width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-compact-disc fs-5"></i>
+                    </span>
+                    <div>
+                        <h5 class="text-white fw-bold mb-0" style="letter-spacing: 0.5px; font-size: 1.15rem;">ĐĂNG TẢI BẢN TRACK RECORD POOL</h5>
+                        <small class="text-dim" style="font-size: 0.85rem;">Phân loại Track Lọt / Track Nhóm / Track Slot • Tự động quét BPM & Tone Key</small>
+                    </div>
+                </div>
+
+                <form id="producerTrackUploadForm" method="post" enctype="multipart/form-data" onsubmit="event.preventDefault(); submitProducerTrackUpload(this);">
+                    <input type="hidden" name="sourceType" value="DirectFile" />
+                    <input type="hidden" name="durationSeconds" id="trackDurationInput" value="240" />
+                    <input type="hidden" name="type" value="Track" />
+                    <input type="file" id="trackAudioFileInput" name="audioFile" accept="audio/*,.mp3,.wav,.flac,.m4a,.ogg" class="d-none" onchange="handleTrackAudioFileSelect(this)" />
+
+                    <!-- DROP ZONE FILE TRACK -->
+                    <div class="mb-4">
+                        <!-- Khi chưa chọn file -->
+                        <div class="p-4 text-center rounded-4 border border-secondary border-opacity-50" 
+                             id="trackAudioDropZone"
+                             style="background: rgba(0, 180, 216, 0.03); border: 2px dashed rgba(0, 180, 216, 0.3) !important; cursor: pointer; transition: all 0.3s ease;"
+                             onclick="document.getElementById('trackAudioFileInput').click()">
+                            <i class="fas fa-cloud-arrow-up text-info fa-3x mb-3" style="filter: drop-shadow(0 0 10px rgba(0, 180, 216, 0.5));"></i>
+                            <h6 class="text-white fw-bold mb-1">Bấm để chọn file Track âm thanh hoặc kéo thả vào đây</h6>
+                            <small class="text-dim d-block mb-3">Hỗ trợ các định dạng phòng thu: <strong>MP3 (320kbps), WAV (24-bit Lossless), FLAC, M4A</strong></small>
+                            <span class="btn btn-sm btn-outline-info rounded-pill px-4 py-2 fw-bold">
+                                <i class="fas fa-folder-open me-1"></i> Chọn File Track Từ Máy Tính
+                            </span>
+                        </div>
+
+                        <!-- Khung thông tin file khi đã chọn -->
+                        <div id="trackFileSelectedInfo" class="d-none p-3 rounded-3" style="background: #141622; border: 1px solid rgba(0, 180, 216, 0.25);">
+                            <div class="d-flex align-items-center justify-content-between p-1">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="rounded-3 p-2 d-flex align-items-center justify-content-center" style="background: rgba(0, 180, 216, 0.2); width: 44px; height: 44px;">
+                                        <i class="fas fa-compact-disc text-info fs-3"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-white fw-bold fs-6 mb-1" id="trackSelectedFileName">filename.mp3</div>
+                                        <small class="text-dim" id="trackSelectedFileSize">0 MB • audio/mpeg</small>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-sm px-3 py-1 rounded-2" onclick="clearTrackSelectedAudioFile();" style="border: 1px solid rgba(239, 68, 68, 0.5); color: #ef4444; background: transparent;">
+                                    ✕ Đổi file khác
+                                </button>
+                            </div>
+
+                            <audio id="trackAudioPreviewElement" controls class="w-100 mt-3 d-none" style="border-radius: 20px; outline: none;"></audio>
+
+                            <!-- TRỢ LÝ TỰ ĐỘNG PHÂN TÍCH BPM & KEY -->
+                            <div id="trackAudioAnalysisBox" class="mt-3 p-3 rounded-3"
+                                 style="background: #0c0d14; border: 1px solid rgba(255, 255, 255, 0.08);">
+                                <div class="d-flex align-items-center justify-content-between mb-2 pb-1">
+                                    <span class="text-white small fw-bold d-flex align-items-center gap-2" style="font-size: 0.85rem; letter-spacing: 0.5px;">
+                                        <i class="fas fa-wand-magic-sparkles text-info"></i> TRỢ LÝ QUÉT THÔNG SỐ TRACK DJ
+                                    </span>
+                                    <span id="trackAnalysisStatusBadge" class="badge text-white px-3 py-1 rounded-pill" style="background: #10b981; font-size: 0.8rem;">
+                                        <i class="fas fa-check-circle me-1"></i> Đã Nhận Diện Thành Công!
+                                    </span>
+                                </div>
+
+                                <div class="d-flex flex-wrap align-items-center gap-2" id="trackAnalysisResultBadges">
+                                    <span class="badge py-2 px-3 fw-bold rounded-pill text-white" id="trackDetectedBpmBadge" style="font-size: 0.95rem; background: #e63946;">-- BPM</span>
+                                    <span class="badge py-2 px-3 fw-bold rounded-pill text-white" id="trackDetectedKeyBadge" style="font-size: 0.95rem; background: #00b4d8;">Key --</span>
+                                    <span class="badge border py-2 px-3 text-white font-monospace rounded-pill" id="trackDetectedDurationBadge" style="font-size: 0.9rem; background: #1e2029; border-color: rgba(255, 255, 255, 0.15) !important;">Thời lượng: --:--</span>
+                                    <span class="badge bg-secondary text-white small" id="trackDetectionSourceBadge">Nguồn: Tự nhận diện</span>
+                                </div>
+
+                                <!-- TOP CANDIDATE KEYS TRỰC QUAN CHO PRODUCER -->
+                                <div id="trackTopCandidatesRow" class="mt-2 pt-2 border-top border-secondary border-opacity-25 d-none">
+                                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-1 mb-1">
+                                        <span class="text-white small fw-bold" style="font-size: 0.8rem;">
+                                            <i class="fas fa-sparkles text-warning me-1"></i> Các Khóa Âm Khả Dĩ Nhất (Click để chọn ngay):
+                                        </span>
+                                        <small class="text-dim" style="font-size: 0.72rem;">Thuật toán EDMA Harmonic Chroma</small>
+                                    </div>
+                                    <div class="d-flex flex-wrap gap-2" id="trackTopCandidatesContainer">
+                                        <!-- Render tự động bởi JS -->
+                                    </div>
+                                </div>
+
+                                <small class="text-dim d-block mt-2" style="font-size: 0.75rem;">
+                                    <i class="fas fa-info-circle text-info me-1"></i> Bạn có thể chọn 1 trong các gợi ý trên hoặc bấm vào bảng 24 phím Camelot bên dưới để thay đổi Tone Key nhanh trong 1 giây!
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- METADATA FIELDS -->
+                    <div class="row g-3">
+                        <!-- Hàng 1 -->
+                        <div class="col-12 col-md-6">
+                            <label class="form-label text-white small">Tiêu Đề Bản Track: <span class="text-danger">*</span></label>
+                            <input type="text" name="title" id="trackTitleInput" class="form-control bg-dark text-white border-secondary" placeholder="Ví dụ: Bay Phòng Cực Căng (TLong Remix)..." required />
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <label class="form-label text-white small">Nghệ Sĩ / Remixer: <span class="text-danger">*</span></label>
+                            <input type="text" name="artist" id="trackArtistInput" class="form-control bg-dark text-white border-secondary" value="DJ TLong (Producer)" required />
+                        </div>
+
+                        <!-- Hàng 2: Thể loại -->
+                        <div class="col-12 col-md-12">
+                            <label class="form-label text-white small">Thể Loại Âm Nhạc:</label>
+                            <select name="genre" id="trackGenreSelect" class="form-select bg-dark text-white border-secondary">
+                                <option value="Vinahouse" selected>Vinahouse</option>
+                                <option value="Electro House">Electro House</option>
+                                <option value="Melbourne Bounce">Melbourne Bounce</option>
+                                <option value="Progressive House">Progressive House</option>
+                                <option value="Dubplate / VIP">Dubplate / VIP</option>
+                                <option value="Trance">Trance</option>
+                                <option value="Tech House">Tech House</option>
+                            </select>
+                        </div>
+
+                        <!-- Hàng 3: BPM & TONE KEY CAMELOT VỚI BẢNG CHỌN NHANH 24 PHÍM -->
+                        <div class="col-12">
+                            <div class="p-3 rounded-3" style="background: rgba(0, 180, 216, 0.05); border: 1px solid rgba(0, 180, 216, 0.2);">
+                                <div class="row g-3 mb-3">
+                                    <div class="col-12 col-md-6">
+                                        <label class="form-label text-white small d-flex justify-content-between">
+                                            <span><i class="fas fa-drum text-danger me-1"></i> BPM (Nhịp đập): <span class="text-danger">*</span></span>
+                                            <small class="text-dim">Mặc định: 140</small>
+                                        </label>
+                                        <input type="number" name="bpm" id="trackBpmInput" class="form-control bg-dark text-white border-secondary fw-bold" value="140" min="60" max="220" required />
+                                    </div>
+
+                                    <div class="col-12 col-md-6">
+                                        <label class="form-label text-white small d-flex justify-content-between">
+                                            <span><i class="fas fa-key text-info me-1"></i> Tone Key Camelot: <span class="text-danger">*</span></span>
+                                            <small class="text-dim" id="currentSelectedKeyLabel">8A (Am)</small>
+                                        </label>
+                                        <input type="text" name="musicalKey" id="trackKeyInput" class="form-control bg-dark text-white border-info fw-bold" value="8A" placeholder="VD: 8A, 11B..." required />
+                                    </div>
+                                </div>
+
+                                <!-- BỘ CHỌN NHANH CAMELOT WHEEL 24 PHÍM TRỰC QUAN -->
+                                <div class="mt-2">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="text-dim small fw-bold" style="font-size: 0.78rem;">
+                                            <i class="fas fa-circle-dot text-info me-1"></i> BẢNG CHỌN NHANH TONE KEY (CLICK ĐỂ CHỌN NGAY):
+                                        </span>
+                                        <small class="text-muted" style="font-size: 0.72rem;">Chuẩn Camelot Easymix</small>
+                                    </div>
+
+                                    <!-- HÀNG 1: 12 PHÍM GIỌNG THỨ (MINOR - A) -->
+                                    <div class="mb-1">
+                                        <div class="d-flex align-items-center gap-1 mb-1">
+                                            <span class="badge bg-info text-dark fw-bold px-1.5 py-0.5" style="font-size: 0.65rem;">MINOR (A)</span>
+                                            <small class="text-dim" style="font-size: 0.68rem;">Phổ biến nhất trong Vinahouse & EDM</small>
+                                        </div>
+                                        <div class="d-flex flex-wrap gap-1" id="camelotMinorButtons">
+                                            <!-- Sinh tự động bằng JS -->
+                                        </div>
+                                    </div>
+
+                                    <!-- HÀNG 2: 12 PHÍM GIỌNG TRƯỞNG (MAJOR - B) -->
+                                    <div class="mt-2">
+                                        <div class="d-flex align-items-center gap-1 mb-1">
+                                            <span class="badge bg-warning text-dark fw-bold px-1.5 py-0.5" style="font-size: 0.65rem;">MAJOR (B)</span>
+                                            <small class="text-dim" style="font-size: 0.68rem;">Giai điệu vui tươi, Festival, House</small>
+                                        </div>
+                                        <div class="d-flex flex-wrap gap-1" id="camelotMajorButtons">
+                                            <!-- Sinh tự động bằng JS -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hàng 4: Phân cấp Track & Chất lượng -->
+                        <div class="col-12 col-md-6">
+                            <label class="form-label text-white small">Phân Cấp Track (Chỉ nhận gói Track): <span class="text-danger">*</span></label>
+                            <select name="categoryCode" id="trackCategorySelect" class="form-select bg-dark text-white border-secondary" required>
+                                <option value="TrackLot">🎵 Track Lọt (Khách nghe full, Free tải được)</option>
+                                <option value="TrackNhom" selected>💎 Track Nhóm (Standard & Premium tải được)</option>
+                                <option value="TrackSlot">👑 Track Slot VIP (Chỉ Premium tải, Demo 30s)</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label class="form-label text-white small">Chất Lượng Âm Thanh Công Bố:</label>
+                            <select name="qualityAvailable" id="trackQualitySelect" class="form-select bg-dark text-white border-secondary">
+                                <option value="MP3 320kbps">MP3 320kbps (Chuẩn phòng thu)</option>
+                                <option value="WAV Lossless 24-Bit">WAV Lossless 24-Bit (Master Club)</option>
+                                <option value="FLAC 24-Bit Lossless">FLAC 24-Bit Lossless</option>
+                            </select>
+                        </div>
+
+                        <!-- Hàng 5: Ảnh bìa Track -->
+                        <div class="col-12">
+                            <label class="form-label text-white small">Ảnh Bìa Track (Cover Art - Tùy chọn):</label>
+                            <div class="input-group">
+                                <input type="file" name="coverFile" accept="image/*" class="form-control bg-dark text-white border-secondary" />
+                                <input type="url" name="coverUrl" class="form-control bg-dark text-white border-secondary" placeholder="Hoặc dán URL ảnh https://..." />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FOOTER ACTIONS -->
+                    <div class="mt-4 pt-3 border-top border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
+                        <button type="button" class="btn btn-outline-secondary px-4 rounded-pill text-white" onclick="clearTrackSelectedAudioFile(); document.getElementById('producerTrackUploadForm').reset();" style="background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.2);">
+                            Hủy bỏ
+                        </button>
+                        <button type="submit" id="trackUploadSubmitBtn" class="btn px-4 py-2 rounded-pill fw-bold text-white shadow" style="background: linear-gradient(135deg, #00b4d8, #0077b6); border: none;">
+                            <i class="fas fa-cloud-arrow-up me-2"></i> Đăng Bản Track Vào Kho Nhạc
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- CỘT 2: KHO BÀI TRACK CÁ NHÂN CỦA PRODUCER -->
+        <div class="col-xl-6 col-lg-6">
+            <div class="p-4 rounded-4 border border-secondary border-opacity-25 h-100"
+                 style="background: rgba(18, 19, 32, 0.95); backdrop-filter: blur(25px); box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);">
+                
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 pb-3 border-bottom border-secondary border-opacity-25">
+                    <div>
+                        <h5 class="text-white fw-bold mb-0">
+                            <i class="fas fa-compact-disc text-info me-2"></i>Kho Bản Track Đã Đăng Của Bạn
+                        </h5>
+                        <small class="text-dim">Chỉ hiển thị các bài Track đơn (3 - 6 phút) do chính bạn tải lên</small>
+                    </div>
+                    <span class="badge bg-info text-dark fw-bold px-3 py-2 rounded-pill" id="producerTracksCountBadge">
+                        0 bản Track
+                    </span>
+                </div>
+
+                <div class="table-responsive rounded-4 border border-secondary border-opacity-25" id="producerTracksTableContainer">
+                    <div class="p-5 text-center text-dim">
+                        <i class="fas fa-spinner fa-spin fa-2x mb-2 text-info"></i>
+                        <br />Đang tải danh sách bản Track cá nhân...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    let trackAudioFile = null;
+
+    const CAMELOT_KEYS_MINOR = [
+        { key: "1A", note: "G#m" }, { key: "2A", note: "D#m" }, { key: "3A", note: "A#m" },
+        { key: "4A", note: "Fm" },  { key: "5A", note: "Cm" },  { key: "6A", note: "Gm" },
+        { key: "7A", note: "Dm" },  { key: "8A", note: "Am" },  { key: "9A", note: "Em" },
+        { key: "10A", note: "Bm" }, { key: "11A", note: "F#m" }, { key: "12A", note: "C#m" }
+    ];
+
+    const CAMELOT_KEYS_MAJOR = [
+        { key: "1B", note: "B" },   { key: "2B", note: "F#" },  { key: "3B", note: "C#" },
+        { key: "4B", note: "G#" },  { key: "5B", note: "D#" },  { key: "6B", note: "A#" },
+        { key: "7B", note: "F" },   { key: "8B", note: "C" },   { key: "9B", note: "G" },
+        { key: "10B", note: "D" },  { key: "11B", note: "A" },  { key: "12B", note: "E" }
+    ];
+
+    document.addEventListener('DOMContentLoaded', function() {
+        renderCamelotKeyButtons();
+
+        // 1. Phân quyền Producer chặt chẽ
+        setTimeout(function() {
+            const user = window.TLongPlayer ? window.TLongPlayer.currentUser : null;
+            if (!user) {
+                fetch('/Auth/Me').then(r => r.json()).then(data => {
+                    const u = data.user;
+                    if (!data.success || (!u)) {
+                        alert("⚠️ Vui lòng đăng nhập tài khoản Producer!");
+                        window.location.href = '/';
+                    } else if (u.primaryRole === 'Admin' || u.role === 'Admin') {
+                        alert("⚠️ THÔNG BÁO:\nTài khoản Admin chỉ quản trị hệ thống, KHÔNG có quyền đăng nhạc!\nChức năng đăng nhạc chỉ dành riêng cho Producer.");
+                        window.location.href = '/Admin';
+                    } else if (u.primaryRole !== 'Producer' && u.role !== 'Producer') {
+                        alert("⚠️ CẢNH BÁO BẢO MẬT:\nKhu vực Studio đăng nhạc chỉ dành riêng cho Nhà Sản Xuất (Producer)!");
+                        window.location.href = '/';
+                    } else {
+                        initProducerTrackStudio(u);
+                    }
+                }).catch(() => {
+                    window.location.href = '/';
+                });
+            } else if (user.primaryRole === 'Admin' || user.role === 'Admin') {
+                alert("⚠️ THÔNG BÁO:\nTài khoản Admin chỉ quản trị hệ thống, KHÔNG có quyền đăng nhạc!\nChức năng đăng nhạc chỉ dành riêng cho Producer.");
+                window.location.href = '/Admin';
+            } else if (user.primaryRole !== 'Producer' && user.role !== 'Producer') {
+                alert("⚠️ CẢNH BÁO BẢO MẬT:\nKhu vực Studio đăng nhạc chỉ dành riêng cho Nhà Sản Xuất (Producer)!");
+                window.location.href = '/';
+            } else {
+                initProducerTrackStudio(user);
+            }
+        }, 150);
+
+        // Sync BPM input to badge
+        const bpmInput = document.getElementById('trackBpmInput');
+        if (bpmInput) {
+            bpmInput.addEventListener('input', function() {
+                const badge = document.getElementById('trackDetectedBpmBadge');
+                if (badge && this.value > 0) badge.textContent = `${this.value} BPM`;
+            });
+        }
+
+        // Sync Key input to badge & active buttons
+        const keyInput = document.getElementById('trackKeyInput');
+        if (keyInput) {
+            keyInput.addEventListener('input', function() {
+                selectCamelotKey(this.value.trim().toUpperCase(), false);
+            });
+        }
+    });
+
+    function renderCamelotKeyButtons() {
+        const minorBox = document.getElementById('camelotMinorButtons');
+        const majorBox = document.getElementById('camelotMajorButtons');
+
+        if (minorBox) {
+            minorBox.innerHTML = CAMELOT_KEYS_MINOR.map(item => `
+                <button type="button" class="btn btn-sm py-1 px-2 camelot-btn rounded-2" id="camBtn_${item.key}"
+                        onclick="selectCamelotKey('${item.key}', true)"
+                        style="font-size: 0.72rem; min-width: 54px; background: rgba(0, 180, 216, 0.1); border: 1px solid rgba(0, 180, 216, 0.3); color: #00b4d8;">
+                    <strong>${item.key}</strong> <span class="text-white small" style="font-size: 0.65rem;">${item.note}</span>
+                </button>
+            `).join('');
+        }
+
+        if (majorBox) {
+            majorBox.innerHTML = CAMELOT_KEYS_MAJOR.map(item => `
+                <button type="button" class="btn btn-sm py-1 px-2 camelot-btn rounded-2" id="camBtn_${item.key}"
+                        onclick="selectCamelotKey('${item.key}', true)"
+                        style="font-size: 0.72rem; min-width: 54px; background: rgba(255, 209, 102, 0.1); border: 1px solid rgba(255, 209, 102, 0.3); color: #ffd166;">
+                    <strong>${item.key}</strong> <span class="text-white small" style="font-size: 0.65rem;">${item.note}</span>
+                </button>
+            `).join('');
+        }
+
+        // Active key ban đầu (8A)
+        highlightCamelotButton("8A");
+    }
+
+    function selectCamelotKey(key, updateInput = true) {
+        if (!key) return;
+        const upper = key.toUpperCase();
+        const info = window.getCamelotKeyInfo ? window.getCamelotKeyInfo(upper) : { camelot: upper, name: upper, label: upper };
+        
+        if (updateInput) {
+            const keyInput = document.getElementById('trackKeyInput');
+            if (keyInput) keyInput.value = info.camelot;
+        }
+
+        const badge = document.getElementById('trackDetectedKeyBadge');
+        if (badge) badge.textContent = `Key ${info.label}`;
+
+        const labelEl = document.getElementById('currentSelectedKeyLabel');
+        if (labelEl) labelEl.textContent = info.label;
+
+        highlightCamelotButton(info.camelot);
+
+        // Highlight active candidate pill button if present
+        document.querySelectorAll('.candidate-pill-btn').forEach(btn => {
+            const btnKey = btn.getAttribute('data-key');
+            if (btnKey === info.camelot) {
+                btn.style.background = 'linear-gradient(135deg, #00b4d8, #0077b6)';
+                btn.style.color = '#fff';
+                btn.style.borderColor = '#90e0ef';
+                btn.style.boxShadow = '0 0 12px rgba(0, 180, 216, 0.6)';
+            } else {
+                btn.style.background = 'rgba(255, 255, 255, 0.08)';
+                btn.style.color = '#e0e1dd';
+                btn.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                btn.style.boxShadow = 'none';
+            }
+        });
+    }
+
+    function highlightCamelotButton(camelotCode) {
+        document.querySelectorAll('.camelot-btn').forEach(btn => {
+            btn.classList.remove('active-camelot');
+            if (btn.id && btn.id.includes('A')) {
+                btn.style.background = 'rgba(0, 180, 216, 0.1)';
+                btn.style.borderColor = 'rgba(0, 180, 216, 0.3)';
+                btn.style.color = '#00b4d8';
+                btn.style.boxShadow = 'none';
+            } else {
+                btn.style.background = 'rgba(255, 209, 102, 0.1)';
+                btn.style.borderColor = 'rgba(255, 209, 102, 0.3)';
+                btn.style.color = '#ffd166';
+                btn.style.boxShadow = 'none';
+            }
+        });
+
+        const activeBtn = document.getElementById(`camBtn_${camelotCode}`);
+        if (activeBtn) {
+            activeBtn.classList.add('active-camelot');
+            if (camelotCode.includes('A')) {
+                activeBtn.style.background = '#00b4d8';
+                activeBtn.style.borderColor = '#90e0ef';
+                activeBtn.style.color = '#000';
+                activeBtn.style.boxShadow = '0 0 12px rgba(0, 180, 216, 0.8)';
+            } else {
+                activeBtn.style.background = '#ffd166';
+                activeBtn.style.borderColor = '#fff3b0';
+                activeBtn.style.color = '#000';
+                activeBtn.style.boxShadow = '0 0 12px rgba(255, 209, 102, 0.8)';
+            }
+        }
+    }
+
+    async function initProducerTrackStudio(producerUser) {
+        try {
+            const pRes = await fetch('/Producer/Profile');
+            const pJson = await pRes.json();
+            if (pJson.success && pJson.data) {
+                const p = pJson.data;
+                document.getElementById('producerStudioStageName').innerHTML = `<i class="fas fa-user-tie text-info me-1"></i> DJ / Producer: <strong>${p.stageName}</strong>`;
+                document.getElementById('producerStudioBankSnippet').innerHTML = `<i class="fas fa-building-columns text-warning me-1"></i> Ngân hàng: <strong>${p.bankName || 'Chưa cập nhật'}</strong> (${p.bankAccountNumber || '--'})`;
+                
+                const artistInput = document.getElementById('trackArtistInput');
+                if (artistInput) artistInput.value = p.stageName;
+            }
+        } catch(e) {
+            console.warn(e);
+        }
+
+        setupTrackAudioDropZone();
+        loadProducerTrackList();
+    }
+
+    function setupTrackAudioDropZone() {
+        const dropZone = document.getElementById('trackAudioDropZone');
+        if (!dropZone) return;
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropZone.style.borderColor = '#00b4d8';
+                dropZone.style.background = 'rgba(0, 180, 216, 0.15)';
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropZone.style.borderColor = 'rgba(0, 180, 216, 0.3)';
+                dropZone.style.background = 'rgba(0, 180, 216, 0.03)';
+            }, false);
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            if (files.length > 0) {
+                handleTrackAudioFile(files[0]);
+            }
+        }, false);
+    }
+
+    function handleTrackAudioFileSelect(input) {
+        if (input.files && input.files[0]) {
+            handleTrackAudioFile(input.files[0]);
+        }
+    }
+
+    function handleTrackAudioFile(file) {
+        trackAudioFile = file;
+        const dropZone = document.getElementById('trackAudioDropZone');
+        const infoEl = document.getElementById('trackFileSelectedInfo');
+        if (dropZone) dropZone.classList.add('d-none');
+        if (infoEl) infoEl.classList.remove('d-none');
+
+        document.getElementById('trackSelectedFileName').textContent = file.name;
+        document.getElementById('trackSelectedFileSize').textContent = (file.size / (1024 * 1024)).toFixed(2) + ' MB • ' + (file.type || 'audio/mpeg');
+
+        // Auto fill title
+        const titleInput = document.getElementById('trackTitleInput');
+        if (titleInput && (!titleInput.value || titleInput.value.trim() === '')) {
+            let cleanName = file.name.replace(/\.[^/.]+$/, "");
+            cleanName = cleanName.replace(/_/g, " ").replace(/-/g, " ");
+            titleInput.value = cleanName;
+        }
+
+        // Quality detection
+        const ext = file.name.split('.').pop().toLowerCase();
+        const qualitySelect = document.getElementById('trackQualitySelect');
+        if (qualitySelect) {
+            if (ext === 'wav') qualitySelect.value = 'WAV Lossless 24-Bit';
+            else if (ext === 'flac') qualitySelect.value = 'FLAC 24-Bit Lossless';
+            else qualitySelect.value = 'MP3 320kbps';
+        }
+
+        // Preview audio
+        const previewAudio = document.getElementById('trackAudioPreviewElement');
+        if (previewAudio) {
+            previewAudio.src = URL.createObjectURL(file);
+            previewAudio.classList.remove('d-none');
+        }
+
+        // Tiến hành phân tích BPM & Tone Key
+        analyzeTrackAudioFile(file);
+    }
+
+    function clearTrackSelectedAudioFile() {
+        trackAudioFile = null;
+        const fileInput = document.getElementById('trackAudioFileInput');
+        if (fileInput) fileInput.value = '';
+
+        const dropZone = document.getElementById('trackAudioDropZone');
+        const infoEl = document.getElementById('trackFileSelectedInfo');
+        if (dropZone) dropZone.classList.remove('d-none');
+        if (infoEl) infoEl.classList.add('d-none');
+
+        const bpmBadge = document.getElementById('trackDetectedBpmBadge');
+        const keyBadge = document.getElementById('trackDetectedKeyBadge');
+        const durationBadge = document.getElementById('trackDetectedDurationBadge');
+        if (bpmBadge) bpmBadge.textContent = '-- BPM';
+        if (keyBadge) keyBadge.textContent = 'Key --';
+        if (durationBadge) durationBadge.textContent = 'Thời lượng: --:--';
+
+        const previewAudio = document.getElementById('trackAudioPreviewElement');
+        if (previewAudio) {
+            previewAudio.pause();
+            previewAudio.src = '';
+            previewAudio.classList.add('d-none');
+        }
+
+        const candRow = document.getElementById('trackTopCandidatesRow');
+        const candBox = document.getElementById('trackTopCandidatesContainer');
+        if (candRow) candRow.classList.add('d-none');
+        if (candBox) candBox.innerHTML = '';
+    }
+
+    async function analyzeTrackAudioFile(file) {
+        const statusBadge = document.getElementById('trackAnalysisStatusBadge');
+        const bpmBadge = document.getElementById('trackDetectedBpmBadge');
+        const keyBadge = document.getElementById('trackDetectedKeyBadge');
+        const durationBadge = document.getElementById('trackDetectedDurationBadge');
+        const sourceBadge = document.getElementById('trackDetectionSourceBadge');
+        const bpmInput = document.getElementById('trackBpmInput');
+        const keyInput = document.getElementById('trackKeyInput');
+        const durationInput = document.getElementById('trackDurationInput');
+        const titleInput = document.getElementById('trackTitleInput');
+        const artistInput = document.getElementById('trackArtistInput');
+
+        if (statusBadge) {
+            statusBadge.className = 'badge bg-warning text-dark px-3 py-1 rounded-pill fw-bold';
+            statusBadge.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Đang phân tích ID3 & Sóng âm DSP...';
+        }
+
+        try {
+            // 1. Check ID3 & Filename
+            const meta = window.parseAudioMetadata ? await window.parseAudioMetadata(file) : { bpm: null, key: null, title: null, artist: null };
+
+            if (meta.title && titleInput && (!titleInput.value || titleInput.value.trim() === '')) {
+                titleInput.value = meta.title;
+            }
+            if (meta.artist && artistInput && (!artistInput.value || artistInput.value.trim() === '' || artistInput.value.includes('(Producer)'))) {
+                artistInput.value = meta.artist;
+            }
+
+            // 2. Decode AudioBuffer
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const arrayBuffer = await file.arrayBuffer();
+            const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+
+            // 3. Duration
+            const duration = Math.round(audioBuffer.duration);
+            if (durationInput) durationInput.value = duration;
+            if (durationBadge) durationBadge.textContent = `Thời lượng: ${formatTrackDuration(duration)}`;
+
+            // 4. BPM Analysis
+            let detectedBpm = meta.bpm;
+            let bpmSource = "Tên file/ID3";
+            if (!detectedBpm && window.detectBpmFromAudio) {
+                detectedBpm = await window.detectBpmFromAudio(audioBuffer);
+                bpmSource = "Phân tích DSP";
+            } else if (!detectedBpm) {
+                detectedBpm = 140;
+                bpmSource = "Mặc định";
+            }
+            if (bpmInput) bpmInput.value = detectedBpm;
+            if (bpmBadge) bpmBadge.textContent = `${detectedBpm} BPM`;
+
+            // 5. Tone Key Analysis
+            // Chạy kết hợp cả 2: Metadata (ID3v2/ID3v1/Tên file) VÀ Thuật toán sóng âm DSP (Ensemble Pearson Chromagram)
+            let dspResult = null;
+            if (window.detectKeyFromAudio) {
+                dspResult = await window.detectKeyFromAudio(audioBuffer);
+            }
+
+            let keyInfo = null;
+            let keySource = "Phân tích sóng âm DSP";
+
+            if (meta.key && window.getCamelotKeyInfo) {
+                // Nếu ID3v2/TKEY hoặc Tên file có khóa Camelot rõ ràng (như 6A, 11B, 1A)
+                const metaKeyInfo = window.getCamelotKeyInfo(meta.key);
+                keyInfo = {
+                    camelot: metaKeyInfo.camelot,
+                    name: metaKeyInfo.name,
+                    label: metaKeyInfo.label,
+                    confidence: 99,
+                    topCandidates: dspResult && dspResult.topCandidates ? [...dspResult.topCandidates] : []
+                };
+                // Đảm bảo khóa ID3 đứng vị trí #1 với 99% độ tin cậy
+                if (keyInfo.topCandidates.length > 0) {
+                    const existingIdx = keyInfo.topCandidates.findIndex(c => c.camelot === metaKeyInfo.camelot);
+                    if (existingIdx >= 0) {
+                        keyInfo.topCandidates[existingIdx].confidence = 99;
+                        const item = keyInfo.topCandidates.splice(existingIdx, 1)[0];
+                        keyInfo.topCandidates.unshift(item);
+                    } else {
+                        keyInfo.topCandidates.unshift({
+                            camelot: metaKeyInfo.camelot,
+                            name: metaKeyInfo.name,
+                            label: metaKeyInfo.label,
+                            confidence: 99
+                        });
+                        if (keyInfo.topCandidates.length > 3) keyInfo.topCandidates.pop();
+                    }
+                }
+                keySource = "ID3 / Tag DJ Chuyên Nghiệp (100% Khớp)";
+            } else if (dspResult) {
+                keyInfo = dspResult;
+                keySource = `Phân Tích Sóng Âm DSP (${dspResult.confidence}% Khớp)`;
+            } else {
+                keyInfo = { camelot: "8A", name: "Am", label: "8A (Am)", confidence: 75, topCandidates: [] };
+                keySource = "Mặc định";
+            }
+
+            selectCamelotKey(keyInfo.camelot, true);
+
+            // Render Top 3 Candidates
+            const candRow = document.getElementById('trackTopCandidatesRow');
+            const candBox = document.getElementById('trackTopCandidatesContainer');
+            if (candRow && candBox) {
+                if (keyInfo.topCandidates && keyInfo.topCandidates.length > 0) {
+                    const medals = ['🥇 Khả năng 1', '🥈 Khả năng 2', '🥉 Khả năng 3'];
+                    candBox.innerHTML = keyInfo.topCandidates.map((c, idx) => {
+                        const isPrimary = idx === 0;
+                        const btnStyle = isPrimary
+                            ? 'background: linear-gradient(135deg, #00b4d8, #0077b6); color: #fff; border: 1px solid #90e0ef; box-shadow: 0 0 10px rgba(0, 180, 216, 0.4);'
+                            : 'background: rgba(255, 255, 255, 0.08); color: #e0e1dd; border: 1px solid rgba(255, 255, 255, 0.2);';
+
+                        return `
+                            <button type="button" class="btn btn-sm py-1.5 px-3 rounded-pill fw-bold d-flex align-items-center gap-1.5 transition-all candidate-pill-btn"
+                                    data-key="${c.camelot}"
+                                    onclick="selectCamelotKey('${c.camelot}', true)"
+                                    style="${btnStyle} font-size: 0.8rem; cursor: pointer;">
+                                <span>${medals[idx]}:</span>
+                                <strong class="text-white">${c.label}</strong>
+                                <span class="badge ${isPrimary ? 'bg-dark text-info' : 'bg-secondary'} ms-1" style="font-size: 0.68rem;">${c.confidence}%</span>
+                            </button>
+                        `;
+                    }).join('');
+                    candRow.classList.remove('d-none');
+                } else {
+                    candRow.classList.add('d-none');
+                }
+
+            }
+
+            if (sourceBadge) {
+                const confText = keyInfo.confidence ? ` (${keyInfo.confidence}% tin cậy)` : '';
+                sourceBadge.textContent = `Nguồn: ${keySource}${confText} • BPM: ${bpmSource}`;
+            }
+
+            if (statusBadge) {
+                statusBadge.className = 'badge text-white px-3 py-1 rounded-pill fw-bold';
+                statusBadge.style.background = '#10b981';
+                statusBadge.innerHTML = '<i class="fas fa-check-circle me-1"></i> Đã Nhận Diện Thành Công!';
+            }
+
+            try { audioCtx.close(); } catch(e) {}
+        } catch (err) {
+            console.warn("[Track Audio Engine Fallback]", err);
+            if (bpmInput && !bpmInput.value) bpmInput.value = 140;
+            if (keyInput && !keyInput.value) selectCamelotKey("8A", true);
+            if (bpmBadge) bpmBadge.textContent = `${bpmInput.value} BPM`;
+            if (statusBadge) {
+                statusBadge.className = 'badge bg-secondary text-white px-3 py-1 rounded-pill';
+                statusBadge.innerHTML = '<i class="fas fa-music me-1"></i> Mặc định 140 BPM • Key 8A';
+            }
+        }
+    }
+
+    function formatTrackDuration(sec) {
+        if (!sec || isNaN(sec)) return "00:00";
+        const m = Math.floor(sec / 60);
+        const s = Math.floor(sec % 60);
+        return (m < 10 ? '0' + m : m) + ':' + (s < 10 ? '0' + s : s);
+    }
+
+    // Submit dedicated Track Upload
+    async function submitProducerTrackUpload(form) {
+        const submitBtn = document.getElementById('trackUploadSubmitBtn');
+        const audioFile = trackAudioFile || document.getElementById('trackAudioFileInput')?.files?.[0];
+
+        if (!audioFile) {
+            showToastNotification("⚠️ Vui lòng chọn 1 file Track âm thanh (MP3/WAV/FLAC)!");
+            return;
+        }
+
+        const originalBtnHtml = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Đang tải Track lên Kho dữ liệu...';
+
+        try {
+            const formData = new FormData(form);
+            formData.set('sourceType', 'DirectFile');
+            formData.set('type', 'Track'); // STRICTLY TRACK
+            formData.set('audioFile', audioFile);
+
+            const res = await fetch('/Producer/UploadTrack', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+
+            if (res.ok && data.success) {
+                showToastNotification(data.message || "🎧 Đăng tải bản Track thành công!");
+                form.reset();
+                clearTrackSelectedAudioFile();
+                selectCamelotKey("8A", true);
+                loadProducerTrackList();
+                return;
+            }
+
+            showToastNotification("❌ " + (data.message || "Đăng tải Track thất bại!"));
+        } catch(e) {
+            console.error(e);
+            showToastNotification("❌ Lỗi kết nối khi tải bản Track lên máy chủ!");
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnHtml;
+        }
+    }
+
+    // Load ONLY Track List (Type == "Track")
+    async function loadProducerTrackList() {
+        const container = document.getElementById('producerTracksTableContainer');
+        const badge = document.getElementById('producerTracksCountBadge');
+        if (!container) return;
+
+        try {
+            const res = await fetch('/Producer/MyTracks?type=Track');
+            const data = await res.json();
+
+            if (!data.success || !data.data || data.data.length === 0) {
+                container.innerHTML = `
+                    <div class="p-5 text-center text-dim">
+                        <i class="fas fa-compact-disc fa-3x mb-3 text-info opacity-50"></i>
+                        <h6 class="text-white">Chưa có bản Track nào được đăng tải</h6>
+                        <small>Hãy sử dụng biểu mẫu bên trái để tải lên bài Track đầu tiên của bạn!</small>
+                    </div>
+                `;
+                if (badge) badge.textContent = "0 bản Track";
+                return;
+            }
+
+            const tracks = data.data;
+            if (badge) badge.textContent = `${tracks.length} bản Track`;
+
+            container.innerHTML = `
+                <table class="table table-dark table-hover align-middle mb-0" style="background: transparent;">
+                    <thead>
+                        <tr class="text-dim small border-bottom border-secondary border-opacity-25 font-monospace">
+                            <th style="width: 50px;">Phát</th>
+                            <th>Bản Track</th>
+                            <th>BPM / Key</th>
+                            <th>Thời Lượng</th>
+                            <th>Phân Cấp</th>
+                            <th>Định Dạng</th>
+                            <th class="text-end">Thao Tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${tracks.map(t => {
+                            const isSlot = t.categoryCode && t.categoryCode.includes('Slot');
+                            const isNhom = t.categoryCode && t.categoryCode.includes('Nhom');
+                            const catBadge = isSlot ? '<span class="badge badge-premium-gold"><i class="fas fa-crown me-1"></i>Slot</span>'
+                                : (isNhom ? '<span class="badge badge-standard-red"><i class="fas fa-certificate me-1"></i>Nhóm</span>'
+                                : '<span class="badge bg-secondary">Lọt</span>');
+
+                            return `
+                                <tr>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-info rounded-circle d-flex align-items-center justify-content-center p-0" 
+                                                style="width: 32px; height: 32px;"
+                                                onclick='playTrack({
+                                                    id: "${t.musicId}",
+                                                    title: "${t.title.replace(/"/g, '\\"')}",
+                                                    artist: "${(t.artist || '').replace(/"/g, '\\"')}",
+                                                    coverUrl: "${t.coverUrl || ''}",
+                                                    audioUrl: "${t.sourceUrl}",
+                                                    bpm: ${t.bpm || 140},
+                                                    key: "${t.musicalKey || '8A'}",
+                                                    durationSeconds: ${t.durationSeconds || 240},
+                                                    categoryCode: "${t.categoryCode || 'TrackLot'}"
+                                                })'>
+                                            <i class="fas fa-play" style="font-size: 0.75rem;"></i>
+                                        </button>
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold text-white" style="font-size: 0.9rem;">${t.title}</div>
+                                        <small class="text-dim">${t.artist || 'DJ TLong'}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge-shimmer-ruby me-1" style="font-size: 0.72rem;">${t.bpm} BPM</span>
+                                        <span class="badge-shimmer-cyan" style="font-size: 0.72rem;">${t.musicalKey}</span>
+                                    </td>
+                                    <td class="text-dim small font-monospace">${formatTrackDuration(t.durationSeconds)}</td>
+                                    <td>${catBadge}</td>
+                                    <td><span class="badge bg-dark border border-secondary text-info small">${t.qualityAvailable || 'MP3'}</span></td>
+                                    <td class="text-end">
+                                        <button class="btn btn-sm btn-outline-danger px-2 py-1 rounded-2" onclick="deleteProducerTrack('${t.musicId}', '${t.title.replace(/'/g, "\\'")}')" title="Xóa bản Track">
+                                            <i class="fas fa-trash-can"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            `;
+        } catch(e) {
+            console.error(e);
+            container.innerHTML = `<div class="p-4 text-center text-danger">Lỗi khi tải kho Track cá nhân!</div>`;
+        }
+    }
+
+    async function deleteProducerTrack(id, title) {
+        if (!confirm(`⚠️ Bạn có chắc chắn muốn xóa bản Track '${title}' khỏi hệ thống?`)) return;
+
+        try {
+            const res = await fetch(`/Producer/DeleteTrack/${id}`, { method: 'POST' });
+            const data = await res.json();
+            if (data.success) {
+                showToastNotification("🗑️ " + data.message);
+                loadProducerTrackList();
+            } else {
+                showToastNotification("❌ " + (data.message || "Xóa thất bại!"));
+            }
+        } catch(e) {
+            console.error(e);
+            showToastNotification("❌ Lỗi kết nối khi xóa bản Track!");
+        }
+    }
+</script>
+}
