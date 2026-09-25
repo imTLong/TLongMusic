@@ -47,6 +47,22 @@
           }
         }
       },
+      "Microsoft.AspNetCore.Authentication.Google/8.0.11": {
+        "type": "package",
+        "compile": {
+          "lib/net8.0/Microsoft.AspNetCore.Authentication.Google.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/Microsoft.AspNetCore.Authentication.Google.dll": {
+            "related": ".xml"
+          }
+        },
+        "frameworkReferences": [
+          "Microsoft.AspNetCore.App"
+        ]
+      },
       "Microsoft.Bcl.AsyncInterfaces/1.1.1": {
         "type": "package",
         "compile": {
@@ -1170,6 +1186,21 @@
         "azureicon.png",
         "lib/netstandard2.0/Azure.Identity.dll",
         "lib/netstandard2.0/Azure.Identity.xml"
+      ]
+    },
+    "Microsoft.AspNetCore.Authentication.Google/8.0.11": {
+      "sha512": "XYjmQF9ggDnpXds7aH5CgW2SWVmubJ/F6NOnDwDseMYnEBZSwhstkY9qZszd6wsAhpW1HeT9yO9nZqFPRMiDAA==",
+      "type": "package",
+      "path": "microsoft.aspnetcore.authentication.google/8.0.11",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "THIRD-PARTY-NOTICES.TXT",
+        "lib/net8.0/Microsoft.AspNetCore.Authentication.Google.dll",
+        "lib/net8.0/Microsoft.AspNetCore.Authentication.Google.xml",
+        "microsoft.aspnetcore.authentication.google.8.0.11.nupkg.sha512",
+        "microsoft.aspnetcore.authentication.google.nuspec"
       ]
     },
     "Microsoft.Bcl.AsyncInterfaces/1.1.1": {
@@ -3013,6 +3044,7 @@
   },
   "projectFileDependencyGroups": {
     "net8.0": [
+      "Microsoft.AspNetCore.Authentication.Google >= 8.0.11",
       "Microsoft.EntityFrameworkCore.SqlServer >= 8.0.11",
       "NAudio >= 2.2.1",
       "NAudio.Lame >= 2.1.0"
@@ -3025,11 +3057,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Nguyen Thanh Long\\Documents\\GitHub\\TLongMusic\\TLongMusic.csproj",
+      "projectUniqueName": "D:\\Code\\WEB NGHE NHẠC\\TLongMusic.csproj",
       "projectName": "TLongMusic",
-      "projectPath": "C:\\Users\\Nguyen Thanh Long\\Documents\\GitHub\\TLongMusic\\TLongMusic.csproj",
+      "projectPath": "D:\\Code\\WEB NGHE NHẠC\\TLongMusic.csproj",
       "packagesPath": "C:\\Users\\Nguyen Thanh Long\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Nguyen Thanh Long\\Documents\\GitHub\\TLongMusic\\obj\\",
+      "outputPath": "D:\\Code\\WEB NGHE NHẠC\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -3070,6 +3102,10 @@
         "framework": "net8.0",
         "targetAlias": "net8.0",
         "dependencies": {
+          "Microsoft.AspNetCore.Authentication.Google": {
+            "target": "Package",
+            "version": "[8.0.11, )"
+          },
           "Microsoft.EntityFrameworkCore.SqlServer": {
             "target": "Package",
             "version": "[8.0.11, )"

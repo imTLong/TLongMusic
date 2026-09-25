@@ -175,7 +175,14 @@ namespace TLongMusic.Controllers
             string userTier = activeSub?.PackageId ?? "Free";
             bool isAdminOrProducer = User.IsInRole("Admin") || User.IsInRole("Producer");
 
-            var requiredTier = music.Category?.RequiredTierToDownload ?? "Free";
+            var requiredTier = music.Category?.RequiredTierToDownload;
+            if (string.IsNullOrEmpty(requiredTier) && !string.IsNullOrEmpty(music.CategoryCode))
+            {
+                if (music.CategoryCode.Contains("Slot", StringComparison.OrdinalIgnoreCase)) requiredTier = "Premium";
+                else if (music.CategoryCode.Contains("Nhom", StringComparison.OrdinalIgnoreCase)) requiredTier = "Standard";
+                else requiredTier = "Free";
+            }
+            requiredTier ??= "Free";
 
             // FREE TIER RULE: Only downloads Lọt
             if (!isAdminOrProducer && userTier == "Free" && (requiredTier == "Standard" || requiredTier == "Premium"))

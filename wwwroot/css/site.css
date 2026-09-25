@@ -38,7 +38,7 @@ body {
     color: var(--text-pure);
     font-family: var(--font-heading);
     overflow-x: hidden;
-    padding-bottom: 72px;
+    padding-bottom: 125px;
     min-height: 100vh;
     position: relative;
 }
@@ -977,72 +977,181 @@ body.playing-lot .crystal-table-row.active-track .track-play-inline-btn {
     left: 0;
     right: 0;
     z-index: 1050;
-    background: rgba(10, 11, 18, 0.94);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    background: rgba(12, 13, 22, 0.96);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
     border-top: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow: 0 -6px 25px rgba(0, 0, 0, 0.7), 0 -1px 12px rgba(255, 19, 74, 0.18);
-    padding: 5px 14px;
-    height: 56px;
+    box-shadow: 0 -10px 35px rgba(0, 0, 0, 0.75), 0 -1px 20px rgba(255, 19, 74, 0.12);
+    padding: 22px 20px 14px 20px;
+    height: 104px;
+    min-height: 104px;
     display: flex;
     align-items: center;
 }
 
-
-.player-track-cover {
-    width: 38px;
-    height: 38px;
-    border-radius: 8px;
-    object-fit: cover;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-    flex-shrink: 0;
+.tlong-player-bar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 19, 74, 0.5) 25%, rgba(255, 209, 102, 0.6) 50%, rgba(0, 223, 216, 0.5) 75%, transparent 100%);
+    pointer-events: none;
 }
 
+.player-cover-anchor {
+    position: relative;
+    cursor: pointer;
+    display: inline-block;
+    flex-shrink: 0;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.player-track-cover {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    object-fit: cover;
+    border: 1.5px solid rgba(255, 255, 255, 0.22);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.65);
+    flex-shrink: 0;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.player-cover-anchor:hover .player-track-cover {
+    transform: scale(1.06);
+    box-shadow: 0 0 16px rgba(255, 209, 102, 0.4);
+}
+
+.player-ctrl-row {
+    margin-top: 3px;
+    margin-bottom: 5px;
+}
+
+/* NÚT PLAY/PAUSE MASTER CHÍNH: HÀO QUANG ĐỎ RUBY */
 .player-btn-main {
-    width: 32px;
-    height: 32px;
+    width: 42px;
+    height: 42px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #ff134a 0%, #c4002b 100%);
+    background: linear-gradient(135deg, #ff134a 0%, #ff2a5f 50%, #c4002b 100%);
     color: #fff;
-    border: 1.5px solid rgba(255, 255, 255, 0.4);
+    border: 2px solid rgba(255, 255, 255, 0.55);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.82rem;
-    box-shadow: 0 0 15px var(--ruby-glow);
+    font-size: 1rem;
+    box-shadow: 0 0 20px var(--ruby-glow), 0 4px 12px rgba(0, 0, 0, 0.45);
     transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    flex-shrink: 0;
+    cursor: pointer;
 }
 
 .player-btn-main:hover {
     transform: scale(1.1);
-    box-shadow: 0 0 22px rgba(255, 19, 74, 0.9);
+    box-shadow: 0 0 28px rgba(255, 19, 74, 0.95), 0 6px 15px rgba(0, 0, 0, 0.5);
+    color: #fff;
 }
 
-.player-btn-ctrl {
-    background: transparent;
-    border: none;
-    color: var(--text-dim);
-    font-size: 0.82rem;
-    padding: 3px 6px;
+/* NÚT TIẾN/LÙI BÀI (PREV / NEXT): KÍNH TRÒN BO ĐẸP */
+.player-btn-step {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: rgba(255, 255, 255, 0.85);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.88rem;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
-    transition: color 0.2s ease;
+    flex-shrink: 0;
+}
+
+.player-btn-step:hover {
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.35);
+    color: #ffffff;
+    transform: scale(1.08);
+}
+
+/* NÚT ĐIỀU KHIỂN PHỤ (SHUFFLE, REPEAT): VIÊN NGỌC TINH TẾ */
+.player-btn-ctrl {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: transparent;
+    border: 1px solid transparent;
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 0.86rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
 }
 
 .player-btn-ctrl:hover {
     color: #fff;
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.12);
 }
 
+.player-btn-ctrl.active {
+    color: #ffd166 !important;
+    background: rgba(255, 209, 102, 0.15) !important;
+    border-color: rgba(255, 209, 102, 0.4) !important;
+    box-shadow: 0 0 12px rgba(255, 209, 102, 0.35) !important;
+}
+
+/* NÚT TUA 10 GIÂY (-10S / +10S) */
 .player-btn-skip {
-    color: var(--text-dim);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.78rem;
     transition: all 0.2s ease;
-    border-radius: 6px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
 }
 
 .player-btn-skip:hover {
     color: #ffd166 !important;
-    background: rgba(255, 209, 102, 0.12);
+    background: rgba(255, 209, 102, 0.15) !important;
+    border-color: rgba(255, 209, 102, 0.35) !important;
     transform: scale(1.08);
+}
+
+.btn-quick-fav {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    color: rgba(255, 255, 255, 0.45);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: all 0.2s ease;
+}
+
+.btn-quick-fav:hover {
+    color: #ff134a !important;
+    background: rgba(255, 19, 74, 0.12);
+    border-color: rgba(255, 19, 74, 0.3);
+    transform: scale(1.1);
+}
+
+.digital-time-display {
+    font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+    user-select: none;
 }
 
 .seek-slider {
@@ -2273,4 +2382,56 @@ html, body {
         padding: 2px 4px !important;
         font-size: 0.72rem !important;
     }
+}
+
+/* ========================================================
+   PRODUCER STUDIO - NÚT 7 MÀU (RAINBOW HOLOGRAPHIC AURORA)
+   ======================================================== */
+.btn-producer-studio-rainbow {
+    background: linear-gradient(135deg, #ff007f, #7928ca, #0070f3, #00dfd8, #43e97b, #fa709a, #fee140, #ff007f) !important;
+    background-size: 300% 300% !important;
+    animation: rainbowShift 4s ease infinite !important;
+    color: #ffffff !important;
+    font-weight: 800 !important;
+    font-size: 0.82rem !important;
+    letter-spacing: 0.5px !important;
+    border: 1px solid rgba(255, 255, 255, 0.4) !important;
+    border-radius: 50px !important;
+    padding: 0.38rem 1.05rem !important;
+    box-shadow: 0 0 16px rgba(255, 0, 127, 0.5), 0 0 25px rgba(0, 112, 243, 0.4), inset 0 0 8px rgba(255, 255, 255, 0.3) !important;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    white-space: nowrap !important;
+    cursor: pointer;
+    text-transform: uppercase;
+}
+
+.btn-producer-studio-rainbow:hover,
+.btn-producer-studio-rainbow:focus {
+    transform: translateY(-2px) scale(1.04) !important;
+    box-shadow: 0 0 25px rgba(255, 0, 127, 0.8), 0 0 38px rgba(0, 223, 216, 0.7), inset 0 0 12px rgba(255, 255, 255, 0.5) !important;
+    color: #ffffff !important;
+}
+
+.btn-producer-studio-rainbow:active {
+    transform: translateY(0) scale(0.98) !important;
+}
+
+.btn-producer-studio-rainbow::after {
+    vertical-align: middle !important;
+    margin-left: 0.4rem !important;
+}
+
+@keyframes rainbowShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.producer-menu-item {
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.producer-menu-item:hover {
+    transform: translateY(-2px) scale(1.02) !important;
+    filter: brightness(1.15) !important;
 }

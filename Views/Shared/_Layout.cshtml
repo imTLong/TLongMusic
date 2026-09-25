@@ -56,18 +56,18 @@
                                 <i class="fas fa-sparkles text-danger"></i> Khám Phá
                             </a>
                         </li>
-                        <li class="nav-item">
+                        <li class="nav-item" id="navItemKhoTrack" style="@(User.Identity?.IsAuthenticated == true ? "" : "display: none !important;")">
                             <a class="nav-link tlong-nav-link text-nowrap @(Context.Request.Path.StartsWithSegments("/Track") ? "active" : "")" href="/Track">
                                 <i class="fas fa-compact-disc text-info"></i> 🎵 Kho Track DJ
                             </a>
                         </li>
-                        <li class="nav-item">
+                        <li class="nav-item" id="navItemKhoNonstop" style="@(User.Identity?.IsAuthenticated == true ? "" : "display: none !important;")">
                             <a class="nav-link tlong-nav-link text-nowrap @(Context.Request.Path.StartsWithSegments("/Nonstop") ? "active" : "")" href="/Nonstop">
                                 <i class="fas fa-fire-flame-curved text-warning"></i> 🔥 Kho Nonstop
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link tlong-nav-link text-nowrap" href="#pricingSection">
+                            <a class="nav-link tlong-nav-link text-nowrap @(Context.Request.Path.StartsWithSegments("/Goi-Hoi-Vien") || Context.Request.Path.StartsWithSegments("/Membership") ? "active" : "")" href="/Goi-Hoi-Vien">
                                 <i class="fas fa-gem text-danger"></i> Gói Hội Viên
                             </a>
                         </li>
@@ -105,120 +105,132 @@
     <!-- Crystal Footer -->
     <footer class="mt-5 py-5 border-top" style="background: rgba(8, 9, 15, 0.85); backdrop-filter: blur(20px); border-color: rgba(255, 255, 255, 0.1) !important; position: relative; z-index: 2;">
         <div class="container px-lg-4">
-            <div class="row g-4">
-                <div class="col-lg-4 col-md-6">
+            <div class="row g-4 justify-content-between">
+                <div class="col-lg-6 col-md-7">
                     <div class="d-flex align-items-center gap-3 mb-3">
                         <div class="tlong-logo-container" style="width: 40px; height: 40px;">
                             <img src="~/images/logo.png" alt="Logo" class="tlong-logo-img" style="width: 38px; height: 38px;" />
                         </div>
                         <h4 class="tlong-brand-title mb-0">TLONG<span>MUSIC</span></h4>
                     </div>
-                    <p class="text-dim small" style="line-height: 1.7;">
+                    <p class="text-dim small mb-0" style="line-height: 1.7;">
                         Nền tảng âm nhạc trực tuyến và Record Pool thế hệ mới dành cho DJ và người yêu âm nhạc điện tử Việt Nam. Trải nghiệm chất lượng âm thanh Master 24-Bit và tải nhạc phòng thu đỉnh cao.
                     </p>
                 </div>
 
-                <div class="col-lg-2 col-md-6">
-                    <h6 class="text-white font-weight-bold mb-3" style="font-size: 0.95rem;">Kho Âm Nhạc</h6>
-                    <ul class="list-unstyled text-dim small d-flex flex-column gap-2">
-                        <li><a href="/Nonstop" class="text-decoration-none text-dim"><i class="fas fa-fire-flame-curved text-warning me-1"></i> Kho Nonstop Theo Ngày</a></li>
-                        <li><a href="/Track" class="text-decoration-none text-dim"><i class="fas fa-compact-disc text-info me-1"></i> Kho Track DJ Theo Ngày</a></li>
-                        <li><a href="/#pricingSection" class="text-decoration-none text-dim">Gói Hội Viên Record Pool</a></li>
-                    </ul>
-                </div>
-
-                <div class="col-lg-3 col-md-6">
-                    <h6 class="text-white font-weight-bold mb-3" style="font-size: 0.95rem;">Hạng Hội Viên</h6>
-                    <ul class="list-unstyled text-dim small d-flex flex-column gap-2">
-                        <li><a href="#pricingSection" class="text-decoration-none text-dim">Gói Standard VIP (99.000đ)</a></li>
-                        <li><a href="#pricingSection" class="text-decoration-none text-dim">Gói Premium Master (199.000đ)</a></li>
-                        <li><a href="#" class="text-decoration-none text-dim">Bảo Vệ Âm Thanh & Voice Tag</a></li>
-                    </ul>
-                </div>
-
-                <div class="col-lg-3 col-md-6">
+                <div class="col-lg-4 col-md-5">
                     <h6 class="text-white font-weight-bold mb-3" style="font-size: 0.95rem;">Hỗ Trợ & Đặt Nhạc</h6>
-                    <p class="text-dim small mb-2"><i class="fas fa-phone-alt text-danger me-2"></i> Zalo / Hotline: <strong>09xx.xxx.xxx</strong></p>
-                    <p class="text-dim small mb-2"><i class="fas fa-envelope text-danger me-2"></i> Email: <strong>support@tlongmusic.vn</strong></p>
-                    <p class="text-dim small"><i class="fas fa-shield-halved text-danger me-2"></i> Máy chủ tốc độ cao Cloudflare R2</p>
+                    <p class="text-dim small mb-2"><i class="fas fa-phone-alt text-danger me-2"></i> Zalo / Hotline: <strong class="text-white">0388862876</strong></p>
+                    <p class="text-dim small mb-2"><i class="fas fa-envelope text-danger me-2"></i> Email: <strong class="text-white">tranphongbat8686@gmail.com</strong></p>
+                    <p class="text-dim small mb-0"><i class="fas fa-shield-halved text-danger me-2"></i> Máy chủ tốc độ cao Cloudflare R2</p>
                 </div>
             </div>
 
             <hr class="my-4" style="border-color: rgba(255, 255, 255, 0.08);" />
 
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center text-dim small">
-                <div>&copy; 2026 <strong>TLongMusic Crystal</strong>. Bản quyền thuộc về TLongMusic Studio.</div>
-                <div class="mt-2 mt-md-0 font-monospace" style="font-size: 0.78rem;">
-                    Engineered with C# (.NET 8) & Kho dữ liệu Architecture
-                </div>
+            <div class="text-center text-dim small">
+                &copy; 2026 <strong>TLongMusic Crystal</strong>. Toàn bộ bản quyền thuộc về TLongMusic Studio.
             </div>
         </div>
     </footer>
 
     <!-- ==========================================
-         STICKY BOTTOM PLAYER: ULTRA-COMPACT SLEEK CRYSTAL BAR
+         STICKY BOTTOM PLAYER: THIẾT KẾ KHOA HỌC CHUẨN STUDIO DJ
          ========================================== -->
     <div class="tlong-player-bar">
-        <div class="container-fluid px-3 px-xl-4" style="max-width: 1720px;">
-            <div class="row align-items-center g-2 g-md-3">
-                <!-- Left: Track Metadata (Compact) -->
-                <div class="col-7 col-md-3 d-flex align-items-center gap-2">
-                    <img id="playerTrackCover" src="~/images/logo.png" alt="Cover" class="player-track-cover" />
-                    <div style="min-width: 0; flex-grow: 1;">
-                        <div class="d-flex align-items-center gap-1">
-                            <h6 id="playerTrackTitle" class="text-white mb-0 text-truncate" style="font-size: 0.82rem; font-weight: 700; line-height: 1.2;">
-                                Chọn bài để phát
-                            </h6>
-                            <span id="playerDemoBadge" class="badge-shimmer-ruby d-none" style="font-size: 0.58rem; padding: 1px 4px;">DEMO 30S</span>
+        <div class="container-fluid px-3 px-xl-4" style="max-width: 1760px;">
+            <div class="row align-items-center g-2 g-lg-3">
+                <!-- VÙNG 1: THÔNG TIN BÀI HÁT & THÔNG SỐ STUDIO (LEFT) -->
+                <div class="col-7 col-md-4 col-xl-3 d-flex align-items-center gap-2.5">
+                    <a id="playerTrackCoverLink" href="javascript:void(0)" onclick="navigateToCurrentTrackDetail(event)" title="Xem trang chi tiết bài hát" class="player-cover-anchor">
+                        <img id="playerTrackCover" src="~/images/logo.png" alt="Cover" class="player-track-cover" />
+                        <div class="player-cover-glow"></div>
+                    </a>
+                    <div class="player-track-meta d-flex flex-column justify-content-center" style="min-width: 0; flex-grow: 1;">
+                        <div class="d-flex align-items-center gap-1.5">
+                            <a id="playerTrackTitleLink" href="javascript:void(0)" onclick="navigateToCurrentTrackDetail(event)" title="Xem chi tiết bài hát" class="text-white text-decoration-none hover-gold text-truncate d-inline-block" style="cursor: pointer; max-width: 100%;">
+                                <h6 id="playerTrackTitle" class="text-white mb-0 text-truncate fw-bold" style="font-size: 0.88rem; line-height: 1.25;">
+                                    Chọn bài để phát
+                                </h6>
+                            </a>
+                            <span id="playerDemoBadge" class="badge-shimmer-ruby d-none flex-shrink-0" style="font-size: 0.58rem; padding: 1px 5px;">DEMO 30S</span>
                         </div>
-                        <div class="d-flex align-items-center gap-1 mt-0">
-                            <span id="playerTrackArtist" class="text-dim text-truncate" style="max-width: 95px; font-size: 0.68rem;">TLong Studio</span>
-                            <span id="playerTrackBpm" class="badge-shimmer-ruby" style="font-size: 0.58rem; padding: 1px 4px;">-- BPM</span>
-                            <span id="playerTrackKey" class="badge-shimmer-cyan d-none d-sm-inline-block" style="font-size: 0.58rem; padding: 1px 4px;">--</span>
+                        <div class="d-flex align-items-center gap-1.5 mt-1 flex-wrap">
+                            <span id="playerTrackArtist" class="text-dim text-truncate" style="max-width: 120px; font-size: 0.74rem;">TLong Studio</span>
+                            <span id="playerTrackBpm" class="badge-bpm font-monospace flex-shrink-0" style="font-size: 0.62rem; padding: 1px 6px;">-- BPM</span>
+                            <span id="playerTrackKey" class="badge-camelot font-monospace d-none d-sm-inline-block flex-shrink-0" style="font-size: 0.62rem; padding: 1px 6px;">--</span>
                         </div>
                     </div>
+                    <!-- Quick Favorite Heart Button -->
+                    <button id="playerBarFavBtn" class="player-btn-ctrl btn-quick-fav d-none d-sm-inline-flex ms-1" onclick="toggleCurrentTrackFavorite(this)" title="Yêu thích bài đang phát">
+                        <i class="far fa-heart text-danger"></i>
+                    </button>
                 </div>
 
-                <!-- Center: Controls & Compact Progress Bar -->
-                <div class="col-12 col-md-6 order-3 order-md-2 text-center py-0">
-                    <div class="d-flex justify-content-center align-items-center gap-2 gap-sm-3 mb-1 player-ctrl-row">
-                        <button class="player-btn-ctrl" onclick="playPrevTrack()" title="Bài trước"><i class="fas fa-backward-step"></i></button>
-                        <button class="player-btn-ctrl player-btn-skip px-1" onclick="skipTime(-10)" title="Lùi 10 giây">
-                            <span class="d-inline-flex align-items-center gap-1" style="font-size: 0.72rem; font-weight: 700;">
-                                <i class="fas fa-rotate-left" style="font-size: 0.75rem;"></i>
-                                <span style="font-size: 0.62rem;">10s</span>
-                            </span>
+                <!-- VÙNG 2: BỘ ĐIỀU KHIỂN TRUNG TÂM & TIẾN TRÌNH THỜI GIAN (CENTER) -->
+                <div class="col-12 col-md-5 col-xl-6 order-3 order-md-2 text-center py-0 d-flex flex-column justify-content-center align-items-center my-auto">
+                    <div class="d-flex justify-content-center align-items-center gap-2 gap-sm-3 player-ctrl-row mb-1">
+                        <!-- Shuffle Button -->
+                        <button id="playerShuffleBtn" class="player-btn-ctrl d-none d-sm-inline-flex" onclick="toggleShuffle()" title="Phát ngẫu nhiên (Shuffle)">
+                            <i class="fas fa-shuffle"></i>
                         </button>
-                        <button id="playerPlayPauseBtn" class="player-btn-main" onclick="togglePlayPause()" title="Phát / Dừng">
+                        <!-- Prev Track -->
+                        <button id="playerPrevBtn" class="player-btn-step" onclick="playPrevTrack()" title="Bài trước (Prev)">
+                            <i class="fas fa-backward-step"></i>
+                        </button>
+                        <!-- Skip -10s -->
+                        <button class="player-btn-skip d-none d-md-inline-flex" onclick="skipTime(-10)" title="Lùi lại 10 giây">
+                            <i class="fas fa-rotate-left"></i>
+                        </button>
+                        <!-- Main Master Play/Pause -->
+                        <button id="playerPlayPauseBtn" class="player-btn-main mx-1" onclick="togglePlayPause()" title="Phát / Tạm dừng">
                             <i class="fas fa-play" style="margin-left: 2px;"></i>
                         </button>
-                        <button class="player-btn-ctrl player-btn-skip px-1" onclick="skipTime(10)" title="Tua 10 giây">
-                            <span class="d-inline-flex align-items-center gap-1" style="font-size: 0.72rem; font-weight: 700;">
-                                <span style="font-size: 0.62rem;">10s</span>
-                                <i class="fas fa-rotate-right" style="font-size: 0.75rem;"></i>
-                            </span>
+                        <!-- Skip +10s (Tua tới đằng trước nút Next) -->
+                        <button class="player-btn-skip d-none d-md-inline-flex" onclick="skipTime(10)" title="Tua tới 10 giây">
+                            <i class="fas fa-rotate-right"></i>
                         </button>
-                        <button class="player-btn-ctrl" onclick="playNextTrack()" title="Bài tiếp"><i class="fas fa-forward-step"></i></button>
+                        <!-- Next Track -->
+                        <button id="playerNextBtn" class="player-btn-step" onclick="playNextTrack()" title="Bài kế tiếp (Next)">
+                            <i class="fas fa-forward-step"></i>
+                        </button>
+                        <!-- Repeat Button -->
+                        <button id="playerRepeatBtn" class="player-btn-ctrl d-none d-sm-inline-flex" onclick="toggleRepeat()" title="Lặp lại (Off / All / One)">
+                            <i class="fas fa-repeat"></i>
+                        </button>
                     </div>
 
-                    <div class="d-flex align-items-center gap-2 px-1 w-100 player-seek-row" style="margin-top: 5px;">
-                        <span id="playerCurrentTime" class="text-dim font-monospace" style="min-width: 32px; font-size: 0.7rem;">0:00</span>
-                        <input type="range" id="playerSeekSlider" class="seek-slider" min="0" max="100" value="0" />
-                        <span id="playerDuration" class="text-dim font-monospace" style="min-width: 32px; font-size: 0.7rem;">0:00</span>
+                    <!-- Digital Precision Seek Timeline -->
+                    <div class="d-flex align-items-center gap-2 px-1 w-100 player-seek-row" style="margin-top: 4px;">
+                        <span id="playerCurrentTime" class="font-monospace text-warning fw-bold digital-time-display" style="min-width: 44px; font-size: 0.78rem; letter-spacing: 0.5px;">00:00</span>
+                        <div class="seek-slider-container flex-grow-1 position-relative">
+                            <input type="range" id="playerSeekSlider" class="seek-slider w-100" min="0" max="100" value="0" />
+                        </div>
+                        <span id="playerDuration" class="font-monospace text-light fw-semibold digital-time-display" style="min-width: 44px; font-size: 0.78rem; letter-spacing: 0.5px; opacity: 0.85;">00:00</span>
                     </div>
                 </div>
 
-                <!-- Right: Quality & Download Action (Compact) -->
-                <div class="col-5 col-md-3 order-2 order-md-3 d-flex justify-content-end align-items-center gap-2">
-                    <span id="playerTrackQuality" class="badge-shimmer-gold d-none d-lg-inline-block font-monospace fw-bold" style="font-size: 0.68rem; padding: 2px 7px;">MP3</span>
+                <!-- VÙNG 3: ĐỊNH DẠNG ÂM THANH, ÂM LƯỢNG & NÚT TẢI NHẠC (RIGHT) -->
+                <div class="col-5 col-md-3 col-xl-3 order-2 order-md-3 d-flex justify-content-end align-items-center gap-2 gap-lg-3">
+                    <!-- Format Badge (hidden để giữ id cho JS) -->
+                    <span id="playerTrackQuality" class="d-none"></span>
 
-                    <div class="d-none d-md-flex align-items-center gap-1">
-                        <i id="volumeIcon" class="fas fa-volume-up text-dim" style="font-size: 0.72rem;"></i>
-                        <input type="range" id="playerVolumeSlider" class="seek-slider" min="0" max="100" value="85" style="width: 55px;" />
+                    <!-- Volume Control with Click-to-Mute -->
+                    <div class="d-none d-md-flex align-items-center gap-2 player-volume-box">
+                        <button class="player-btn-ctrl p-0" onclick="toggleMute()" title="Bật/Tắt tiếng (Mute)">
+                            <i id="volumeIcon" class="fas fa-volume-up text-dim hover-white" style="font-size: 0.88rem; width: 18px; text-align: center;"></i>
+                        </button>
+                        <input type="range" id="playerVolumeSlider" class="seek-slider player-vol-slider" min="0" max="100" value="85" style="width: 75px;" title="Âm lượng" />
                     </div>
 
-                    <button class="btn btn-sm btn-shimmer-ruby py-1 px-2.5 d-flex align-items-center gap-1" style="font-size: 0.76rem;" onclick="if(window.TLongPlayer.currentTrack) handleDownload(window.TLongPlayer.currentTrack.id, window.TLongPlayer.currentTrack.title, window.TLongPlayer.currentTrack.tierRequired); else showToastNotification('Vui lòng chọn bài để tải!');">
-                        <i class="fas fa-download"></i> <span>Tải</span>
+                    <!-- Jump to Detail Page -->
+                    <button class="player-btn-ctrl d-none d-lg-inline-flex" onclick="navigateToCurrentTrackDetail(event)" title="Xem trang chi tiết bài hát">
+                        <i class="fas fa-arrow-up-right-from-square" style="font-size: 0.85rem;"></i>
+                    </button>
+
+                    <!-- Primary Ruby Download Button -->
+                    <button id="playerDownloadBtn" class="btn btn-sm btn-shimmer-ruby py-1.5 px-3.5 d-flex align-items-center gap-1.5 rounded-pill fw-bold shadow" style="font-size: 0.82rem;" onclick="if(window.TLongPlayer.currentTrack) handleDownload(window.TLongPlayer.currentTrack.id, window.TLongPlayer.currentTrack.title, window.TLongPlayer.currentTrack.tierRequired); else showToastNotification('Vui lòng chọn bài để tải!');">
+                        <i class="fas fa-cloud-arrow-down"></i> <span class="d-none d-sm-inline">Tải Nhạc</span><span class="d-inline d-sm-none">Tải</span>
                     </button>
                 </div>
             </div>
@@ -811,8 +823,9 @@
                             </h6>
                             <div class="row g-3">
                                 <div class="col-md-6">
-                                    <label class="form-label text-dim small">Tên đăng nhập (Cố định):</label>
-                                    <input type="text" id="profileUsername" class="form-control bg-dark text-dim border-secondary" readonly disabled />
+                                    <label class="form-label text-white small">Tên đăng nhập (Username): <span class="text-danger">*</span></label>
+                                    <input type="text" id="profileUsername" name="username" class="form-control bg-dark text-white border-secondary font-monospace" required minlength="3" maxlength="50" placeholder="username..." />
+                                    <small class="text-dim d-block mt-1" style="font-size: 0.72rem;">Từ 3-50 ký tự, không dấu cách</small>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label text-dim small">Họ và tên hiển thị: <span class="text-danger">*</span></label>

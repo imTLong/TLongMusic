@@ -865,8 +865,13 @@
                     </div>
 
                     <!-- FOOTER ACTIONS -->
-                    <div class="d-flex justify-content-between align-items-center pt-3 border-top border-secondary border-opacity-25">
-                        <button type="button" class="btn btn-outline-secondary px-4 rounded-pill" data-bs-dismiss="modal">Đóng</button>
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top border-secondary border-opacity-25 flex-wrap gap-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <button type="button" class="btn btn-outline-secondary px-3 rounded-pill" data-bs-dismiss="modal">Đóng</button>
+                            <button type="button" class="btn btn-outline-danger px-3 rounded-pill fw-bold" onclick="adminClearCurrentModalUserSubs()" title="Xóa tất cả các gói đăng ký của thành viên này">
+                                <i class="fas fa-trash-can me-1"></i> Xóa Tất Cả Gói Đăng Ký
+                            </button>
+                        </div>
                         <button type="submit" id="btnSubmitExtend" class="btn btn-shimmer-gold px-4 py-2.5 rounded-pill fw-bold d-flex align-items-center gap-2 shadow-lg">
                             <i class="fas fa-check-circle"></i>
                             <span>Xác Nhận Gia Hạn (<span id="btnSubmitDaysText">+7 ngày</span>)</span>

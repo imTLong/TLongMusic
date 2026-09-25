@@ -11,6 +11,22 @@
   },
   {
     "ContainingType": "TLongMusic.Controllers.AdminController",
+    "Method": "ClearUserSubscriptions",
+    "RelativePath": "Admin/ClearUserSubscriptions",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "model",
+        "Type": "TLongMusic.Models.Dto.AdminClearSubscriptionsDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TLongMusic.Controllers.AdminController",
     "Method": "CreateProducer",
     "RelativePath": "Admin/CreateProducer",
     "HttpMethod": "POST",
@@ -448,6 +464,43 @@
     "IsController": true,
     "Order": 0,
     "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TLongMusic.Controllers.ProducerController",
+    "Method": "ToggleStatus",
+    "RelativePath": "Producer/ToggleStatus/{id}",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Guid",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "TLongMusic.Controllers.ProducerController",
+    "Method": "UpdateTrack",
+    "RelativePath": "Producer/UpdateTrack/{id}",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Guid",
+        "IsRequired": true
+      },
+      {
+        "Name": "dto",
+        "Type": "TLongMusic.Models.Dto.ProducerUpdateTrackDto",
+        "IsRequired": true
+      }
+    ],
     "ReturnTypes": []
   },
   {

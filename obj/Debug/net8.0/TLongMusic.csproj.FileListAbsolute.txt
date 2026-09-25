@@ -180,3 +180,5 @@ C:\Users\Nguyen Thanh Long\Documents\GitHub\TLongMusic\obj\Debug\net8.0\refint\T
 C:\Users\Nguyen Thanh Long\Documents\GitHub\TLongMusic\obj\Debug\net8.0\TLongMusic.pdb
 C:\Users\Nguyen Thanh Long\Documents\GitHub\TLongMusic\obj\Debug\net8.0\TLongMusic.genruntimeconfig.cache
 C:\Users\Nguyen Thanh Long\Documents\GitHub\TLongMusic\obj\Debug\net8.0\ref\TLongMusic.dll
+D:\Code\WEB NGHE NHẠC\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.Google.dll
+D:\Code\WEB NGHE NHẠC\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt

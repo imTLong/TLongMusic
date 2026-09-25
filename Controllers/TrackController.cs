@@ -119,13 +119,7 @@ public class TrackController : Controller
             viewModel.CurrentUserTier = currentUserTier;
             viewModel.IsPremiumUser = isPremiumUser;
             viewModel.IsVipUser = isVipUser;
-
-            // Nếu tài khoản Standard và chưa chọn tier filter nào: Mặc định chỉ hiển thị track của Nhóm
-            if (string.IsNullOrWhiteSpace(tier) && currentUserTier == "standard")
-            {
-                tier = "nhom";
-                viewModel.SelectedTier = "nhom";
-            }
+            viewModel.SelectedTier = tier ?? "all";
 
             // Lọc theo tier nếu có
             if (!string.IsNullOrWhiteSpace(tier) && tier != "all")
@@ -143,6 +137,27 @@ public class TrackController : Controller
                 else if (tier.Equals("lot", StringComparison.OrdinalIgnoreCase))
                 {
                     // Chỉ hiển thị track Lọt (Free) - Tuyệt đối không lẫn Slot hay Nhóm
+                    trackList = trackList.Where(IsTrackLot).ToList();
+                }
+            }
+            else
+            {
+                // Ở MỤC "TẤT CẢ" (tier == null hoặc tier == "all"):
+                // - Tài khoản Standard: Bỏ phần nhạc Slot (chỉ hiện Nhạc Nhóm + Nhạc Lọt)
+                // - Tài khoản Free (hoặc chưa đăng nhập): Chỗ Tất Cả chỉ hiện Track Lọt
+                // - Tài khoản Premium / Admin / Producer: Hiển thị trọn vẹn toàn bộ
+                if (isPremiumUser || isAdminOrProducer)
+                {
+                    // Giữ nguyên toàn bộ bài (Slot + Nhóm + Lọt)
+                }
+                else if (currentUserTier == "standard")
+                {
+                    // Standard: Bỏ phần nhạc slot
+                    trackList = trackList.Where(t => !IsTrackSlot(t)).ToList();
+                }
+                else
+                {
+                    // Free: Chỉ hiện track lọt
                     trackList = trackList.Where(IsTrackLot).ToList();
                 }
             }
@@ -202,10 +217,15 @@ public class TrackController : Controller
     private static Track MapEntityToTrack(Models.Entities.Music m)
     {
         var requiredTier = RequiredTier.Free;
-        if (m.Category != null)
+        if (m.Category != null && !string.IsNullOrEmpty(m.Category.RequiredTierToDownload))
         {
             if (m.Category.RequiredTierToDownload == "Premium") requiredTier = RequiredTier.Premium;
             else if (m.Category.RequiredTierToDownload == "Standard") requiredTier = RequiredTier.Standard;
+        }
+        else if (!string.IsNullOrEmpty(m.CategoryCode))
+        {
+            if (m.CategoryCode.Contains("Slot", StringComparison.OrdinalIgnoreCase)) requiredTier = RequiredTier.Premium;
+            else if (m.CategoryCode.Contains("Nhom", StringComparison.OrdinalIgnoreCase)) requiredTier = RequiredTier.Standard;
         }
 
         var isSlot = (m.CategoryCode != null && m.CategoryCode.Contains("Slot", StringComparison.OrdinalIgnoreCase)) || requiredTier == RequiredTier.Premium;
@@ -291,6 +311,7 @@ public class TrackController : Controller
             music = await _context.Musics
                 .Include(m => m.Category)
                 .Include(m => m.Producer)
+                    .ThenInclude(p => p.User)
                 .Include(m => m.Favorites)
                 .FirstOrDefaultAsync(m => m.MusicId == musicGuid && m.Status == "Published");
         }
@@ -300,6 +321,7 @@ public class TrackController : Controller
             music = await _context.Musics
                 .Include(m => m.Category)
                 .Include(m => m.Producer)
+                    .ThenInclude(p => p.User)
                 .Include(m => m.Favorites)
                 .FirstOrDefaultAsync(m => m.Status == "Published");
 

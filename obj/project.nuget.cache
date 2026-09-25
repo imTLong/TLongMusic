@@ -1,11 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "nDFuxmuQ9fQ=",
+  "dgSpecHash": "r0JZAf+Kmfc=",
   "success": true,
-  "projectFilePath": "C:\\Users\\Nguyen Thanh Long\\Documents\\GitHub\\TLongMusic\\TLongMusic.csproj",
+  "projectFilePath": "D:\\Code\\WEB NGHE NHẠC\\TLongMusic.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Nguyen Thanh Long\\.nuget\\packages\\azure.core\\1.38.0\\azure.core.1.38.0.nupkg.sha512",
     "C:\\Users\\Nguyen Thanh Long\\.nuget\\packages\\azure.identity\\1.11.4\\azure.identity.1.11.4.nupkg.sha512",
+    "C:\\Users\\Nguyen Thanh Long\\.nuget\\packages\\microsoft.aspnetcore.authentication.google\\8.0.11\\microsoft.aspnetcore.authentication.google.8.0.11.nupkg.sha512",
     "C:\\Users\\Nguyen Thanh Long\\.nuget\\packages\\microsoft.bcl.asyncinterfaces\\1.1.1\\microsoft.bcl.asyncinterfaces.1.1.1.nupkg.sha512",
     "C:\\Users\\Nguyen Thanh Long\\.nuget\\packages\\microsoft.csharp\\4.5.0\\microsoft.csharp.4.5.0.nupkg.sha512",
     "C:\\Users\\Nguyen Thanh Long\\.nuget\\packages\\microsoft.data.sqlclient\\5.1.6\\microsoft.data.sqlclient.5.1.6.nupkg.sha512",
@@ -67,10 +68,10 @@
     "C:\\Users\\Nguyen Thanh Long\\.nuget\\packages\\system.text.json\\4.7.2\\system.text.json.4.7.2.nupkg.sha512",
     "C:\\Users\\Nguyen Thanh Long\\.nuget\\packages\\system.threading.tasks.extensions\\4.5.4\\system.threading.tasks.extensions.4.5.4.nupkg.sha512",
     "C:\\Users\\Nguyen Thanh Long\\.nuget\\packages\\system.windows.extensions\\6.0.0\\system.windows.extensions.6.0.0.nupkg.sha512",
-    "C:\\Users\\Nguyen Thanh Long\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\8.0.30\\microsoft.windowsdesktop.app.ref.8.0.30.nupkg.sha512",
-    "C:\\Users\\Nguyen Thanh Long\\.nuget\\packages\\microsoft.netcore.app.ref\\8.0.30\\microsoft.netcore.app.ref.8.0.30.nupkg.sha512",
     "C:\\Users\\Nguyen Thanh Long\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\8.0.30\\microsoft.aspnetcore.app.ref.8.0.30.nupkg.sha512",
-    "C:\\Users\\Nguyen Thanh Long\\.nuget\\packages\\microsoft.netcore.app.host.win-x64\\8.0.30\\microsoft.netcore.app.host.win-x64.8.0.30.nupkg.sha512"
+    "C:\\Users\\Nguyen Thanh Long\\.nuget\\packages\\microsoft.netcore.app.host.win-x64\\8.0.30\\microsoft.netcore.app.host.win-x64.8.0.30.nupkg.sha512",
+    "C:\\Users\\Nguyen Thanh Long\\.nuget\\packages\\microsoft.netcore.app.ref\\8.0.30\\microsoft.netcore.app.ref.8.0.30.nupkg.sha512",
+    "C:\\Users\\Nguyen Thanh Long\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\8.0.30\\microsoft.windowsdesktop.app.ref.8.0.30.nupkg.sha512"
   ],
   "logs": []
 }

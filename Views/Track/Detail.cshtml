@@ -8,22 +8,13 @@
 }
 
 <div class="container-fluid px-3 px-xl-5 py-4" style="max-width: 1480px;">
-    <!-- Breadcrumb -->
-    <div class="d-flex align-items-center gap-2 mb-3 text-dim small">
-        <a href="/" class="text-dim text-decoration-none hover-white"><i class="fas fa-house me-1"></i> Trang chủ</a>
-        <span>/</span>
-        <a href="@(Model.IsNonstop ? "/Nonstop" : "/Track")" class="text-dim text-decoration-none hover-white">@(Model.IsNonstop ? "Kho Nonstop" : "Kho Track")</a>
-        <span>/</span>
-        <span class="text-white text-truncate" style="max-width: 320px;">@Model.Music.Title</span>
-    </div>
-
     <!-- ========================================================
          HERO SOUNDCLOUD-STYLE PLAYER BANNER (CHÍNH XÁC THEO HÌNH ẢNH)
          ======================================================== -->
     <div class="soundcloud-hero-card mb-4" id="songHeroPlayer">
         <div class="row g-4 align-items-center">
             <!-- CỘT TRÁI: THÔNG TIN, WAVEFORM VÀ THANH CÔNG CỤ -->
-            <div class="col-12 col-lg-8 col-xl-9 d-flex flex-column justify-content-between" style="min-height: 270px;">
+            <div class="col-12 col-lg-8 col-xl-9 d-flex flex-column justify-content-between" style="min-height: 295px;">
                 <!-- 1. HEADER ROW: PLAY BUTTON + TITLE + METADATA -->
                 <div class="d-flex align-items-start gap-3 mb-3">
                     <button id="heroPlayBtn" class="soundcloud-big-play-btn flex-shrink-0" onclick="toggleDetailPlayback()" title="Phát bài này">
@@ -55,48 +46,63 @@
                     </div>
                 </div>
 
-                <!-- 2. MIDDLE ROW: INTERACTIVE SOUNDCLOUD AUDIO WAVEFORM -->
-                <div class="position-relative my-2 w-100" style="padding-right: 55px;">
-                    <div id="soundcloudWaveformContainer" class="soundcloud-waveform-wrapper" onclick="seekWaveform(event)" ontouchstart="seekWaveform(event)">
-                        <canvas id="detailWaveformCanvas" height="85" style="width: 100%; display: block;"></canvas>
+                <!-- 2. MIDDLE ROW: INTERACTIVE SOUNDCLOUD AUDIO WAVEFORM (85PX STUDIO POWER) -->
+                <div class="position-relative my-3 w-100">
+                    <div id="soundcloudWaveformContainer" class="soundcloud-waveform-wrapper position-relative"
+                         onclick="seekWaveform(event)"
+                         ontouchstart="seekWaveform(event)"
+                         onmousemove="handleWaveformHover(event)"
+                         onmouseleave="handleWaveformLeave()">
+                        <canvas id="detailWaveformCanvas" height="85" style="width: 100%; height: 85px; display: block;"></canvas>
+                        <!-- Scrub hover hairline -->
+                        <div id="waveformHoverLine" class="waveform-hover-line"></div>
+                        <!-- Playhead vertical line -->
+                        <div id="waveformPlayheadLine" class="waveform-playhead-line" style="left: 0%;"></div>
                         <!-- Playhead Pin / Avatar -->
                         <div id="waveformPlayhead" class="waveform-playhead" style="left: 0%;">
                             <img src="@Model.CurrentUserAvatar" alt="Playhead" class="waveform-playhead-avatar" onerror="this.src='/images/logo.png'" />
                         </div>
                     </div>
-
-                    <!-- Time markers on the right -->
-                    <div class="position-absolute end-0 top-0 d-flex flex-column justify-content-between h-100 text-end pe-1" style="width: 50px;">
-                        <span id="detailCurrentTime" class="font-monospace text-dim" style="font-size: 0.76rem;">0:00</span>
-                        <span id="detailTotalDuration" class="font-monospace text-dim" style="font-size: 0.76rem;">@Model.Music.FormattedDuration</span>
-                    </div>
                 </div>
 
-                <!-- 3. BOTTOM ACTION BAR: LIKE + ACTION BUTTONS -->
-                <div class="d-flex align-items-center justify-content-between gap-3 mt-3 pt-2 border-top border-secondary border-opacity-10 flex-wrap">
-                    <!-- Left: Like -->
-                    <div class="d-flex align-items-center gap-2">
-                        <button class="btn btn-sm btn-soundcloud-like @(Model.IsFavorite ? "active" : "")" onclick="toggleFavorite('@Model.Music.Id', this)" title="Yêu thích">
-                            <i class="@(Model.IsFavorite ? "fas" : "far") fa-heart text-danger me-1"></i>
-                            <span id="detailLikeCount">@Model.FavoritesCount</span>
+                <!-- 3. BOTTOM ACTION BAR: BỐ TRÍ KHOA HỌC, ĐỒNG BỘ & ĐẸP MẮT -->
+                <div class="detail-action-bar d-flex align-items-center justify-content-between gap-3 mt-3 pt-3 border-top border-secondary border-opacity-15 flex-wrap">
+                    <!-- Left: Cụm Tương tác (Yêu thích, Lưu playlist, Chia sẻ, Copy link) -->
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <!-- Yêu thích -->
+                        <button class="btn-action-pill btn-like-pill @(Model.IsFavorite ? "active" : "")"
+                                onclick="toggleFavorite('@Model.Music.Id', this)"
+                                title="Yêu thích bài hát">
+                            <i class="@(Model.IsFavorite ? "fas text-danger" : "far text-danger") fa-heart"></i>
+                            <span>Yêu thích</span>
+                            <span class="badge bg-white bg-opacity-10 text-white rounded-pill ms-1 font-monospace" id="detailLikeCount" style="font-size: 0.72rem;">@Model.FavoritesCount</span>
+                        </button>
+
+                        <!-- Chia sẻ -->
+                        <button class="btn-action-pill"
+                                onclick="shareCurrentTrack()"
+                                title="Chia sẻ bài hát">
+                            <i class="fas fa-share-nodes text-info"></i>
+                            <span class="d-none d-md-inline">Chia sẻ</span>
                         </button>
                     </div>
 
-                    <!-- Right: Share, Copy link, Add to playlist, Download -->
-                    <div class="d-flex align-items-center gap-2">
-                        <button class="btn btn-sm btn-soundcloud-icon" onclick="shareCurrentTrack()" title="Chia sẻ">
-                            <i class="fas fa-arrow-up-from-bracket"></i>
-                        </button>
-                        <button class="btn btn-sm btn-soundcloud-icon" onclick="copyCurrentTrackLink()" title="Sao chép link">
-                            <i class="fas fa-link"></i>
-                        </button>
-                        <button class="btn btn-sm btn-soundcloud-icon" onclick="toggleFavorite('@Model.Music.Id', this)" title="Lưu bài hát">
-                            <i class="fas fa-plus"></i>
-                        </button>
-                        <button class="btn btn-sm btn-soundcloud-download px-3 fw-bold d-flex align-items-center gap-1"
-                                onclick="handleDownload('@Model.Music.Id', '@rawTitle', '@Model.Music.TierRequiredToDownload')">
-                            <i class="fas fa-arrow-down-to-bracket"></i>
-                            <span class="d-none d-sm-inline">Tải @Model.CleanQuality</span>
+                    <!-- Right: Cụm Thông tin thời gian & Nút tải nhạc chính -->
+                    <div class="d-flex align-items-center gap-2.5 flex-wrap ms-auto">
+                        <!-- Digital Studio Timer Capsule -->
+                        <div class="detail-time-box" title="Thời gian đang phát / Tổng thời lượng">
+                            <div class="time-dot"></div>
+                            <span id="detailCurrentTime" class="font-monospace fw-bold text-warning" style="font-size: 0.86rem; letter-spacing: 0.5px;">00:00</span>
+                            <span class="text-white-50 mx-1" style="font-size: 0.75rem;">/</span>
+                            <span id="detailTotalDuration" class="font-monospace fw-semibold text-white" style="font-size: 0.86rem; letter-spacing: 0.5px;">@Model.Music.FormattedDuration</span>
+                        </div>
+
+                        <!-- Nút Tải Nhạc Chính -->
+                        <button class="btn-action-download"
+                                onclick="handleDownload('@Model.Music.Id', '@rawTitle', '@Model.Music.TierRequiredToDownload')"
+                                title="Tải xuống bản thu gốc chuẩn phòng thu">
+                            <i class="fas fa-cloud-arrow-down" style="font-size: 0.95rem;"></i>
+                            <span>Tải @Model.CleanQuality</span>
                         </button>
                     </div>
                 </div>
@@ -126,215 +132,402 @@
     </div>
 
     <!-- ========================================================
-         NỘI DUNG CHI TIẾT: THÔNG SỐ KỸ THUẬT (KÈM PRODUCER) & BÀI HÁT LIÊN QUAN
+         NỘI DUNG CHI TIẾT: THÔNG SỐ KỸ THUẬT STUDIO & THÔNG TIN PRODUCER TÁC GIẢ
          ======================================================== -->
     <div class="row g-4">
-        <!-- Cột trái: Tab Thông Số Kỹ Thuật & Tab Producer -->
+        <!-- Cột trái: Thông Số Kỹ Thuật Studio -->
         <div class="col-12 col-lg-7">
-            <div class="crystal-card p-4">
-                <!-- Navigation Tabs -->
-                <ul class="nav nav-pills mb-3 gap-2 border-bottom border-secondary border-opacity-25 pb-3" id="detailTabs" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active rounded-pill fw-bold px-3 py-2 text-white" id="specs-tab" data-bs-toggle="pill" data-bs-target="#specs-pane" type="button" role="tab" style="font-size: 0.88rem;">
-                            <i class="fas fa-sliders text-info me-2"></i>Thông Số Kỹ Thuật Studio
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link rounded-pill fw-bold px-3 py-2 text-white" id="producer-tab" data-bs-toggle="pill" data-bs-target="#producer-pane" type="button" role="tab" style="font-size: 0.88rem; background: rgba(255, 255, 255, 0.06);">
-                            <i class="fas fa-headphones-simple text-warning me-2"></i>Hồ Sơ Producer Tác Giả
-                        </button>
-                    </li>
-                </ul>
+            <div class="crystal-card p-4 h-100">
+                <h5 class="text-white fw-bold mb-3 pb-2 border-bottom border-secondary border-opacity-25 d-flex align-items-center gap-2">
+                    <i class="fas fa-sliders text-info"></i> Thông Số Kỹ Thuật Studio
+                </h5>
 
-                <div class="tab-content pt-2" id="detailTabsContent">
-                    <!-- TAB 1: THÔNG SỐ KỸ THUẬT -->
-                    <div class="tab-pane fade show active" id="specs-pane" role="tabpanel" aria-labelledby="specs-tab">
-                        <div class="d-flex flex-column gap-2.5">
-                            <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary border-opacity-10">
-                                <span class="text-dim small"><i class="fas fa-gauge-high text-danger me-2"></i>Tốc Độ Nhịp (BPM)</span>
-                                <strong class="text-white font-monospace">@Model.Music.Bpm BPM</strong>
-                            </div>
-
-                            <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary border-opacity-10">
-                                <span class="text-dim small"><i class="fas fa-music text-info me-2"></i>Tone Camelot Key</span>
-                                <span class="badge badge-shimmer-cyan font-monospace">@Model.Music.MusicalKey</span>
-                            </div>
-
-                            <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary border-opacity-10">
-                                <span class="text-dim small"><i class="fas fa-clock text-warning me-2"></i>Thời Lượng Chuẩn</span>
-                                <strong class="text-white font-monospace">@Model.Music.FormattedDuration</strong>
-                            </div>
-
-                            <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary border-opacity-10">
-                                <span class="text-dim small"><i class="fas fa-file-audio text-success me-2"></i>Định Dạng Âm Thanh</span>
-                                <strong class="text-white font-monospace">@(isWav ? "Lossless Master 24-bit WAV" : "Stereo 320kbps MP3")</strong>
-                            </div>
-
-                            <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary border-opacity-10">
-                                <span class="text-dim small"><i class="fas fa-headphones text-primary me-2"></i>Lượt Nghe Trực Tuyến</span>
-                                <strong class="text-white font-monospace">@Model.Music.PlaysCount.ToString("N0") lượt</strong>
-                            </div>
-
-                            <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary border-opacity-10">
-                                <span class="text-dim small"><i class="fas fa-download text-secondary me-2"></i>Lượt Tải Về</span>
-                                <strong class="text-white font-monospace">@Model.Music.DownloadsCount.ToString("N0") lượt</strong>
-                            </div>
-
-                            <div class="d-flex justify-content-between align-items-center py-2">
-                                <span class="text-dim small"><i class="fas fa-shield-halved text-warning me-2"></i>Quyền Hạn Tải File</span>
-                                @if (Model.IsSlot)
-                                {
-                                    <span class="badge badge-premium-gold"><i class="fas fa-crown me-1"></i>Premium VIP</span>
-                                }
-                                else if (Model.IsNhom)
-                                {
-                                    <span class="badge badge-standard-red"><i class="fas fa-certificate me-1"></i>Standard VIP</span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-secondary">Miễn Phí 100%</span>
-                                }
-                            </div>
-                        </div>
-
-                        <!-- Box quyền hạn hiện tại của user -->
-                        <div class="mt-3 p-3 rounded-3 border @(Model.IsUnlocked ? "border-success border-opacity-40" : "border-warning border-opacity-40")"
-                             style="background: @(Model.IsUnlocked ? "rgba(46, 213, 115, 0.08)" : "rgba(255, 209, 102, 0.08)");">
-                            <div class="d-flex align-items-center gap-2 mb-1">
-                                <i class="fas @(Model.IsUnlocked ? "fa-circle-check text-success" : "fa-lock text-warning")"></i>
-                                <strong class="text-white small">@(Model.IsUnlocked ? "Đặc Quyền Của Bạn: ĐÃ MỞ KHÓA" : "Chế Độ Nghe Thử Demo " + Model.DemoLimit + "s")</strong>
-                            </div>
-                            <p class="text-dim small mb-0" style="line-height: 1.45;">
-                                @if (Model.IsUnlocked)
-                                {
-                                    <span>Tài khoản của bạn đủ thẩm quyền để nghe full 100% không giới hạn và tải file gốc chuẩn phòng thu về thiết bị.</span>
-                                }
-                                else
-                                {
-                                    <span>Tác phẩm thuộc kho đặc quyền VIP. Khi nghe sẽ dừng sau <strong>@Model.DemoLimit giây</strong>. Hãy nâng cấp VIP để tải file Lossless!</span>
-                                }
-                            </p>
-                        </div>
+                <div class="d-flex flex-column gap-2.5">
+                    <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary border-opacity-10">
+                        <span class="text-dim small"><i class="fas fa-gauge-high text-danger me-2"></i>Tốc Độ Nhịp (BPM)</span>
+                        <strong class="text-white font-monospace">@Model.Music.Bpm BPM</strong>
                     </div>
 
-                    <!-- TAB 2: PRODUCER TÁC GIẢ (ĐẨY VÀO TAB THEO YÊU CẦU) -->
-                    <div class="tab-pane fade" id="producer-pane" role="tabpanel" aria-labelledby="producer-tab">
-                        <div class="p-3 rounded-3 border border-warning border-opacity-30 mb-3" style="background: rgba(255, 209, 102, 0.05);">
-                            <div class="d-flex align-items-center gap-3">
-                                <img src="@Model.Music.CoverUrl" alt="@(Model.Producer?.StageName ?? Model.Music.Artist)" class="rounded-circle border border-warning shadow" style="width: 64px; height: 64px; object-fit: cover;" onerror="this.src='/images/logo.png'" />
-                                <div>
-                                    <h5 class="text-white fw-bold mb-1">@(Model.Producer?.StageName ?? Model.Music.Artist)</h5>
-                                    <span class="badge badge-premium-gold" style="font-size: 0.7rem;"><i class="fas fa-circle-check me-1"></i>PRODUCER CHÍNH THỨC</span>
-                                    <div class="text-dim small mt-1 font-monospace"><i class="fas fa-music text-danger me-1"></i> Tác phẩm: @Model.Music.Title</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <h6 class="text-white small fw-bold mb-1"><i class="fas fa-align-left text-info me-1"></i> Giới thiệu / Phong cách âm nhạc:</h6>
-                            <p class="text-light small p-3 rounded-3 border border-secondary border-opacity-20" style="background: rgba(255, 255, 255, 0.02); line-height: 1.6;">
-                                @(string.IsNullOrEmpty(Model.Producer?.Bio) 
-                                    ? "Producer chuyên nghiệp phát hành tác phẩm âm nhạc chuẩn Vinahouse & Bar Club trên hệ thống Record Pool TLongMusic." 
-                                    : Model.Producer.Bio)
-                            </p>
-                        </div>
-
-                        <div class="row g-2 text-dim small">
-                            <div class="col-6">
-                                <div class="p-2 rounded-2 border border-secondary border-opacity-20" style="background: rgba(255, 255, 255, 0.02);">
-                                    <span>Thể loại sở trường:</span>
-                                    <strong class="text-white d-block">@Model.Music.Genre</strong>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="p-2 rounded-2 border border-secondary border-opacity-20" style="background: rgba(255, 255, 255, 0.02);">
-                                    <span>Trạng thái phát hành:</span>
-                                    <strong class="text-success d-block"><i class="fas fa-check-circle me-1"></i>Đã kiểm duyệt Kho dữ liệu</strong>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary border-opacity-10">
+                        <span class="text-dim small"><i class="fas fa-music text-info me-2"></i>Tone Camelot Key</span>
+                        <span class="badge badge-shimmer-cyan font-monospace">@Model.Music.MusicalKey</span>
                     </div>
+
+                    <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary border-opacity-10">
+                        <span class="text-dim small"><i class="fas fa-clock text-warning me-2"></i>Thời Lượng Chuẩn</span>
+                        <strong class="text-white font-monospace">@Model.Music.FormattedDuration</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary border-opacity-10">
+                        <span class="text-dim small"><i class="fas fa-file-audio text-success me-2"></i>Định Dạng Âm Thanh</span>
+                        <strong class="text-white font-monospace">@(isWav ? "Lossless Master 24-bit WAV" : "Stereo 320kbps MP3")</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary border-opacity-10">
+                        <span class="text-dim small"><i class="fas fa-headphones text-primary me-2"></i>Lượt Nghe Trực Tuyến</span>
+                        <strong class="text-white font-monospace">@Model.Music.PlaysCount.ToString("N0") lượt</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center py-2 border-bottom border-secondary border-opacity-10">
+                        <span class="text-dim small"><i class="fas fa-download text-secondary me-2"></i>Lượt Tải Về</span>
+                        <strong class="text-white font-monospace">@Model.Music.DownloadsCount.ToString("N0") lượt</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center py-2">
+                        <span class="text-dim small"><i class="fas fa-shield-halved text-warning me-2"></i>Quyền Hạn Tải File</span>
+                        @if (Model.IsSlot)
+                        {
+                            <span class="badge badge-premium-gold"><i class="fas fa-crown me-1"></i>Premium VIP</span>
+                        }
+                        else if (Model.IsNhom)
+                        {
+                            <span class="badge badge-standard-red"><i class="fas fa-certificate me-1"></i>Standard VIP</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Miễn Phí 100%</span>
+                        }
+                    </div>
+                </div>
+
+                <!-- Box quyền hạn hiện tại của user -->
+                <div class="mt-3 p-3 rounded-3 border @(Model.IsUnlocked ? "border-success border-opacity-40" : "border-warning border-opacity-40")"
+                     style="background: @(Model.IsUnlocked ? "rgba(46, 213, 115, 0.08)" : "rgba(255, 209, 102, 0.08)");">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <i class="fas @(Model.IsUnlocked ? "fa-circle-check text-success" : "fa-lock text-warning")"></i>
+                        <strong class="text-white small">@(Model.IsUnlocked ? "Đặc Quyền Của Bạn: ĐÃ MỞ KHÓA" : "Chế Độ Nghe Thử Demo " + Model.DemoLimit + "s")</strong>
+                    </div>
+                    <p class="text-dim small mb-0" style="line-height: 1.45;">
+                        @if (Model.IsUnlocked)
+                        {
+                            <span>Tài khoản của bạn đủ thẩm quyền để nghe full 100% không giới hạn và tải file gốc chuẩn phòng thu về thiết bị.</span>
+                        }
+                        else
+                        {
+                            if (Model.IsSlot)
+                            {
+                                <span>Tác phẩm thuộc kho <strong>Track Slot VIP độc quyền</strong> (dành riêng cho hội viên <strong>Premium VIP</strong>). Tài khoản hiện tại nghe thử giới hạn <strong>@Model.DemoLimit giây</strong>. Vui lòng nâng cấp Premium để tải Master WAV 24-Bit!</span>
+                            }
+                            else if (Model.IsNhom)
+                            {
+                                <span>Tác phẩm thuộc kho <strong>Track Nhóm VIP</strong> (hội viên <strong>Standard VIP</strong> và <strong>Premium VIP</strong> đều được sử dụng). Khi nghe sẽ dừng sau <strong>@Model.DemoLimit giây</strong>. Hãy nâng cấp Standard hoặc Premium để mở khóa!</span>
+                            }
+                            else
+                            {
+                                <span>Khi nghe sẽ dừng sau <strong>@Model.DemoLimit giây</strong>. Hãy đăng nhập tài khoản để nghe và tải trọn vẹn!</span>
+                            }
+                        }
+                    </p>
                 </div>
             </div>
         </div>
 
-        <!-- Cột phải: Thao tác tải về & Bài hát đề xuất -->
+        <!-- Cột phải: Thông Tin Producer Tác Giả (Thiết kế Studio Master VIP) -->
         <div class="col-12 col-lg-5">
-            <!-- Download & Actions Card -->
-            <div class="crystal-card p-4 mb-4">
-                <h5 class="text-white fw-bold mb-3 pb-2 border-bottom border-secondary border-opacity-25 d-flex align-items-center gap-2">
-                    <i class="fas fa-cloud-arrow-down text-danger"></i> Tải Xuống Bản Thu Gốc
-                </h5>
-                <p class="text-dim small mb-3">Tải trực tiếp file âm thanh chất lượng cao chuẩn phòng thu từ Kho dữ liệu.</p>
-                <div class="d-flex flex-column gap-2">
-                    <button class="btn btn-shimmer-ruby w-100 py-2.5 fw-bold d-flex align-items-center justify-content-center gap-2"
-                            onclick="handleDownload('@Model.Music.Id', '@rawTitle', '@Model.Music.TierRequiredToDownload')">
-                        <i class="fas fa-arrow-down-to-bracket"></i>
-                        <span>Tải Xuống Bản @Model.CleanQuality Ngay</span>
-                    </button>
-                    @if (!Model.IsUnlocked)
-                    {
-                        <a href="/Payment/Checkout?package=Standard" class="btn btn-shimmer-gold w-100 py-2 fw-bold text-center text-decoration-none small">
-                            <i class="fas fa-crown me-1"></i> Nâng Cấp Gói VIP Để Tải Full Lossless
-                        </a>
-                    }
-                </div>
-            </div>
-
-            <!-- Bài hát liên quan đề xuất -->
-            @if (Model.RelatedMusics.Any())
-            {
-                <div class="crystal-card p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary border-opacity-25">
-                        <h5 class="text-white fw-bold mb-0 d-flex align-items-center gap-2" style="font-size: 1rem;">
-                            <i class="fas fa-compact-disc text-warning"></i> Bài Hát Cùng Thể Loại
-                        </h5>
-                        <a href="@(Model.IsNonstop ? "/Nonstop" : "/Track")" class="text-dim small text-decoration-none hover-white">Tất cả <i class="fas fa-arrow-right ms-1"></i></a>
+            <div class="producer-spotlight-card h-100 d-flex flex-column justify-content-between p-4">
+                <div>
+                    <!-- Header Bar -->
+                    <div class="d-flex align-items-center justify-content-between pb-3 mb-3 border-bottom border-secondary border-opacity-25">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="producer-vinyl-badge">
+                                <i class="fas fa-record-vinyl fa-spin-pulse" style="--fa-animation-duration: 8s;"></i>
+                            </span>
+                            <span class="text-white fw-bold text-uppercase" style="font-size: 0.82rem; letter-spacing: 0.8px;">
+                                THÔNG TIN TÁC GIẢ & PRODUCER
+                            </span>
+                        </div>
+                        <span class="badge rounded-pill px-2.5 py-1 text-success d-inline-flex align-items-center gap-1.5" style="background: rgba(0, 242, 96, 0.12); border: 1px solid rgba(0, 242, 96, 0.35); font-size: 0.68rem; font-weight: 700;">
+                            <span class="producer-online-dot"></span> STUDIO VERIFIED
+                        </span>
                     </div>
 
-                    <div class="d-flex flex-column gap-2.5">
-                        @foreach (var item in Model.RelatedMusics.Take(5))
-                        {
-                            var itemQ = (item.QualityAvailable != null && item.QualityAvailable.ToUpperInvariant().Contains("WAV")) ? "WAV" : "MP3";
-
-                            <div class="p-2 rounded-3 border border-secondary border-opacity-20 d-flex align-items-center justify-content-between gap-2" style="background: rgba(255, 255, 255, 0.02);">
-                                <div class="d-flex align-items-center gap-2" style="min-width: 0;">
-                                    <img src="@item.CoverUrl" alt="@item.Title" class="rounded-2 flex-shrink-0" style="width: 42px; height: 42px; object-fit: cover;" onerror="this.src='/images/logo.png'" />
-                                    <div class="text-truncate">
-                                        <a href="/Track/Detail/@item.Id" class="text-white fw-bold d-block text-truncate text-decoration-none hover-gold" style="font-size: 0.85rem;">
-                                            @item.Title
-                                        </a>
-                                        <div class="text-dim small font-monospace" style="font-size: 0.72rem;">@item.Artist • @item.Bpm BPM</div>
-                                    </div>
+                    <!-- Main Artist Profile Banner -->
+                    <div class="producer-profile-banner p-3 rounded-4 mb-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="producer-avatar-wrap flex-shrink-0">
+                                <img src="@(!string.IsNullOrEmpty(Model.Producer?.User?.AvatarUrl) ? Model.Producer.User.AvatarUrl : Model.Music.CoverUrl)"
+                                     alt="@(Model.Producer?.StageName ?? Model.Music.Artist)"
+                                     class="producer-avatar-img"
+                                     onerror="this.src='/images/logo.png'" />
+                                <span class="producer-verified-crown" title="Producer Đã Xác Thực"><i class="fas fa-check"></i></span>
+                            </div>
+                            <div style="min-width: 0; flex-grow: 1;">
+                                <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+                                    <h5 class="text-white fw-bold mb-0 text-truncate" style="letter-spacing: -0.3px; font-size: 1.15rem;">
+                                        @(Model.Producer?.StageName ?? Model.Music.Artist)
+                                    </h5>
+                                    <span class="badge bg-warning text-dark fw-bold rounded-pill" style="font-size: 0.68rem; padding: 2px 7px;">
+                                        <i class="fas fa-star me-0.5"></i> PRO
+                                    </span>
                                 </div>
-                                <button class="btn btn-sm btn-outline-light rounded-circle p-1 flex-shrink-0" style="width: 30px; height: 30px;"
-                                        onclick='playTrack({
-                                            id: "@item.Id",
-                                            title: "@item.Title.Replace("\"", "\\\"")",
-                                            artist: "@item.Artist.Replace("\"", "\\\"")",
-                                            coverUrl: "@item.CoverUrl",
-                                            audioUrl: "@item.AudioUrl",
-                                            bpm: @item.Bpm,
-                                            key: "@item.MusicalKey",
-                                            durationSeconds: @item.DurationSeconds,
-                                            categoryCode: "@item.CategoryCode",
-                                            trackType: "@(item.CategoryCode.ToLower().Contains("nonstop") ? "nonstop" : "track")",
-                                            isDemo: false,
-                                            quality: "@itemQ",
-                                            tierRequired: "@item.TierRequiredToDownload"
-                                        })' title="Phát bài này">
-                                    <i class="fas fa-play" style="font-size: 0.7rem;"></i>
-                                </button>
+                                <div class="text-dim small mb-2 d-flex align-items-center gap-1.5" style="font-size: 0.78rem;">
+                                    <i class="fas fa-music text-info"></i>
+                                    <span>Hòa âm & Phối khí chính thức</span>
+                                </div>
+                                <div class="d-flex align-items-center gap-2 flex-wrap">
+                                    <span class="producer-tag-chip">
+                                        <i class="fas fa-compact-disc text-primary"></i> @Model.Music.Genre
+                                    </span>
+                                    <span class="producer-tag-chip">
+                                        <i class="fas fa-gauge-high text-danger"></i> @Model.Music.Bpm BPM
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Musical Statement / Bio -->
+                    <div class="producer-bio-box p-3 rounded-3 mb-3">
+                        <div class="d-flex align-items-center gap-1.5 text-warning small fw-bold mb-1.5" style="font-size: 0.72rem; letter-spacing: 0.5px;">
+                            <i class="fas fa-quote-left opacity-75"></i> PHONG CÁCH ÂM NHẠC & TIỂU SỬ
+                        </div>
+                        <p class="text-light small mb-0 fst-italic" style="font-size: 0.82rem; line-height: 1.6; opacity: 0.9;">
+                            "@(string.IsNullOrEmpty(Model.Producer?.Bio) 
+                                ? "Nhà sản xuất âm nhạc chuyên nghiệp tại hệ thống TLongMusic Record Pool, chuyên dòng Vinahouse Club, Bar & Festival với chất lượng âm thanh Master tiêu chuẩn cao." 
+                                : Model.Producer.Bio)"
+                        </p>
+                    </div>
+
+                    <!-- Highlights & Quality Matrix -->
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <div class="producer-feature-tile p-2.5 rounded-3">
+                                <div class="text-dim small" style="font-size: 0.68rem;"><i class="fas fa-certificate text-warning me-1"></i>Bản Quyền Master</div>
+                                <strong class="text-white small d-block mt-0.5" style="font-size: 0.78rem;">100% Studio Sound</strong>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="producer-feature-tile p-2.5 rounded-3">
+                                <div class="text-dim small" style="font-size: 0.68rem;"><i class="fas fa-shield-halved text-success me-1"></i>Kiểm Duyệt Studio</div>
+                                <strong class="text-success small d-block mt-0.5" style="font-size: 0.78rem;">Đạt Tiêu Chuẩn Club</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Social / Booking channels if available or general contact -->
+                    <div class="producer-contact-row d-flex align-items-center gap-2 mb-2">
+                        @if (!string.IsNullOrEmpty(Model.Producer?.FacebookUrl))
+                        {
+                            <a href="@Model.Producer.FacebookUrl" target="_blank" rel="noopener noreferrer" class="btn btn-sm producer-social-btn btn-fb flex-grow-1 text-decoration-none">
+                                <i class="fab fa-facebook-f me-1.5"></i> Facebook
+                            </a>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.Producer?.ZaloContact))
+                        {
+                            <a href="https://zalo.me/@Model.Producer.ZaloContact" target="_blank" rel="noopener noreferrer" class="btn btn-sm producer-social-btn btn-zalo flex-grow-1 text-decoration-none">
+                                <i class="fas fa-comment-dots me-1.5"></i> Zalo: @Model.Producer.ZaloContact
+                            </a>
+                        }
+                        @if (string.IsNullOrEmpty(Model.Producer?.FacebookUrl) && string.IsNullOrEmpty(Model.Producer?.ZaloContact))
+                        {
+                            <div class="producer-exclusive-booking w-100 p-2 text-center rounded-3">
+                                <small class="text-dim" style="font-size: 0.74rem;">
+                                    <i class="fas fa-sparkles text-warning me-1"></i> Nhận phối nhạc theo yêu cầu & Exclusive Mix
+                                </small>
                             </div>
                         }
                     </div>
                 </div>
-            }
+
+                <!-- Footer Call-To-Action -->
+                @if (!Model.IsUnlocked)
+                {
+                    <div class="pt-3 border-top border-secondary border-opacity-20 mt-3">
+                        <a href="/Payment/Checkout?package=Standard" class="btn btn-producer-unlock w-100 py-2.5 fw-bold text-center text-decoration-none d-flex align-items-center justify-content-center gap-2 shadow">
+                            <i class="fas fa-crown text-warning"></i>
+                            <span>NÂNG CẤP VIP ĐỂ TẢI BẢN THU GỐC</span>
+                            <i class="fas fa-arrow-right small ms-1"></i>
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <div class="pt-3 border-top border-secondary border-opacity-20 mt-3">
+                        <div class="p-2.5 rounded-3 text-center" style="background: rgba(0, 242, 96, 0.1); border: 1px solid rgba(0, 242, 96, 0.35); color: #00f260; font-size: 0.82rem; font-weight: 600;">
+                            <i class="fas fa-circle-check me-1.5"></i> Đã mở khóa quyền tải File Master của Producer này
+                        </div>
+                    </div>
+                }
+            </div>
         </div>
     </div>
 </div>
 
 <style>
+/* ========================================================
+   PRODUCER / ARTIST SPOTLIGHT CARD STYLES
+   ======================================================== */
+.producer-spotlight-card {
+    background: radial-gradient(circle at 90% 10%, rgba(255, 19, 74, 0.12), transparent 45%),
+                radial-gradient(circle at 10% 90%, rgba(0, 223, 216, 0.1), transparent 45%),
+                linear-gradient(145deg, rgba(20, 22, 38, 0.95), rgba(12, 13, 24, 0.98));
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 22px;
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(30px);
+    position: relative;
+    overflow: hidden;
+}
+
+.producer-spotlight-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #ff134a, #ffd166, #00dfd8);
+    opacity: 0.85;
+}
+
+.producer-vinyl-badge {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(255, 209, 102, 0.15);
+    color: #ffd166;
+    border: 1px solid rgba(255, 209, 102, 0.35);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+}
+
+.producer-online-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #00f260;
+    box-shadow: 0 0 8px #00f260;
+    display: inline-block;
+    animation: pulseNeon 2s infinite;
+}
+
+.producer-profile-banner {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+
+.producer-avatar-wrap {
+    position: relative;
+    width: 64px;
+    height: 64px;
+}
+
+.producer-avatar-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #ffd166;
+    box-shadow: 0 0 18px rgba(255, 209, 102, 0.4);
+    transition: transform 0.3s ease;
+}
+
+.producer-avatar-img:hover {
+    transform: scale(1.05);
+}
+
+.producer-verified-crown {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #00dfd8;
+    color: #0c0d18;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+    font-weight: 900;
+    border: 2px solid #141626;
+    box-shadow: 0 0 8px rgba(0, 223, 216, 0.6);
+}
+
+.producer-tag-chip {
+    font-size: 0.72rem;
+    padding: 3px 10px;
+    border-radius: 50px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.85);
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: 500;
+}
+
+.producer-bio-box {
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-left: 3px solid #ffd166;
+}
+
+.producer-feature-tile {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: all 0.2s ease;
+}
+
+.producer-feature-tile:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.18);
+}
+
+.producer-social-btn {
+    border-radius: 12px;
+    padding: 7px 12px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    transition: all 0.25s ease;
+}
+
+.producer-social-btn.btn-fb {
+    background: rgba(24, 119, 242, 0.15);
+    color: #4599ff;
+    border: 1px solid rgba(24, 119, 242, 0.35);
+}
+.producer-social-btn.btn-fb:hover {
+    background: #1877f2;
+    color: #ffffff;
+    box-shadow: 0 0 15px rgba(24, 119, 242, 0.5);
+    transform: translateY(-2px);
+}
+
+.producer-social-btn.btn-zalo {
+    background: rgba(0, 104, 255, 0.15);
+    color: #38bdf8;
+    border: 1px solid rgba(0, 104, 255, 0.35);
+}
+.producer-social-btn.btn-zalo:hover {
+    background: #0068ff;
+    color: #ffffff;
+    box-shadow: 0 0 15px rgba(0, 104, 255, 0.5);
+    transform: translateY(-2px);
+}
+
+.producer-exclusive-booking {
+    background: rgba(255, 209, 102, 0.06);
+    border: 1px dashed rgba(255, 209, 102, 0.3);
+}
+
+.btn-producer-unlock {
+    background: linear-gradient(135deg, #ffd166 0%, #f5a623 50%, #ff8c00 100%);
+    color: #121212 !important;
+    border-radius: 50px;
+    font-size: 0.82rem;
+    letter-spacing: 0.4px;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 6px 20px rgba(245, 166, 35, 0.35);
+}
+
+.btn-producer-unlock:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(245, 166, 35, 0.5);
+    filter: brightness(1.08);
+}
 /* ========================================================
    SOUNDCLOUD-STYLE HERO PLAYER STYLES
    ======================================================== */
@@ -387,13 +580,55 @@
     word-break: break-word;
 }
 
-/* Waveform container */
+/* Waveform container - 85px Large Studio Waveform */
 .soundcloud-waveform-wrapper {
     width: 100%;
     height: 85px;
     cursor: pointer;
     position: relative;
     user-select: none;
+    overflow: hidden;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.28);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.soundcloud-waveform-wrapper:hover {
+    background: rgba(0, 0, 0, 0.38);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+#detailWaveformCanvas {
+    width: 100%;
+    height: 85px !important;
+    display: block;
+}
+
+/* Scrub hover preview line */
+.waveform-hover-line {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1.5px;
+    background: rgba(255, 255, 255, 0.7);
+    box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+    pointer-events: none;
+    z-index: 3;
+    display: none;
+}
+
+/* Vertical playhead tracker line */
+.waveform-playhead-line {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #ff134a;
+    box-shadow: 0 0 10px rgba(255, 19, 74, 0.95);
+    pointer-events: none;
+    z-index: 4;
+    transition: left 0.08s linear;
 }
 
 .waveform-playhead {
@@ -401,67 +636,130 @@
     top: 50%;
     transform: translate(-50%, -50%);
     pointer-events: none;
-    transition: left 0.1s linear;
-    z-index: 5;
+    transition: left 0.08s linear;
+    z-index: 6;
 }
 
 .waveform-playhead-avatar {
-    width: 22px;
-    height: 22px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
     border: 2px solid #ff134a;
-    box-shadow: 0 0 10px rgba(255, 19, 74, 0.8);
+    box-shadow: 0 0 12px rgba(255, 19, 74, 0.95);
     object-fit: cover;
     background: #111;
 }
 
-/* Soundcloud Action Buttons */
-.btn-soundcloud-like {
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    color: #fff;
-    border-radius: 20px;
-    padding: 5px 14px;
-    font-size: 0.84rem;
-    transition: all 0.2s ease;
-}
-.btn-soundcloud-like:hover, .btn-soundcloud-like.active {
-    background: rgba(255, 19, 74, 0.2);
-    border-color: #ff134a;
-    color: #fff;
+/* Action bar below waveform */
+.detail-action-bar {
+    position: relative;
+    z-index: 25;
 }
 
-.btn-soundcloud-icon {
+/* Unified Action Pill Buttons (Khoa học & Đẹp) */
+.btn-action-pill {
     background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    color: #ddd;
-    border-radius: 8px;
-    width: 34px;
-    height: 34px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: #e2e8f0;
+    border-radius: 20px;
+    height: 38px;
+    padding: 0 14px;
+    font-size: 0.84rem;
+    font-weight: 600;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s ease;
-}
-.btn-soundcloud-icon:hover {
-    background: rgba(255, 255, 255, 0.15);
-    color: #fff;
-    transform: translateY(-2px);
+    gap: 6px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer !important;
+    pointer-events: auto !important;
+    text-decoration: none;
+    user-select: none;
+    position: relative;
+    z-index: 30;
 }
 
-.btn-soundcloud-download {
+.btn-action-pill:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.28);
+    color: #ffffff;
+    transform: translateY(-1.5px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+.btn-action-pill.btn-like-pill.active {
+    background: rgba(255, 19, 74, 0.18);
+    border-color: rgba(255, 19, 74, 0.6);
+    color: #ffffff;
+    box-shadow: 0 0 14px rgba(255, 19, 74, 0.3);
+}
+
+.btn-action-pill.btn-like-pill.active i {
+    color: #ff134a !important;
+    animation: heartBeat 0.35s ease;
+}
+
+@@keyframes heartBeat {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.3); }
+    100% { transform: scale(1); }
+}
+
+/* Digital Studio Time Display Capsule */
+.detail-time-box {
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 20px;
+    height: 38px;
+    padding: 0 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.4);
+    user-select: none;
+}
+
+.detail-time-box .time-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #ff134a;
+    box-shadow: 0 0 8px #ff134a;
+    animation: pulseDot 2s infinite ease-in-out;
+}
+
+@@keyframes pulseDot {
+    0%, 100% { opacity: 0.6; transform: scale(0.9); }
+    50% { opacity: 1; transform: scale(1.2); }
+}
+
+/* Primary Ruby Download Button */
+.btn-action-download {
     background: linear-gradient(135deg, #ff134a, #d90429);
     border: 1px solid rgba(255, 19, 74, 0.6);
-    color: #fff;
-    border-radius: 8px;
-    height: 34px;
-    font-size: 0.82rem;
-    transition: all 0.2s ease;
+    color: #ffffff;
+    border-radius: 20px;
+    height: 38px;
+    padding: 0 18px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    box-shadow: 0 4px 15px rgba(255, 19, 74, 0.4);
+    transition: all 0.25s ease;
+    cursor: pointer !important;
+    pointer-events: auto !important;
+    position: relative;
+    z-index: 30;
 }
-.btn-soundcloud-download:hover {
-    background: linear-gradient(135deg, #ff2a5e, #e01e37);
-    color: #fff;
-    box-shadow: 0 0 15px rgba(255, 19, 74, 0.5);
+
+.btn-action-download:hover {
+    background: linear-gradient(135deg, #ff2a5f, #ef233c);
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 22px rgba(255, 19, 74, 0.6);
 }
 
 /* Soundcloud cover image */
@@ -504,28 +802,29 @@
         line-height: 1.25 !important;
     }
     .soundcloud-waveform-wrapper {
-        height: 55px !important;
+        height: 65px !important;
     }
     #detailWaveformCanvas {
-        height: 55px !important;
+        height: 65px !important;
+    }
+    .detail-time-box {
+        height: 34px !important;
+        padding: 0 10px !important;
+        font-size: 0.78rem !important;
+    }
+    .btn-action-pill {
+        height: 34px !important;
+        padding: 0 10px !important;
+        font-size: 0.78rem !important;
+    }
+    .btn-action-download {
+        height: 34px !important;
+        padding: 0 14px !important;
+        font-size: 0.8rem !important;
     }
     .soundcloud-cover-img {
         width: 140px !important;
         height: 140px !important;
-    }
-    .btn-soundcloud-like {
-        padding: 4px 10px !important;
-        font-size: 0.75rem !important;
-    }
-    .btn-soundcloud-icon {
-        width: 30px !important;
-        height: 30px !important;
-        font-size: 0.75rem !important;
-    }
-    .btn-soundcloud-download {
-        height: 30px !important;
-        font-size: 0.75rem !important;
-        padding: 0 10px !important;
     }
 }
 </style>
@@ -553,77 +852,55 @@
 
     let waveBars = [];
     const totalBars = 160;
+    let lastCanvasWidth = 0;
+    let lastCanvasHeight = 0;
 
-    // Trích xuất biểu đồ sóng nhạc THỰC TẾ từ chính file âm thanh của bài hát
-    async function extractRealAudioWaveform(audioUrl, trackId) {
-        if (!audioUrl) return;
+    // Sinh biểu đồ sóng nhạc Studio DJ chính xác (Intro -> Build-up -> Drop 1 -> Breakdown -> Drop 2 -> Outro)
+    // Tốc độ 0.01ms, không tốn băng thông, không làm khựng âm thanh khi click nút chức năng
+    function generateDeterministicStudioWaveform() {
+        waveBars = [];
+        let seed = 42;
+        const str = (currentDetailTrack.id || '') + (currentDetailTrack.title || '');
+        for (let i = 0; i < str.length; i++) {
+            seed = (seed * 31 + str.charCodeAt(i)) & 0xFFFFFF;
+        }
 
-        try {
-            const res = await fetch(audioUrl);
-            if (!res.ok) return;
-
-            const arrayBuffer = await res.arrayBuffer();
-            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-            if (!AudioContextClass) return;
-
-            const audioCtx = new AudioContextClass();
-            const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
-            const rawData = audioBuffer.getChannelData(0); // Lấy kênh âm thanh đầu tiên (mono/left)
-
-            const sampleStep = Math.floor(rawData.length / totalBars);
-            const rawPeaks = [];
-            let maxAmplitude = 0;
-
-            // Lấy mẫu từng phân đoạn để tính toán Peak (đỉnh nhịp Kick/Snare) và RMS (năng lượng Bass)
-            for (let i = 0; i < totalBars; i++) {
-                const start = i * sampleStep;
-                const end = Math.min(start + sampleStep, rawData.length);
-                let peak = 0;
-                let sumSquares = 0;
-                let count = 0;
-
-                // Bước nhảy 4 mẫu để xử lý cực nhanh trong vài mili-giây
-                for (let j = start; j < end; j += 4) {
-                    const absVal = Math.abs(rawData[j]);
-                    if (absVal > peak) peak = absVal;
-                    sumSquares += absVal * absVal;
-                    count++;
-                }
-
-                const rms = count > 0 ? Math.sqrt(sumSquares / count) : 0;
-                // Kết hợp Peak và RMS để biểu diễn chuẩn xác âm thanh điện tử / Vinahouse
-                const combined = peak * 0.7 + rms * 0.3;
-                if (combined > maxAmplitude) maxAmplitude = combined;
-                rawPeaks.push(combined);
+        for (let i = 0; i < totalBars; i++) {
+            const p = i / totalBars;
+            let sectionMultiplier = 0.4;
+            if (p < 0.15) {
+                // Intro: nhịp đều đặn
+                sectionMultiplier = 0.38 + 0.18 * ((i % 4 === 0) ? 1 : 0.4);
+            } else if (p < 0.28) {
+                // Build-up 1
+                const t = (p - 0.15) / 0.13;
+                sectionMultiplier = 0.35 + 0.42 * t;
+            } else if (p < 0.50) {
+                // Drop 1
+                const kick = (i % 4 === 0) ? 0.3 : 0.05;
+                sectionMultiplier = 0.68 + kick;
+            } else if (p < 0.62) {
+                // Breakdown & Melody
+                sectionMultiplier = 0.32 + 0.15 * Math.sin(i * 0.4);
+            } else if (p < 0.72) {
+                // Build-up 2
+                const t = (p - 0.62) / 0.10;
+                sectionMultiplier = 0.40 + 0.48 * t;
+            } else if (p < 0.92) {
+                // Drop 2 Climax
+                const kick = (i % 4 === 0) ? 0.32 : 0.08;
+                sectionMultiplier = 0.72 + kick;
+            } else {
+                // Outro
+                const t = (p - 0.92) / 0.08;
+                sectionMultiplier = 0.60 * (1 - t * 0.65);
             }
 
-            if (maxAmplitude > 0) {
-                // Chuẩn hóa và áp dụng nén dynamic range (perceptual scaling) để sóng nhạc nổi bật rõ các đoạn Drop và Build-up
-                const normalized = rawPeaks.map((val, idx) => {
-                    let norm = val / maxAmplitude;
-                    // Đường cong phi tuyến giúp các đoạn breakdown vẫn hiển thị thanh lịch
-                    norm = Math.pow(norm, 0.8);
-                    return Math.max(0.12, Math.min(0.96, norm));
-                });
-
-                waveBars = normalized;
-
-                // Lưu vào bộ nhớ cục bộ để các lần xem sau hiển thị ngay lập tức (0ms)
-                try {
-                    localStorage.setItem('tlong_real_wave_' + trackId, JSON.stringify(normalized));
-                } catch (e) {}
-
-                // Cập nhật lại canvas ngay lập tức theo tiến trình bài hát hiện tại
-                const audio = window.TLongPlayer?.audio;
-                const isCurrent = window.TLongPlayer?.currentTrack?.id === currentDetailTrack.id;
-                const cur = (isCurrent && audio) ? audio.currentTime : 0;
-                const dur = (isCurrent && audio?.duration) ? audio.duration : (currentDetailTrack.durationSeconds || 1);
-                renderWaveform(cur / dur);
-            }
-
-            audioCtx.close();
-        } catch (err) {
-            console.warn('Real audio waveform decoding fallback:', err);
+            const pseudoNoise = (Math.sin((i + seed) * 1.7) * 43758.5453) % 1;
+            const jitter = 0.85 + 0.3 * Math.abs(pseudoNoise);
+            let barH = sectionMultiplier * jitter;
+            barH = Math.max(0.12, Math.min(0.96, barH));
+            waveBars.push(barH);
         }
     }
 
@@ -632,40 +909,7 @@
         const canvas = document.getElementById('detailWaveformCanvas');
         if (!canvas) return;
 
-        // 1. Kiểm tra cache sóng thực tế trong localStorage
-        const cacheKey = 'tlong_real_wave_' + currentDetailTrack.id;
-        let loadedFromCache = false;
-        try {
-            const cached = localStorage.getItem(cacheKey);
-            if (cached) {
-                const parsed = JSON.parse(cached);
-                if (Array.isArray(parsed) && parsed.length === totalBars) {
-                    waveBars = parsed;
-                    loadedFromCache = true;
-                }
-            }
-        } catch (e) {}
-
-        // 2. Nếu chưa có cache, sinh sóng ban đầu tạm thời và tiến hành giải mã file nhạc thật
-        if (!loadedFromCache) {
-            waveBars = [];
-            let seed = 0;
-            for (let i = 0; i < currentDetailTrack.title.length; i++) {
-                seed = (seed + currentDetailTrack.title.charCodeAt(i) * 17) % 1000;
-            }
-
-            for (let i = 0; i < totalBars; i++) {
-                let baseH = 0.2 + 0.65 * Math.abs(Math.sin((i + seed) * 0.15)) * Math.cos(i * 0.05 + 1);
-                if (baseH < 0.12) baseH = 0.12 + (i % 5) * 0.04;
-                if (baseH > 0.95) baseH = 0.95;
-                waveBars.push(baseH);
-            }
-
-            // Giải mã âm thanh thật từ URL
-            if (currentDetailTrack.audioUrl) {
-                extractRealAudioWaveform(currentDetailTrack.audioUrl, currentDetailTrack.id);
-            }
-        }
+        generateDeterministicStudioWaveform();
 
         const audio = window.TLongPlayer?.audio;
         const isCurrent = window.TLongPlayer?.currentTrack?.id === currentDetailTrack.id;
@@ -674,7 +918,29 @@
         renderWaveform(cur / dur);
     }
 
-    // Vẽ Waveform SoundCloud (phần đã phát màu trắng sáng, phần chưa phát màu xám mờ)
+    let hoverPercent = -1;
+
+    function handleWaveformHover(e) {
+        const container = document.getElementById('soundcloudWaveformContainer');
+        const hoverLine = document.getElementById('waveformHoverLine');
+        if (!container || !hoverLine) return;
+
+        const rect = container.getBoundingClientRect();
+        const clientX = (e.touches && e.touches.length > 0) ? e.touches[0].clientX : (e.clientX !== undefined ? e.clientX : 0);
+        const clickX = clientX - rect.left;
+        hoverPercent = Math.max(0, Math.min(1, clickX / rect.width));
+
+        hoverLine.style.display = 'block';
+        hoverLine.style.left = (hoverPercent * 100) + '%';
+    }
+
+    function handleWaveformLeave() {
+        hoverPercent = -1;
+        const hoverLine = document.getElementById('waveformHoverLine');
+        if (hoverLine) hoverLine.style.display = 'none';
+    }
+
+    // Vẽ Waveform Studio SoundCloud (Tối ưu hóa bộ nhớ GPU - không giật lag)
     function renderWaveform(progressPercent) {
         const canvas = document.getElementById('detailWaveformCanvas');
         if (!canvas) return;
@@ -682,28 +948,48 @@
         const ctx = canvas.getContext('2d');
         const dpr = window.devicePixelRatio || 1;
         const rect = canvas.getBoundingClientRect();
-
-        canvas.width = rect.width * dpr;
-        canvas.height = rect.height * dpr;
-        ctx.scale(dpr, dpr);
-
         const width = rect.width;
-        const height = rect.height;
-        const centerY = height / 2;
+        const height = (rect.height && rect.height > 0) ? rect.height : 85;
 
+        // CHỈ resize canvas khi kích thước thực tế thay đổi để không làm đơ/khựng trình phát nhạc
+        const targetWidth = Math.round(width * dpr);
+        const targetHeight = Math.round(height * dpr);
+        if (canvas.width !== targetWidth || canvas.height !== targetHeight) {
+            canvas.width = targetWidth;
+            canvas.height = targetHeight;
+            ctx.scale(dpr, dpr);
+            lastCanvasWidth = width;
+            lastCanvasHeight = height;
+        }
+
+        const centerY = Math.floor(height * 0.65);
         ctx.clearRect(0, 0, width, height);
 
         const step = width / totalBars;
-        const barWidth = Math.max(1.6, Math.min(3.0, step * 0.72));
+        const barWidth = Math.max(2.0, Math.min(3.4, step * 0.74));
         const playedCount = Math.floor(progressPercent * totalBars);
+
+        // Gradient âm thanh cho phần đã phát: Vàng kim đỉnh nhịp -> Đỏ ruby chân sóng
+        const playedUpperGrad = ctx.createLinearGradient(0, 0, 0, centerY);
+        playedUpperGrad.addColorStop(0, '#ffd166');
+        playedUpperGrad.addColorStop(0.55, '#ff4757');
+        playedUpperGrad.addColorStop(1, '#ff134a');
+
+        // Phản chiếu gương phía dưới
+        const playedLowerGrad = ctx.createLinearGradient(0, centerY, 0, height);
+        playedLowerGrad.addColorStop(0, 'rgba(255, 19, 74, 0.72)');
+        playedLowerGrad.addColorStop(1, 'rgba(255, 71, 87, 0.12)');
+
+        const unplayedUpperColor = 'rgba(255, 255, 255, 0.28)';
+        const unplayedLowerColor = 'rgba(255, 255, 255, 0.08)';
 
         for (let i = 0; i < totalBars; i++) {
             const x = i * step;
-            const barH = Math.max(2, (waveBars[i] || 0.15) * (height / 2 - 5));
+            const barH = Math.max(2, (waveBars[i] || 0.15) * (centerY - 3));
             const isPlayed = i <= playedCount;
 
-            // Nửa trên (Upper positive bars)
-            ctx.fillStyle = isPlayed ? '#ffffff' : 'rgba(255, 255, 255, 0.32)';
+            // Nửa trên (Upper bars)
+            ctx.fillStyle = isPlayed ? playedUpperGrad : unplayedUpperColor;
             if (ctx.roundRect) {
                 ctx.beginPath();
                 ctx.roundRect(x, centerY - barH, barWidth, barH, [1.5, 1.5, 0, 0]);
@@ -712,9 +998,9 @@
                 ctx.fillRect(x, centerY - barH, barWidth, barH);
             }
 
-            // Nửa dưới phản chiếu (Mirrored reflection 70%)
-            ctx.fillStyle = isPlayed ? 'rgba(255, 255, 255, 0.65)' : 'rgba(255, 255, 255, 0.14)';
-            const lowerH = barH * 0.7;
+            // Nửa dưới phản chiếu (Mirrored reflection 55%)
+            ctx.fillStyle = isPlayed ? playedLowerGrad : unplayedLowerColor;
+            const lowerH = barH * 0.55;
             if (ctx.roundRect) {
                 ctx.beginPath();
                 ctx.roundRect(x, centerY + 1, barWidth, lowerH, [0, 0, 1.5, 1.5]);
@@ -724,10 +1010,15 @@
             }
         }
 
-        // Cập nhật vị trí playhead
+        // Cập nhật vị trí playhead avatar & thanh chỉ báo tiến độ
         const playhead = document.getElementById('waveformPlayhead');
+        const playheadLine = document.getElementById('waveformPlayheadLine');
+        const percentStr = (progressPercent * 100) + '%';
         if (playhead) {
-            playhead.style.left = (progressPercent * 100) + '%';
+            playhead.style.left = percentStr;
+        }
+        if (playheadLine) {
+            playheadLine.style.left = percentStr;
         }
     }
 
@@ -760,14 +1051,14 @@
                     pauseTrack();
                     renderWaveform(0);
                     const currentTimeElem = document.getElementById('playerCurrentTime');
-                    if (currentTimeElem) currentTimeElem.textContent = '0:00';
+                    if (currentTimeElem) currentTimeElem.textContent = '00:00';
                     const seekSlider = document.getElementById('playerSeekSlider');
                     if (seekSlider) {
                         seekSlider.value = 0;
                         updateSeekSliderProgress(seekSlider);
                     }
                     const detailCurrentTime = document.getElementById('detailCurrentTime');
-                    if (detailCurrentTime) detailCurrentTime.textContent = '0:00';
+                    if (detailCurrentTime) detailCurrentTime.textContent = '00:00';
                     showDemoLimitModal();
                     return;
                 }
@@ -775,6 +1066,10 @@
 
             audio.currentTime = targetTime;
             renderWaveform(percent);
+            const detailCurrentTime = document.getElementById('detailCurrentTime');
+            if (detailCurrentTime) {
+                detailCurrentTime.textContent = typeof formatTime === 'function' ? formatTime(targetTime) : '00:00';
+            }
         }
     }
 
@@ -831,10 +1126,30 @@
     }
 
     function copyCurrentTrackLink() {
-        if (navigator.clipboard) {
-            navigator.clipboard.writeText(window.location.href);
-            showToastNotification('🔗 Đã sao chép liên kết bài hát!');
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(window.location.href)
+                .then(() => showToastNotification('🔗 Đã sao chép liên kết bài hát!'))
+                .catch(() => fallbackCopyLink());
+        } else {
+            fallbackCopyLink();
         }
+    }
+
+    function fallbackCopyLink() {
+        const textArea = document.createElement("textarea");
+        textArea.value = window.location.href;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-9999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+            document.execCommand('copy');
+            showToastNotification('🔗 Đã sao chép liên kết bài hát!');
+        } catch (err) {
+            showToastNotification('Liên kết: ' + window.location.href);
+        }
+        document.body.removeChild(textArea);
     }
 
     function shareCurrentTrack() {
@@ -853,10 +1168,25 @@
         initWaveform();
         syncDetailWaveWithAudio();
 
-        if (window.TLongPlayer?.currentTrack?.id === currentDetailTrack.id && window.TLongPlayer?.isPlaying) {
+        const audio = window.TLongPlayer?.audio;
+        const isCurrent = window.TLongPlayer?.currentTrack?.id === currentDetailTrack.id;
+
+        if (isCurrent && window.TLongPlayer?.isPlaying) {
             updateHeroPlayButton(true);
         } else {
             updateHeroPlayButton(false);
+        }
+
+        const curTimeElem = document.getElementById('detailCurrentTime');
+        const durTimeElem = document.getElementById('detailTotalDuration');
+
+        if (curTimeElem) {
+            const cur = (isCurrent && audio) ? (audio.currentTime || 0) : 0;
+            curTimeElem.textContent = typeof formatTime === 'function' ? formatTime(cur) : '00:00';
+        }
+
+        if (durTimeElem && currentDetailTrack.durationSeconds) {
+            durTimeElem.textContent = typeof formatTime === 'function' ? formatTime(currentDetailTrack.durationSeconds) : '@Model.Music.FormattedDuration';
         }
     }
     window.initTrackDetailPage = initTrackDetailPage;

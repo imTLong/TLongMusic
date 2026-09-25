@@ -775,5 +775,70 @@ namespace TLongMusic.Controllers
                 endDate = newEndDate
             });
         }
+
+        [HttpPost("ClearUserSubscriptions")]
+        public async Task<IActionResult> ClearUserSubscriptions([FromBody] AdminClearSubscriptionsDto model)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !User.IsInRole("Admin"))
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new { success = false, message = "Chỉ Quản Trị Viên (Admin) mới có quyền xóa gói cước của người dùng!" });
+            }
+
+            if (model == null || model.UserId == Guid.Empty)
+            {
+                return BadRequest(new { success = false, message = "Mã người dùng (UserId) không hợp lệ!" });
+            }
+
+            var user = await _context.Users.FindAsync(model.UserId);
+            if (user == null)
+            {
+                return NotFound(new { success = false, message = "Không tìm thấy tài khoản người dùng!" });
+            }
+
+            var userSubs = await _context.Subscriptions
+                .Where(s => s.UserId == model.UserId)
+                .ToListAsync();
+
+            if (userSubs.Count == 0)
+            {
+                return Ok(new { success = true, message = $"Người dùng '{user.FullName ?? user.Username}' hiện không có gói đăng ký nào để xóa.", count = 0 });
+            }
+
+            // Gỡ liên kết foreign key từ Payments nếu có
+            var subIds = userSubs.Select(s => s.SubscriptionId).ToList();
+            var relatedPayments = await _context.Payments
+                .Where(p => p.SubscriptionId.HasValue && subIds.Contains(p.SubscriptionId.Value))
+                .ToListAsync();
+
+            foreach (var p in relatedPayments)
+            {
+                p.SubscriptionId = null;
+            }
+
+            _context.Subscriptions.RemoveRange(userSubs);
+
+            // Ghi nhận thông báo cho User
+            _context.Notifications.Add(new Notification
+            {
+                NotificationId = Guid.NewGuid(),
+                UserId = model.UserId,
+                Title = "Admin đã thu hồi các gói VIP!",
+                Content = $"Tất cả {userSubs.Count} gói đăng ký VIP của bạn đã được Quản trị viên xóa khỏi hệ thống. Tài khoản đã trở về cấp độ Free Member.",
+                Type = "Subscription",
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow
+            });
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                success = true,
+                message = $"Đã xóa thành công tất cả {userSubs.Count} gói đăng ký của '{user.FullName ?? user.Username}'! Tài khoản đã trở về Free Member.",
+                userId = user.UserId,
+                count = userSubs.Count
+            });
+        }
     }
 }

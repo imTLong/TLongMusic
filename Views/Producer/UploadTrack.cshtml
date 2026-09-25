@@ -820,7 +820,6 @@
                             <th>BPM / Key</th>
                             <th>Thời Lượng</th>
                             <th>Phân Cấp</th>
-                            <th>Định Dạng</th>
                             <th class="text-end">Thao Tác</th>
                         </tr>
                     </thead>
@@ -861,7 +860,6 @@
                                     </td>
                                     <td class="text-dim small font-monospace">${formatTrackDuration(t.durationSeconds)}</td>
                                     <td>${catBadge}</td>
-                                    <td><span class="badge bg-dark border border-secondary text-info small">${t.qualityAvailable || 'MP3'}</span></td>
                                     <td class="text-end">
                                         <button class="btn btn-sm btn-outline-danger px-2 py-1 rounded-2" onclick="deleteProducerTrack('${t.musicId}', '${t.title.replace(/'/g, "\\'")}')" title="Xóa bản Track">
                                             <i class="fas fa-trash-can"></i>

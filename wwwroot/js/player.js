@@ -9,8 +9,13 @@ window.TLongPlayer = {
     currentUser: null, // { username, fullName, role: 'Admin'|'Producer'|'Member', tier: 'Free'|'Standard'|'Premium', avatarUrl }
     userTier: 'free',
     audioContext: null,
-    isSynthesizing: false
+    isSynthesizing: false,
+    isShuffle: false,
+    repeatMode: 'off' // 'off' | 'all' | 'one'
 };
+try {
+    window.TLongPlayer.audio.preload = 'auto';
+} catch (e) {}
 
 document.addEventListener('DOMContentLoaded', () => {
     initAuthFromStorage();
@@ -23,6 +28,83 @@ document.addEventListener('DOMContentLoaded', () => {
     restorePlaybackState();
 });
 
+// ==========================================
+// CROSS-TAB MULTI-TAB SYNCHRONIZATION ENGINE
+// (Tự động đồng bộ trạng thái Đăng Xuất giữa tất cả các tab đang mở)
+// ==========================================
+const authSyncChannel = (typeof window !== 'undefined' && 'BroadcastChannel' in window)
+    ? new BroadcastChannel('tlong_auth_sync_channel')
+    : null;
+
+let isCrossTabLoggingOut = false;
+
+function notifyCrossTabLogout() {
+    try {
+        if (authSyncChannel) {
+            authSyncChannel.postMessage({ type: 'TLONG_LOGOUT', timestamp: Date.now() });
+        }
+    } catch (e) {}
+    try {
+        // Ghi vào localStorage để kích hoạt sự kiện 'storage' ở toàn bộ các tab khác
+        localStorage.setItem('tlong_logout_signal', Date.now().toString());
+    } catch (e) {}
+}
+
+function handleCrossTabLogout() {
+    if (isCrossTabLoggingOut) return;
+    isCrossTabLoggingOut = true;
+
+    // 1. Reset dữ liệu phiên làm việc ở tab này
+    window.TLongPlayer.currentUser = null;
+    window.TLongPlayer.userTier = 'free';
+    try {
+        localStorage.removeItem('tlong_current_user');
+        sessionStorage.clear();
+    } catch (e) {}
+
+    // 2. Dừng âm thanh lập tức nếu tab này đang phát nhạc
+    if (window.TLongPlayer?.audio) {
+        try {
+            window.TLongPlayer.audio.pause();
+            window.TLongPlayer.audio.currentTime = 0;
+            window.TLongPlayer.isPlaying = false;
+        } catch (e) {}
+    }
+    if (typeof stopBeatSynthesizer === 'function') {
+        stopBeatSynthesizer();
+    }
+    if (typeof updatePlayPauseButton === 'function') {
+        updatePlayPauseButton();
+    }
+
+    // 3. Xử lý điều hướng hoặc reset giao diện của tab này:
+    const path = window.location.pathname.toLowerCase();
+    // Nếu tab này đang ở trang nhạy cảm hoặc trang cá nhân (Admin, Producer, Profile, Checkout...)
+    if (path.startsWith('/admin') || path.startsWith('/producer') || path.startsWith('/profile') || path.startsWith('/home/profile') || path.startsWith('/payment/checkout')) {
+        window.location.href = '/';
+        return;
+    }
+
+    // Nếu tab này đang ở trang công khai: Tải lại trang để server render chuẩn 100% trạng thái khách vãng lai
+    window.location.reload();
+}
+
+// Lắng nghe qua BroadcastChannel
+if (authSyncChannel) {
+    authSyncChannel.onmessage = (event) => {
+        if (event && event.data && event.data.type === 'TLONG_LOGOUT') {
+            handleCrossTabLogout();
+        }
+    };
+}
+
+// Lắng nghe qua storage event (chỉ kích hoạt ở CÁC TAB KHÁC khi localStorage thay đổi)
+window.addEventListener('storage', (e) => {
+    if (e.key === 'tlong_logout_signal' || (e.key === 'tlong_current_user' && !e.newValue)) {
+        handleCrossTabLogout();
+    }
+});
+
 // Authentication System - Connected to Kho dữ liệu via /Auth API
 async function initAuthFromStorage() {
     try {
@@ -32,6 +114,14 @@ async function initAuthFromStorage() {
             window.TLongPlayer.currentUser = data.user;
             window.TLongPlayer.userTier = data.user.tier.toLowerCase();
             localStorage.setItem('tlong_current_user', JSON.stringify(data.user));
+            updateAuthUI();
+            updateTierUI();
+            return;
+        } else {
+            // Backend khẳng định không đăng nhập: xóa ngay bộ nhớ tạm người dùng cũ
+            window.TLongPlayer.currentUser = null;
+            window.TLongPlayer.userTier = 'free';
+            localStorage.removeItem('tlong_current_user');
             updateAuthUI();
             updateTierUI();
             return;
@@ -100,19 +190,21 @@ function restorePlaybackState() {
 
     try {
         const raw = sessionStorage.getItem('tlong_playback_state');
+        // Sau khi đọc xong, dọn dẹp state để không ảnh hưởng các thao tác sau
+        sessionStorage.removeItem('tlong_playback_state');
+
         if (!raw) return;
         const state = JSON.parse(raw);
-        if (!state || !state.track || !state.isPlaying) return;
+        if (!state || !state.track) return;
 
-        // Chỉ khôi phục nếu chuyển trang trong vòng 60 giây
+        // Chỉ khôi phục bài hát nếu refresh trong vòng 60 giây
         const elapsedSec = (Date.now() - (state.timestamp || Date.now())) / 1000;
         if (elapsedSec > 60) {
-            sessionStorage.removeItem('tlong_playback_state');
             return;
         }
 
         const track = state.track;
-        let resumeTime = (state.currentTime || 0) + elapsedSec;
+        let resumeTime = state.currentTime || 0;
         if (isDemoPlayback(track)) {
             const limit = track.demoLimit || 30;
             if (resumeTime >= limit) {
@@ -130,40 +222,46 @@ function restorePlaybackState() {
         const keyEl = document.getElementById('playerTrackKey');
         const qualityEl = document.getElementById('playerTrackQuality');
         const durationEl = document.getElementById('playerDuration');
+        const currentTimeElem = document.getElementById('playerCurrentTime');
+        const seekSlider = document.getElementById('playerSeekSlider');
 
         if (titleEl) titleEl.textContent = track.title;
+        const titleLink = document.getElementById('playerTrackTitleLink');
+        if (titleLink && track.id) titleLink.href = `/Track/Detail/${track.id}`;
+        const coverLink = document.getElementById('playerTrackCoverLink');
+        if (coverLink && track.id) coverLink.href = `/Track/Detail/${track.id}`;
         if (artistEl) artistEl.textContent = track.artist || 'DJ TLong Studio';
         if (coverEl) coverEl.src = track.coverUrl || '/images/logo.png';
         if (bpmEl && track.bpm) bpmEl.textContent = `${track.bpm} BPM`;
         if (keyEl && track.key) keyEl.textContent = track.key;
         if (qualityEl && track.quality) qualityEl.textContent = track.quality;
         if (durationEl && track.durationSeconds) durationEl.textContent = formatTime(track.durationSeconds);
+        if (currentTimeElem) currentTimeElem.textContent = formatTime(resumeTime);
+        if (seekSlider && track.durationSeconds) {
+            seekSlider.value = (resumeTime / track.durationSeconds) * 100;
+            if (typeof updateSeekSliderProgress === 'function') {
+                updateSeekSliderProgress(seekSlider);
+            }
+        }
 
         updateDemoBadge();
 
         if (track.audioUrl) {
             audio.src = track.audioUrl;
             audio.currentTime = Math.max(0, resumeTime);
-
-            const playPromise = audio.play();
-            if (playPromise !== undefined) {
-                playPromise.then(() => {
-                    window.TLongPlayer.isPlaying = true;
-                    updatePlayPauseButton();
-                }).catch(() => {
-                    // Nếu chính sách trình duyệt yêu cầu click người dùng
-                    window.TLongPlayer.isPlaying = false;
-                    updatePlayPauseButton();
-                    const resumeOnFirstClick = () => {
-                        audio.play().then(() => {
-                            window.TLongPlayer.isPlaying = true;
-                            updatePlayPauseButton();
-                        }).catch(() => {});
-                    };
-                    document.addEventListener('click', resumeOnFirstClick, { once: true });
-                });
-            }
         }
+
+        // KHI REFRESH TRANG: NHẠC TỰ ĐỘNG DỪNG LẠI HOÀN TOÀN
+        // Đưa về trạng thái tạm dừng, tuyệt đối không tự phát và không tự kích hoạt khi click trang
+        window.TLongPlayer.isPlaying = false;
+        if (audio) {
+            try { audio.pause(); } catch(e) {}
+        }
+        if (typeof stopBeatSynthesizer === 'function') {
+            stopBeatSynthesizer();
+        }
+        updatePlayPauseButton();
+
     } catch (e) {
         console.warn("restorePlaybackState error:", e);
     }
@@ -331,6 +429,12 @@ async function navigateSeamlessly(urlStr, pushState = true) {
         if (typeof window.initTrackDetailPage === 'function') {
             window.initTrackDetailPage();
         }
+        if (typeof window.initProfilePage === 'function') {
+            window.initProfilePage();
+        }
+        if (typeof window.initCheckoutPage === 'function') {
+            window.initCheckoutPage();
+        }
 
         // 8. Đồng bộ phân quyền và trạng thái nút Play
         if (typeof updateTierUI === 'function') updateTierUI();
@@ -352,11 +456,18 @@ window.navigateSeamlessly = navigateSeamlessly;
 // Lắng nghe sự kiện click trên toàn bộ liên kết nội bộ
 document.addEventListener('click', (e) => {
     const link = e.target.closest('a');
-    if (!link || !link.href) return;
+    if (!link) return;
+
+    // Tuyệt đối bỏ qua nếu là nút bấm, link javascript, anchor rỗng, hoặc các nút chức năng
+    const rawHref = link.getAttribute('href') || '';
+    if (!rawHref || rawHref === '#' || rawHref.startsWith('javascript:') || rawHref.startsWith('mailto:') || rawHref.startsWith('tel:')) return;
+    if (link.hasAttribute('data-bs-toggle') || link.hasAttribute('data-bs-dismiss') || link.hasAttribute('data-bs-target')) return;
+    if (link.getAttribute('role') === 'button' || link.classList.contains('no-seamless') || link.closest('.no-seamless')) return;
+    if (link.classList.contains('btn-action-pill') || link.classList.contains('player-btn-ctrl') || link.classList.contains('btn-action-download')) return;
 
     // Bỏ qua nếu click chuột phải, giữ Ctrl/Cmd (mở tab mới), download, hoặc nút đóng
     if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-    if (link.target === '_blank' || link.hasAttribute('download') || (link.getAttribute('role') === 'button' && link.href.endsWith('#'))) return;
+    if (link.target === '_blank' || link.hasAttribute('download')) return;
 
     try {
         const url = new URL(link.href, window.location.origin);
@@ -395,11 +506,6 @@ document.addEventListener('click', (e) => {
             return;
         }
 
-        // Nếu là nút Mua VIP / Nâng cấp VIP -> mở modal không cần tải lại
-        if (targetPath.startsWith('/payment/checkout')) {
-            return;
-        }
-
         // 4. CHUYỂN TRANG MƯỢT KHÔNG TẢI LẠI (SEAMLESS SPA)
         e.preventDefault();
         closeMobileNav();
@@ -427,8 +533,28 @@ window.addEventListener('beforeunload', () => {
 // TÍNH NĂNG LỌC TIER KHÔNG TẢI LẠI TRANG (GIỮ NHẠC KHÔNG BỊ NGẮT KHI BẤM)
 // ==========================================
 function applyNonstopTierFilter(tier, event) {
-    if (event) event.preventDefault();
     const cleanTier = (tier || 'all').toLowerCase();
+
+    // Kiểm tra xem trong DOM có đủ các loại bản thu không
+    const rows = document.querySelectorAll('.daily-track-section tr.crystal-table-row');
+    const typesPresent = new Set();
+    rows.forEach(r => {
+        const t = (r.dataset.trackType || '').toLowerCase();
+        if (t) typesPresent.add(t);
+    });
+
+    // Nếu DOM chỉ chứa 1 loại (do server lọc trước) mà người dùng muốn xem 'all' hoặc loại khác, chuyển hướng URL thực tế
+    if ((cleanTier === 'all' && typesPresent.size <= 1) || (cleanTier !== 'all' && !typesPresent.has(cleanTier) && typesPresent.size <= 1)) {
+        const targetUrl = cleanTier === 'all' ? '/Nonstop' : `/Nonstop?tier=${cleanTier}`;
+        if (typeof navigateSeamlessly === 'function') {
+            navigateSeamlessly(targetUrl, true);
+        } else {
+            window.location.href = targetUrl;
+        }
+        return false;
+    }
+
+    if (event) event.preventDefault();
 
     // 1. Cập nhật URL trong thanh địa chỉ không tải lại trang
     const newUrl = cleanTier === 'all' ? '/Nonstop' : `/Nonstop?tier=${cleanTier}`;
@@ -448,10 +574,26 @@ function applyNonstopTierFilter(tier, event) {
     // 3. Lọc các dòng trong bảng
     document.querySelectorAll('.daily-track-section').forEach(section => {
         let hasVisible = false;
-        const rows = section.querySelectorAll('tr.crystal-table-row');
-        rows.forEach(row => {
+        const sRows = section.querySelectorAll('tr.crystal-table-row');
+        sRows.forEach(row => {
             const trackType = (row.dataset.trackType || '').toLowerCase();
-            const match = cleanTier === 'all' || trackType === cleanTier;
+            let match = false;
+            if (cleanTier === 'all') {
+                const uTier = (window.TLongPlayer?.userTier || '').toLowerCase();
+                const uRole = window.TLongPlayer?.currentUser?.role;
+                const isHighTier = uRole === 'Admin' || uRole === 'Producer' || uTier === 'premium';
+                if (isHighTier) {
+                    match = true;
+                } else if (uTier === 'standard') {
+                    // Standard: Bỏ slot
+                    match = trackType !== 'slot';
+                } else {
+                    // Free: Chỉ hiện lọt
+                    match = trackType === 'lot';
+                }
+            } else {
+                match = trackType === cleanTier;
+            }
             row.style.display = match ? '' : 'none';
             if (match) hasVisible = true;
         });
@@ -469,8 +611,28 @@ function applyNonstopTierFilter(tier, event) {
 window.applyNonstopTierFilter = applyNonstopTierFilter;
 
 function applyTrackTierFilter(tier, event) {
-    if (event) event.preventDefault();
     const cleanTier = (tier || 'all').toLowerCase();
+
+    // Kiểm tra xem trong DOM có đủ các loại bản thu không
+    const rows = document.querySelectorAll('.daily-track-section tr.crystal-table-row');
+    const typesPresent = new Set();
+    rows.forEach(r => {
+        const t = (r.dataset.trackType || '').toLowerCase();
+        if (t) typesPresent.add(t);
+    });
+
+    // Nếu DOM chỉ chứa 1 loại (do server lọc trước) mà người dùng muốn xem 'all' hoặc loại khác, chuyển hướng URL thực tế
+    if ((cleanTier === 'all' && typesPresent.size <= 1) || (cleanTier !== 'all' && !typesPresent.has(cleanTier) && typesPresent.size <= 1)) {
+        const targetUrl = cleanTier === 'all' ? '/Track' : `/Track?tier=${cleanTier}`;
+        if (typeof navigateSeamlessly === 'function') {
+            navigateSeamlessly(targetUrl, true);
+        } else {
+            window.location.href = targetUrl;
+        }
+        return false;
+    }
+
+    if (event) event.preventDefault();
 
     const newUrl = cleanTier === 'all' ? '/Track' : `/Track?tier=${cleanTier}`;
     try { window.history.pushState({ tier: cleanTier }, '', newUrl); } catch(e) {}
@@ -487,10 +649,26 @@ function applyTrackTierFilter(tier, event) {
 
     document.querySelectorAll('.daily-track-section').forEach(section => {
         let hasVisible = false;
-        const rows = section.querySelectorAll('tr.crystal-table-row');
-        rows.forEach(row => {
+        const sRows = section.querySelectorAll('tr.crystal-table-row');
+        sRows.forEach(row => {
             const trackType = (row.dataset.trackType || '').toLowerCase();
-            const match = cleanTier === 'all' || trackType === cleanTier;
+            let match = false;
+            if (cleanTier === 'all') {
+                const uTier = (window.TLongPlayer?.userTier || '').toLowerCase();
+                const uRole = window.TLongPlayer?.currentUser?.role;
+                const isHighTier = uRole === 'Admin' || uRole === 'Producer' || uTier === 'premium';
+                if (isHighTier) {
+                    match = true;
+                } else if (uTier === 'standard') {
+                    // Standard: Bỏ slot
+                    match = trackType !== 'slot';
+                } else {
+                    // Free: Chỉ hiện lọt
+                    match = trackType === 'lot';
+                }
+            } else {
+                match = trackType === cleanTier;
+            }
             row.style.display = match ? '' : 'none';
             if (match) hasVisible = true;
         });
@@ -498,7 +676,7 @@ function applyTrackTierFilter(tier, event) {
     });
 
     const slotNotice = document.getElementById('badgeDemoSlotNotice');
-    const nhomNotice = document.getElementById('badgeTrackNhomNotice');
+    const nhomNotice = document.getElementById('badgeNhomNotice') || document.getElementById('badgeTrackNhomNotice');
     if (slotNotice) slotNotice.className = cleanTier === 'slot' ? 'badge bg-warning text-dark fw-bold px-3 py-1.5 rounded-pill shadow' : 'd-none';
     if (nhomNotice) nhomNotice.className = cleanTier === 'nhom' ? 'badge bg-danger text-white fw-bold px-3 py-1.5 rounded-pill shadow' : 'd-none';
 
@@ -609,6 +787,9 @@ async function submitRegister(form) {
 }
 
 async function handleLogout() {
+    // 1. Phát tín hiệu đăng xuất tới tất cả các tab khác ngay lập tức
+    notifyCrossTabLogout();
+
     try {
         await fetch('/Auth/Logout', { method: 'POST' });
     } catch (e) {
@@ -626,7 +807,14 @@ async function handleLogout() {
         try {
             window.TLongPlayer.audio.pause();
             window.TLongPlayer.audio.currentTime = 0;
+            window.TLongPlayer.isPlaying = false;
         } catch (e) {}
+    }
+    if (typeof stopBeatSynthesizer === 'function') {
+        stopBeatSynthesizer();
+    }
+    if (typeof updatePlayPauseButton === 'function') {
+        updatePlayPauseButton();
     }
 
     // Chuyển hướng quay về Homepage
@@ -659,6 +847,24 @@ function updateAuthUI() {
 
     const user = window.TLongPlayer.currentUser;
 
+    // 0. Quản lý hiển thị nút Kho Track và Kho Nonstop ở header: Ẩn khi là khách chưa đăng nhập
+    const navItemTrack = document.getElementById('navItemKhoTrack');
+    const navItemNonstop = document.getElementById('navItemKhoNonstop');
+    if (navItemTrack) {
+        if (!user) {
+            navItemTrack.style.setProperty('display', 'none', 'important');
+        } else {
+            navItemTrack.style.removeProperty('display');
+        }
+    }
+    if (navItemNonstop) {
+        if (!user) {
+            navItemNonstop.style.setProperty('display', 'none', 'important');
+        } else {
+            navItemNonstop.style.removeProperty('display');
+        }
+    }
+
     // 1. Role-specific Prominent Management Buttons in Navbar
     if (roleActionBtnContainer) {
         if (!user) {
@@ -673,16 +879,82 @@ function updateAuthUI() {
             `;
         } else if (user.role === 'Producer' || user.primaryRole === 'Producer') {
             roleActionBtnContainer.innerHTML = `
-                <a href="/Producer/UploadTrack" class="btn btn-outline-info fw-bold rounded-pill px-3 py-1 shadow d-flex align-items-center gap-1 text-nowrap flex-shrink-0 text-decoration-none" 
-                   style="border-width: 2px; color: #00b4d8; border-color: #00b4d8; box-shadow: 0 0 12px rgba(0, 180, 216, 0.4); background: rgba(0, 180, 216, 0.12); white-space: nowrap; font-size: 0.82rem;">
-                    <i class="fas fa-compact-disc text-info"></i>
-                    <span class="text-white text-nowrap">ĐĂNG TRACK LẺ</span>
-                </a>
-                <a href="/Producer/UploadNonstop" class="btn btn-outline-warning fw-bold rounded-pill px-3 py-1 shadow d-flex align-items-center gap-1 text-nowrap flex-shrink-0 text-decoration-none" 
-                   style="border-width: 2px; color: #ffd166; border-color: #ffd166; box-shadow: 0 0 12px rgba(255, 209, 102, 0.4); background: rgba(255, 209, 102, 0.12); white-space: nowrap; font-size: 0.82rem;">
-                    <i class="fas fa-fire-flame-curved text-warning"></i>
-                    <span class="text-white text-nowrap">ĐĂNG NONSTOP</span>
-                </a>
+                <div class="dropdown flex-shrink-0 text-nowrap">
+                    <button class="btn btn-producer-studio-rainbow dropdown-toggle d-flex align-items-center gap-1.5 shadow" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-wand-magic-sparkles text-white"></i>
+                        <span>PRODUCER STUDIO</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow-lg p-2" 
+                        style="background: rgba(14, 15, 26, 0.98); backdrop-filter: blur(30px); border: 1px solid rgba(255, 255, 255, 0.18); border-radius: 18px; min-width: 290px; box-shadow: 0 15px 40px rgba(0,0,0,0.85);">
+                        
+                        <!-- Header phân khu -->
+                        <li class="px-2 pt-1 pb-2 border-bottom border-secondary border-opacity-25 mb-2">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <span class="text-dim small fw-bold text-uppercase" style="letter-spacing: 0.8px; font-size: 0.68rem;">
+                                    <i class="fas fa-headphones text-warning me-1"></i> TRUNG TÂM SẢN XUẤT DJ
+                                </span>
+                                <span class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-50" style="font-size: 0.6rem; letter-spacing: 0.5px;">PRODUCER</span>
+                            </div>
+                        </li>
+
+                        <!-- Nút 1: QUẢN LÝ NHẠC (NỔI BẬT VIP) -->
+                        <li class="mb-2">
+                            <a class="dropdown-item p-2.5 rounded-3 d-flex align-items-center gap-3 text-decoration-none producer-menu-item" 
+                               href="/Producer/ManageMusic"
+                               style="background: linear-gradient(135deg, rgba(255, 19, 74, 0.22), rgba(255, 209, 102, 0.18)); border: 1px solid rgba(255, 209, 102, 0.45); box-shadow: 0 0 15px rgba(255, 209, 102, 0.2); transition: all 0.25s ease;">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" 
+                                     style="width: 42px; height: 42px; background: rgba(255, 209, 102, 0.22); border: 1px solid rgba(255, 209, 102, 0.55); box-shadow: 0 0 10px rgba(255, 209, 102, 0.3);">
+                                    <i class="fas fa-sliders text-warning fs-5"></i>
+                                </div>
+                                <div class="flex-grow-1 overflow-hidden">
+                                    <div class="fw-bold d-flex align-items-center justify-content-between" style="font-size: 0.95rem;">
+                                        <span class="text-warning fw-bold">Quản Lý Nhạc</span>
+                                        <i class="fas fa-arrow-right text-warning small opacity-75"></i>
+                                    </div>
+                                    <div class="text-dim small" style="font-size: 0.72rem; line-height: 1.3;">Kho Track & Nonstop của bạn</div>
+                                </div>
+                            </a>
+                        </li>
+
+                        <!-- Nút 2: ĐĂNG TRACK LẺ (CYAN NEON NỔI BẬT) -->
+                        <li class="mb-2">
+                            <a class="dropdown-item p-2.5 rounded-3 d-flex align-items-center gap-3 text-decoration-none producer-menu-item" 
+                               href="/Producer/UploadTrack"
+                               style="background: rgba(0, 180, 216, 0.15); border: 1px solid rgba(0, 180, 216, 0.4); box-shadow: 0 0 14px rgba(0, 180, 216, 0.18); transition: all 0.25s ease;">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" 
+                                     style="width: 42px; height: 42px; background: rgba(0, 180, 216, 0.22); border: 1px solid rgba(0, 180, 216, 0.55); box-shadow: 0 0 10px rgba(0, 180, 216, 0.3);">
+                                    <i class="fas fa-compact-disc text-info fs-5"></i>
+                                </div>
+                                <div class="flex-grow-1 overflow-hidden">
+                                    <div class="fw-bold d-flex align-items-center justify-content-between" style="font-size: 0.95rem;">
+                                        <span style="color: #00e5ff; font-weight: 700;">Đăng Track Lẻ</span>
+                                        <span class="badge bg-info bg-opacity-25 text-info border border-info border-opacity-50" style="font-size: 0.62rem;">BPM & Key</span>
+                                    </div>
+                                    <div class="text-dim small" style="font-size: 0.72rem; line-height: 1.3;">Phối đơn lẻ, chuẩn Camelot Key</div>
+                                </div>
+                            </a>
+                        </li>
+
+                        <!-- Nút 3: ĐĂNG NONSTOP (GOLD FIRE NỔI BẬT) -->
+                        <li>
+                            <a class="dropdown-item p-2.5 rounded-3 d-flex align-items-center gap-3 text-decoration-none producer-menu-item" 
+                               href="/Producer/UploadNonstop"
+                               style="background: rgba(255, 209, 102, 0.15); border: 1px solid rgba(255, 209, 102, 0.4); box-shadow: 0 0 14px rgba(255, 209, 102, 0.18); transition: all 0.25s ease;">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" 
+                                     style="width: 42px; height: 42px; background: rgba(255, 209, 102, 0.22); border: 1px solid rgba(255, 209, 102, 0.55); box-shadow: 0 0 10px rgba(255, 209, 102, 0.3);">
+                                    <i class="fas fa-fire-flame-curved text-warning fs-5"></i>
+                                </div>
+                                <div class="flex-grow-1 overflow-hidden">
+                                    <div class="fw-bold d-flex align-items-center justify-content-between" style="font-size: 0.95rem;">
+                                        <span style="color: #ffd166; font-weight: 700;">Đăng Nonstop</span>
+                                        <span class="badge bg-warning bg-opacity-25 text-warning border border-warning border-opacity-50" style="font-size: 0.62rem;">Set Mix</span>
+                                    </div>
+                                    <div class="text-dim small" style="font-size: 0.72rem; line-height: 1.3;">Set mix & mixtape nhiều giờ</div>
+                                </div>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             `;
         } else {
             // Member thông thường tuyệt đối không có 2 nút này
@@ -839,13 +1111,18 @@ function updateAuthUI() {
                     </li>` : ''}
                     ${primaryRole === 'Producer' ? `
                     <li>
+                        <a href="/Producer/ManageMusic" class="dropdown-item py-2 text-warning fw-bold">
+                            <i class="fas fa-sliders me-2 text-warning"></i> 🎛️ Quản Lý Nhạc Producer
+                        </a>
+                    </li>
+                    <li>
                         <a href="/Producer/UploadTrack" class="dropdown-item py-2 text-info fw-bold">
                             <i class="fas fa-compact-disc me-2 text-info"></i> 🎵 Đăng Track Lẻ (BPM & Key)
                         </a>
                     </li>
                     <li>
                         <a href="/Producer/UploadNonstop" class="dropdown-item py-2 text-warning fw-bold">
-                            <i class="fas fa-fire-flame-curved me-2 text-warning"></i> 🔥 Đăng Nonstop Dài (Set Mix)
+                            <i class="fas fa-fire-flame-curved me-2 text-warning"></i> 🔥 Đăng Nonstop (Set Mix)
                         </a>
                     </li>` : ''}
                     <li>
@@ -1078,7 +1355,7 @@ function initPlayerEvents() {
                 audio.currentTime = 0;
                 pauseTrack();
                 const currentTimeElem = document.getElementById('playerCurrentTime');
-                if (currentTimeElem) currentTimeElem.textContent = '0:00';
+                if (currentTimeElem) currentTimeElem.textContent = '00:00';
                 const seekSlider = document.getElementById('playerSeekSlider');
                 if (seekSlider) {
                     seekSlider.value = 0;
@@ -1088,7 +1365,7 @@ function initPlayerEvents() {
                     renderWaveform(0);
                 }
                 const detailCurrentTime = document.getElementById('detailCurrentTime');
-                if (detailCurrentTime) detailCurrentTime.textContent = '0:00';
+                if (detailCurrentTime) detailCurrentTime.textContent = '00:00';
                 showDemoLimitModal();
             }
         }
@@ -1105,7 +1382,7 @@ function initPlayerEvents() {
                 audio.currentTime = 0;
                 pauseTrack();
                 const currentTimeElem = document.getElementById('playerCurrentTime');
-                if (currentTimeElem) currentTimeElem.textContent = '0:00';
+                if (currentTimeElem) currentTimeElem.textContent = '00:00';
                 if (seekSlider) {
                     seekSlider.value = 0;
                     updateSeekSliderProgress(seekSlider);
@@ -1114,7 +1391,7 @@ function initPlayerEvents() {
                     renderWaveform(0);
                 }
                 const detailCurrentTime = document.getElementById('detailCurrentTime');
-                if (detailCurrentTime) detailCurrentTime.textContent = '0:00';
+                if (detailCurrentTime) detailCurrentTime.textContent = '00:00';
                 showDemoLimitModal();
             }
         }
@@ -1155,7 +1432,7 @@ function initPlayerEvents() {
             if (currentTime >= limit) {
                 pauseTrack();
                 audio.currentTime = 0;
-                if (currentTimeElem) currentTimeElem.textContent = '0:00';
+                if (currentTimeElem) currentTimeElem.textContent = '00:00';
                 if (seekSlider) {
                     seekSlider.value = 0;
                     updateSeekSliderProgress(seekSlider);
@@ -1166,7 +1443,12 @@ function initPlayerEvents() {
     });
 
     audio.addEventListener('ended', () => {
-        playNextTrack();
+        if (window.TLongPlayer?.repeatMode === 'one') {
+            audio.currentTime = 0;
+            audio.play().catch(e => {});
+        } else {
+            playNextTrack();
+        }
     });
 
     audio.addEventListener('error', () => {
@@ -1205,12 +1487,12 @@ function initPlayerEvents() {
                         seekSlider.value = 0;
                         updateSeekSliderProgress(seekSlider);
                         const currentTimeElem = document.getElementById('playerCurrentTime');
-                        if (currentTimeElem) currentTimeElem.textContent = '0:00';
+                        if (currentTimeElem) currentTimeElem.textContent = '00:00';
                         if (typeof renderWaveform === 'function') {
                             renderWaveform(0);
                         }
                         const detailCurrentTime = document.getElementById('detailCurrentTime');
-                        if (detailCurrentTime) detailCurrentTime.textContent = '0:00';
+                        if (detailCurrentTime) detailCurrentTime.textContent = '00:00';
                         window.TLongPlayer.isSeeking = false;
                         seekSlider.dataset.dragging = '';
                         showDemoLimitModal();
@@ -1239,14 +1521,14 @@ function initPlayerEvents() {
                         audio.currentTime = 0;
                         pauseTrack();
                         const currentTimeElem = document.getElementById('playerCurrentTime');
-                        if (currentTimeElem) currentTimeElem.textContent = '0:00';
+                        if (currentTimeElem) currentTimeElem.textContent = '00:00';
                         seekSlider.value = 0;
                         updateSeekSliderProgress(seekSlider);
                         if (typeof renderWaveform === 'function') {
                             renderWaveform(0);
                         }
                         const detailCurrentTime = document.getElementById('detailCurrentTime');
-                        if (detailCurrentTime) detailCurrentTime.textContent = '0:00';
+                        if (detailCurrentTime) detailCurrentTime.textContent = '00:00';
                         window.TLongPlayer.isSeeking = false;
                         seekSlider.dataset.dragging = '';
                         showDemoLimitModal();
@@ -1505,6 +1787,21 @@ function updateDemoBadge() {
     }
 }
 
+window.navigateToCurrentTrackDetail = function(event) {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    const track = window.TLongPlayer?.currentTrack;
+    if (!track || !track.id) return;
+    const detailUrl = '/Track/Detail/' + track.id;
+    if (typeof navigateSeamlessly === 'function') {
+        navigateSeamlessly(detailUrl);
+    } else {
+        window.location.href = detailUrl;
+    }
+};
+
 function playTrack(trackData) {
     if (!trackData) return;
     window.TLongPlayer.currentTrack = trackData;
@@ -1533,10 +1830,8 @@ function playTrack(trackData) {
 
     stopBeatSynthesizer();
 
-    document.getElementById('playerTrackTitle').textContent = trackData.title;
-    document.getElementById('playerTrackArtist').textContent = trackData.artist;
-    document.getElementById('playerTrackCover').src = trackData.coverUrl || '/images/logo.png';
-
+    const titleEl = document.getElementById('playerTrackTitle');
+    if (titleEl) titleEl.textContent = trackData.title;
     // Handle BPM & Key display for Nonstop vs Track
     const bpmElem = document.getElementById('playerTrackBpm');
     const keyElem = document.getElementById('playerTrackKey');
@@ -1544,6 +1839,16 @@ function playTrack(trackData) {
         || (trackData.key && String(trackData.key).toLowerCase() === 'nonstop')
         || (trackData.categoryCode && String(trackData.categoryCode).toLowerCase().includes('nonstop'))
         || (trackData.trackType && String(trackData.trackType).toLowerCase().includes('nonstop'));
+
+    const detailPath = isNonstop ? `/Nonstop/Detail/${trackData.id}` : `/Track/Detail/${trackData.id}`;
+    const titleLink = document.getElementById('playerTrackTitleLink');
+    if (titleLink && trackData.id) titleLink.href = detailPath;
+    const coverLink = document.getElementById('playerTrackCoverLink');
+    if (coverLink && trackData.id) coverLink.href = detailPath;
+    const artistEl = document.getElementById('playerTrackArtist');
+    if (artistEl) artistEl.textContent = trackData.artist;
+    const coverEl = document.getElementById('playerTrackCover');
+    if (coverEl) coverEl.src = trackData.coverUrl || '/images/logo.png';
 
     if (bpmElem) {
         if (isNonstop) {
@@ -1587,7 +1892,7 @@ function playTrack(trackData) {
     if (durationElem && trackData.durationSeconds) {
         durationElem.textContent = formatTime(trackData.durationSeconds);
     }
-    if (currentTimeElem) currentTimeElem.textContent = '0:00';
+    if (currentTimeElem) currentTimeElem.textContent = '00:00';
     if (seekSlider) seekSlider.value = 0;
 
     updateDemoBadge();
@@ -1706,13 +2011,160 @@ function updatePlayPauseButton() {
     }
 }
 
+// Tìm danh sách các nút phát nhạc hoặc hàng bài hát đang hiển thị trên trang hiện tại
+function getPagePlayableElements() {
+    const triggers = Array.from(document.querySelectorAll('.btn-play-trigger, .track-play-inline-btn, tr.crystal-table-row [onclick*="playTrack"]'));
+    return triggers.filter(el => el.offsetParent !== null);
+}
+
 function playNextTrack() {
-    showToastNotification("✨ Đang chuyển bài tiếp theo...");
+    const playable = getPagePlayableElements();
+    if (playable.length === 0) {
+        showToastNotification("✨ Đang phát lại bài hiện tại");
+        if (window.TLongPlayer?.audio) {
+            window.TLongPlayer.audio.currentTime = 0;
+            window.TLongPlayer.audio.play().catch(e => {});
+        }
+        return;
+    }
+
+    if (window.TLongPlayer?.isShuffle) {
+        const randomIndex = Math.floor(Math.random() * playable.length);
+        showToastNotification("🔀 Phát ngẫu nhiên bài tiếp theo");
+        playable[randomIndex].click();
+        return;
+    }
+
+    const currentId = window.TLongPlayer?.currentTrack?.id;
+    let currentIndex = -1;
+    if (currentId) {
+        currentIndex = playable.findIndex(el => {
+            const row = el.closest('[data-track-id]') || el.closest('tr');
+            return (row && row.dataset && row.dataset.trackId === currentId) || (el.getAttribute('onclick') && el.getAttribute('onclick').includes(currentId));
+        });
+    }
+
+    const nextIndex = (currentIndex >= 0 && currentIndex < playable.length - 1) ? currentIndex + 1 : 0;
+    showToastNotification("⏭️ Chuyển bài kế tiếp");
+    playable[nextIndex].click();
 }
 
 function playPrevTrack() {
-    showToastNotification("✨ Quay lại bài trước...");
+    const playable = getPagePlayableElements();
+    if (playable.length === 0) {
+        if (window.TLongPlayer?.audio) {
+            window.TLongPlayer.audio.currentTime = 0;
+        }
+        return;
+    }
+
+    const currentId = window.TLongPlayer?.currentTrack?.id;
+    let currentIndex = -1;
+    if (currentId) {
+        currentIndex = playable.findIndex(el => {
+            const row = el.closest('[data-track-id]') || el.closest('tr');
+            return (row && row.dataset && row.dataset.trackId === currentId) || (el.getAttribute('onclick') && el.getAttribute('onclick').includes(currentId));
+        });
+    }
+
+    const prevIndex = (currentIndex > 0) ? currentIndex - 1 : (playable.length - 1);
+    showToastNotification("⏮️ Quay lại bài trước");
+    playable[prevIndex].click();
 }
+
+function toggleShuffle() {
+    window.TLongPlayer.isShuffle = !window.TLongPlayer.isShuffle;
+    const btn = document.getElementById('playerShuffleBtn');
+    if (btn) {
+        if (window.TLongPlayer.isShuffle) {
+            btn.classList.add('active', 'text-danger');
+            showToastNotification("🔀 Đã bật chế độ phát ngẫu nhiên");
+        } else {
+            btn.classList.remove('active', 'text-danger');
+            showToastNotification("➡️ Đã tắt chế độ phát ngẫu nhiên");
+        }
+    }
+}
+window.toggleShuffle = toggleShuffle;
+
+function toggleRepeat() {
+    const btn = document.getElementById('playerRepeatBtn');
+    if (window.TLongPlayer.repeatMode === 'off') {
+        window.TLongPlayer.repeatMode = 'all';
+        if (btn) {
+            btn.classList.remove('text-danger');
+            btn.classList.add('active', 'text-warning');
+            btn.innerHTML = '<i class="fas fa-repeat"></i>';
+        }
+        showToastNotification("🔁 Đã bật lặp lại danh sách");
+    } else if (window.TLongPlayer.repeatMode === 'all') {
+        window.TLongPlayer.repeatMode = 'one';
+        if (btn) {
+            btn.classList.remove('text-warning');
+            btn.classList.add('active', 'text-danger');
+            btn.innerHTML = '<i class="fas fa-repeat-1"></i>';
+        }
+        showToastNotification("🔂 Đã bật lặp lại 1 bài");
+    } else {
+        window.TLongPlayer.repeatMode = 'off';
+        if (btn) {
+            btn.classList.remove('active', 'text-warning', 'text-danger');
+            btn.innerHTML = '<i class="fas fa-repeat"></i>';
+        }
+        showToastNotification("➡️ Đã tắt lặp lại");
+    }
+}
+window.toggleRepeat = toggleRepeat;
+
+let lastPlayerVolume = 85;
+function toggleMute() {
+    const audio = window.TLongPlayer?.audio;
+    const slider = document.getElementById('playerVolumeSlider');
+    const icon = document.getElementById('volumeIcon');
+    if (!audio) return;
+
+    if (audio.volume > 0) {
+        lastPlayerVolume = (slider && slider.value > 0) ? slider.value : 85;
+        audio.volume = 0;
+        if (slider) slider.value = 0;
+        if (icon) icon.className = 'fas fa-volume-mute text-danger';
+        showToastNotification("🔇 Đã tắt tiếng");
+    } else {
+        const restoreVal = lastPlayerVolume > 5 ? lastPlayerVolume : 85;
+        audio.volume = restoreVal / 100;
+        if (slider) slider.value = restoreVal;
+        if (icon) icon.className = restoreVal < 50 ? 'fas fa-volume-down text-dim hover-white' : 'fas fa-volume-up text-dim hover-white';
+        showToastNotification("🔊 Đã bật âm thanh");
+    }
+}
+window.toggleMute = toggleMute;
+
+function toggleCurrentTrackFavorite(btnElem) {
+    const track = window.TLongPlayer?.currentTrack;
+    if (!track || !track.id) {
+        showToastNotification("⚠️ Vui lòng chọn bài để yêu thích!");
+        return;
+    }
+    toggleFavorite(track.id, btnElem);
+}
+window.toggleCurrentTrackFavorite = toggleCurrentTrackFavorite;
+
+function navigateToCurrentTrackDetail(event) {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    const track = window.TLongPlayer?.currentTrack;
+    if (!track || !track.id) {
+        showToastNotification("⚠️ Chưa có bài hát nào đang phát!");
+        return;
+    }
+    const isNonstop = (track.trackType === 'nonstop' || track.kind === 'Nonstop' || (track.categoryCode && track.categoryCode.toLowerCase().includes('nonstop')));
+    const targetUrl = isNonstop ? `/Nonstop/Detail/${track.id}` : `/Track/Detail/${track.id}`;
+    if (window.location.pathname.toLowerCase() === targetUrl.toLowerCase()) return;
+    navigateSeamlessly(targetUrl, true);
+}
+window.navigateToCurrentTrackDetail = navigateToCurrentTrackDetail;
 
 // Tua nhạc theo số giây (+10s hoặc -10s)
 function skipTime(seconds) {
@@ -1740,7 +2192,7 @@ function skipTime(seconds) {
             audio.currentTime = 0;
             pauseTrack();
             const currentTimeElem = document.getElementById('playerCurrentTime');
-            if (currentTimeElem) currentTimeElem.textContent = '0:00';
+            if (currentTimeElem) currentTimeElem.textContent = '00:00';
             const seekSlider = document.getElementById('playerSeekSlider');
             if (seekSlider) {
                 seekSlider.value = 0;
@@ -1834,6 +2286,7 @@ async function handleDownload(trackId, title, requiredTier) {
                 const downloadUrl = data.downloadUrl || `/Music/DownloadFile/${trackId}`;
                 const link = document.createElement('a');
                 link.href = downloadUrl;
+                link.className = 'no-seamless';
                 link.setAttribute('download', data.fileName || `${title.replace(/\s+/g, '_')}_TLongMusic.mp3`);
                 document.body.appendChild(link);
                 link.click();
@@ -1851,7 +2304,7 @@ async function handleDownload(trackId, title, requiredTier) {
     }
 }
 
-// VietQR Checkout - Chuyển sang Trang Thanh Toán Chuyên Biệt
+// VietQR Checkout - Chuyển sang Trang Thanh Toán Chuyên Biệt Không Khựng Nhạc (Seamless SPA)
 function openCheckoutModal(planName, price) {
     const pkgId = (planName && planName.toLowerCase().includes('premium')) ? 'Premium' : 'Standard';
     
@@ -1866,8 +2319,22 @@ function openCheckoutModal(planName, price) {
         return;
     }
 
-    // Điều hướng trực tiếp sang Trang Thanh Toán Riêng Biệt (VietQR động + Tự động kích hoạt)
-    window.location.href = `/Payment/Checkout?package=${encodeURIComponent(pkgId)}`;
+    // Đóng bất kỳ modal nào đang mở trước khi chuyển trang (ví dụ modal demo limit)
+    const existingModals = document.querySelectorAll('.modal.show');
+    existingModals.forEach(m => {
+        try {
+            const inst = bootstrap.Modal.getInstance(m);
+            if (inst) inst.hide();
+        } catch(e) {}
+    });
+
+    // Điều hướng mượt mà sang Trang Thanh Toán (Giữ âm thanh phát liền mạch 100%)
+    const checkoutUrl = `/Payment/Checkout?package=${encodeURIComponent(pkgId)}`;
+    if (typeof navigateSeamlessly === 'function') {
+        navigateSeamlessly(checkoutUrl, true);
+    } else {
+        window.location.href = checkoutUrl;
+    }
 }
 
 async function confirmOrderPayment(orderCode, planName) {
@@ -1897,13 +2364,8 @@ async function confirmOrderPayment(orderCode, planName) {
     }
 }
 
-function openUserProfileModal() {
-    const user = window.TLongPlayer.currentUser;
-    if (!user) {
-        showToastNotification("⚠️ Vui lòng đăng nhập trước!");
-        return;
-    }
-
+function populateUserProfileModalFields(user) {
+    if (!user) return;
     const usernameEl = document.getElementById('profileUsername');
     const fullNameEl = document.getElementById('profileFullName');
     const emailEl = document.getElementById('profileEmail');
@@ -1916,23 +2378,77 @@ function openUserProfileModal() {
     const oldPassEl = document.getElementById('profileOldPassword');
     const newPassEl = document.getElementById('profileNewPassword');
 
+    const phone = user.phoneNumber || user.phone || '';
+    const bankName = user.bankName || user.bank || '';
+    const bankAccNo = user.bankAccountNumber || user.bankAccount || user.accountNumber || '';
+    const bankHolder = user.bankAccountHolder || user.accountHolder || user.fullName || '';
+    const avatar = user.avatarUrl || '/images/logo.png';
+    const fullName = user.fullName || user.username || '';
+
     if (usernameEl) usernameEl.value = user.username || '';
-    if (fullNameEl) fullNameEl.value = user.fullName || '';
+    if (fullNameEl) fullNameEl.value = fullName;
     if (emailEl) emailEl.value = user.email || '';
-    if (phoneEl) phoneEl.value = user.phoneNumber || '';
+    if (phoneEl) phoneEl.value = phone;
     if (avatarUrlEl) avatarUrlEl.value = user.avatarUrl || '';
-    if (avatarPreviewEl) avatarPreviewEl.src = user.avatarUrl || '/images/logo.png';
+    if (avatarPreviewEl) avatarPreviewEl.src = avatar;
     const avatarFileInput = document.getElementById('profileAvatarFile');
     if (avatarFileInput) avatarFileInput.value = '';
-    if (bankNameEl) bankNameEl.value = user.bankName || '';
-    if (bankAccNoEl) bankAccNoEl.value = user.bankAccountNumber || '';
-    if (bankAccHolderEl) bankAccHolderEl.value = user.bankAccountHolder || '';
+    if (bankNameEl) bankNameEl.value = bankName;
+    if (bankAccNoEl) bankAccNoEl.value = bankAccNo;
+    if (bankAccHolderEl) bankAccHolderEl.value = bankHolder;
     if (oldPassEl) oldPassEl.value = '';
     if (newPassEl) newPassEl.value = '';
-
-    const modal = new bootstrap.Modal(document.getElementById('userProfileModal'));
-    modal.show();
 }
+
+async function openUserProfileModal() {
+    let user = window.TLongPlayer ? window.TLongPlayer.currentUser : null;
+    if (!user) {
+        const saved = localStorage.getItem('tlong_current_user');
+        if (saved) {
+            try { user = JSON.parse(saved); } catch(e) {}
+        }
+    }
+    if (!user) {
+        try {
+            const res = await fetch('/Auth/CurrentUser');
+            const data = await res.json();
+            if (data.isAuthenticated && data.user) {
+                user = data.user;
+                if (window.TLongPlayer) window.TLongPlayer.currentUser = data.user;
+                localStorage.setItem('tlong_current_user', JSON.stringify(data.user));
+            }
+        } catch(e) {}
+    }
+
+    if (!user) {
+        showToastNotification("⚠️ Vui lòng đăng nhập trước!");
+        return;
+    }
+
+    populateUserProfileModalFields(user);
+
+    const modalEl = document.getElementById('userProfileModal');
+    if (modalEl) {
+        const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+        modal.show();
+    }
+}
+
+// Lắng nghe sự kiện mở modal để luôn đổ thông tin mới nhất vào các ô input
+document.addEventListener('show.bs.modal', (e) => {
+    if (e.target && e.target.id === 'userProfileModal') {
+        let user = window.TLongPlayer ? window.TLongPlayer.currentUser : null;
+        if (!user) {
+            const saved = localStorage.getItem('tlong_current_user');
+            if (saved) {
+                try { user = JSON.parse(saved); } catch(e) {}
+            }
+        }
+        if (user) {
+            populateUserProfileModalFields(user);
+        }
+    }
+});
 
 function previewModalAvatarFile(input) {
     if (input.files && input.files[0]) {
@@ -1956,6 +2472,7 @@ async function submitUpdateProfile(form) {
     }
 
     const formData = new FormData();
+    if (form.username && form.username.value) formData.append('username', form.username.value.trim());
     formData.append('fullName', form.fullName.value.trim());
     formData.append('email', form.email.value.trim());
     if (form.phoneNumber && form.phoneNumber.value) formData.append('phoneNumber', form.phoneNumber.value.trim());
@@ -2158,11 +2675,16 @@ function switchUploadMode(mode) {
 
 window.producerSelectedAudioFile = null;
 
-function formatTime(sec) {
-    if (!sec || isNaN(sec)) return "00:00";
-    const m = Math.floor(sec / 60);
-    const s = Math.floor(sec % 60);
-    return (m < 10 ? '0' + m : m) + ':' + (s < 10 ? '0' + s : s);
+function formatTime(seconds) {
+    if (isNaN(seconds) || seconds === null || seconds === undefined || seconds < 0) return '00:00';
+    const totalSec = Math.floor(seconds);
+    const h = Math.floor(totalSec / 3600);
+    const m = Math.floor((totalSec % 3600) / 60);
+    const s = totalSec % 60;
+    if (h > 0) {
+        return `${h}:${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+    }
+    return `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
 }
 
 // ==========================================
@@ -3156,8 +3678,17 @@ async function toggleFavorite(musicId, btnElem) {
             if (btnElem) {
                 const icon = btnElem.querySelector('i');
                 if (icon) {
-                    icon.className = data.isFavorited ? 'fas fa-heart text-danger' : 'far fa-heart text-dim';
+                    icon.className = data.isFavorited ? 'fas fa-heart text-danger' : 'far fa-heart text-danger';
                 }
+                if (data.isFavorited) {
+                    btnElem.classList.add('active');
+                } else {
+                    btnElem.classList.remove('active');
+                }
+            }
+            const countEl = document.getElementById('detailLikeCount');
+            if (countEl && typeof data.favoritesCount === 'number') {
+                countEl.textContent = data.favoritesCount;
             }
             showToastNotification(data.message);
         }
@@ -3391,10 +3922,15 @@ function stopBeatSynthesizer() {
 }
 
 function formatTime(seconds) {
-    if (isNaN(seconds)) return '0:00';
-    const m = Math.floor(seconds / 60);
-    const s = Math.floor(seconds % 60);
-    return `${m}:${s < 10 ? '0' : ''}${s}`;
+    if (isNaN(seconds) || seconds === null || seconds === undefined || seconds < 0) return '00:00';
+    const totalSec = Math.floor(seconds);
+    const h = Math.floor(totalSec / 3600);
+    const m = Math.floor((totalSec % 3600) / 60);
+    const s = totalSec % 60;
+    if (h > 0) {
+        return `${h}:${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+    }
+    return `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
 }
 
 function showVipModal(htmlContent) {
@@ -3501,11 +4037,15 @@ function filterTracks() {
             // Chỉ hiển thị track của Nhóm
             matchesTier = isNhomRow;
         } else if (tierFilter === 'all') {
-            if (userTier === 'standard') {
-                // Tài khoản Standard mặc định chỉ hiển thị track của Nhóm
-                matchesTier = isNhomRow;
-            } else {
+            const isHighTier = (currentUser && (currentUser.role === 'Admin' || currentUser.role === 'Producer')) || userTier === 'premium';
+            if (isHighTier) {
                 matchesTier = true;
+            } else if (userTier === 'standard') {
+                // Tài khoản Standard: Bỏ phần nhạc slot chỗ Tất Cả (chỉ gồm Nhóm và Lọt)
+                matchesTier = !isSlotRow;
+            } else {
+                // Tài khoản Free: Chỗ Tất Cả chỉ hiện track lọt
+                matchesTier = !isSlotRow && !isNhomRow;
             }
         } else if (tierFilter === 'my_tier') {
             if (currentUser && (currentUser.role === 'Admin' || currentUser.role === 'Producer')) {
@@ -4882,12 +5422,19 @@ function renderAdminUsersTable(users) {
             `;
 
             actionColumnHtml = `
-                <button class="btn btn-sm btn-outline-warning py-1 px-2 fw-bold text-nowrap" 
-                        onclick="openAdminExtendModal('${u.userId}', '${safeFullName}', '${safeUsername}', '${safeAvatar}', '${safeTier}', '${safeExpires}')"
-                        title="Tùy chỉnh gia hạn theo ngày, tuần, tối đa tháng">
-                    <i class="fas fa-sliders me-1"></i> Tùy Chỉnh VIP
-                </button>
-                ${lockBtn}
+                <div class="d-flex align-items-center justify-content-end gap-1">
+                    <button class="btn btn-sm btn-outline-warning py-1 px-2 fw-bold text-nowrap" 
+                            onclick="openAdminExtendModal('${u.userId}', '${safeFullName}', '${safeUsername}', '${safeAvatar}', '${safeTier}', '${safeExpires}')"
+                            title="Tùy chỉnh gia hạn theo ngày, tuần, tối đa tháng">
+                        <i class="fas fa-sliders me-1"></i> Tùy Chỉnh VIP
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger py-1 px-2 text-nowrap"
+                            onclick="adminClearUserSubscriptions('${u.userId}', '${safeUsername}', '${safeFullName}')"
+                            title="Xóa tất cả các gói đăng ký của user này (Hạ về Free)">
+                        <i class="fas fa-trash-can me-1"></i> Xóa Gói
+                    </button>
+                    ${lockBtn}
+                </div>
             `;
         }
 
@@ -4970,6 +5517,55 @@ async function adminQuickExtend(userId, packageId, days, userName) {
         showToastNotification("❌ Lỗi kết nối khi gia hạn tự động!");
     }
 }
+
+// XÓA TẤT CẢ GÓI ĐĂNG KÝ CỦA USER (ADMIN ACTION)
+async function adminClearUserSubscriptions(userId, username, fullName) {
+    const displayName = fullName || username || 'người dùng này';
+    const confirmMsg = `⚠️ CẢNH BÁO XÓA TẤT CẢ GÓI ĐĂNG KÝ:\n\nBạn có chắc chắn muốn XÓA TẤT CẢ GÓI ĐĂNG KÝ VIP của '${displayName}' (@${username})?\n\n• Toàn bộ gói Standard VIP và Premium VIP sẽ bị xóa bỏ hoàn toàn.\n• Tài khoản người dùng sẽ trở về thành viên Free Member ngay lập tức.\n\nNhấn OK để thực hiện xóa.`;
+
+    if (!confirm(confirmMsg)) {
+        return;
+    }
+
+    try {
+        const res = await fetch('/Admin/ClearUserSubscriptions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: userId })
+        });
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+            const modalEl = document.getElementById('adminExtendModal');
+            if (modalEl) {
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                if (modal) modal.hide();
+            }
+            document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+
+            showToastNotification(`🗑️ ${data.message}`);
+            loadAdminUsers(true);
+            if (typeof loadAdminStats === 'function') loadAdminStats();
+            return;
+        }
+
+        showToastNotification(`❌ ${data.message || 'Xóa gói đăng ký thất bại!'}`);
+    } catch (e) {
+        console.error("adminClearUserSubscriptions error:", e);
+        showToastNotification("❌ Lỗi kết nối khi gửi yêu cầu xóa gói đăng ký!");
+    }
+}
+window.adminClearUserSubscriptions = adminClearUserSubscriptions;
+
+function adminClearCurrentModalUserSubs() {
+    if (!window._currentExtendingUser || !window._currentExtendingUser.userId) {
+        showToastNotification("❌ Không tìm thấy thông tin người dùng đang chọn!");
+        return;
+    }
+    const u = window._currentExtendingUser;
+    adminClearUserSubscriptions(u.userId, u.username, u.fullName);
+}
+window.adminClearCurrentModalUserSubs = adminClearCurrentModalUserSubs;
 
 // MODAL TÙY CHỈNH GIA HẠN GÓI VIP (THEO NGÀY, TUẦN, TỐI ĐA THÁNG)
 window._currentExtendingUser = null;

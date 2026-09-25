@@ -1,5 +1,8 @@
+@model TLongMusic.Models.Dto.UserSessionDto
 @{
     ViewData["Title"] = "Hồ Sơ Cá Nhân & Tài Khoản Ngân Hàng - TLongMusic";
+    var primaryRole = Model?.PrimaryRole ?? (Model?.Roles != null && Model.Roles.Contains("Admin") ? "Admin" : Model?.Roles != null && Model.Roles.Contains("Producer") ? "Producer" : "Member");
+    var tier = (Model?.Tier ?? "Free").ToLower();
 }
 
 <div class="container py-4" style="position: relative; z-index: 2;">
@@ -39,19 +42,50 @@
                 
                 <!-- Avatar with Glowing Border -->
                 <div class="position-relative d-inline-block mb-3">
-                    <img id="pageProfileAvatar" src="/images/logo.png" alt="Avatar" 
+                    <img id="pageProfileAvatar" src="@(Model?.AvatarUrl ?? "/images/logo.png")" alt="Avatar" 
                          class="rounded-circle shadow-lg" 
                          style="width: 120px; height: 120px; object-fit: cover; border: 3px solid #ff134a; box-shadow: 0 0 25px rgba(255, 19, 74, 0.5);"
                          onerror="this.src='/images/logo.png'" />
                     <span id="pageProfileOnlineDot" class="position-absolute bottom-0 end-0 p-2 bg-success border border-dark rounded-circle" style="transform: translate(-10px, -10px);"></span>
                 </div>
 
-                <h4 class="text-white fw-bold mb-1" id="pageProfileFullName">Đang tải...</h4>
-                <div class="font-monospace small text-dim mb-2">@@<span id="pageProfileUsername">username</span></div>
+                <h4 class="text-white fw-bold mb-1" id="pageProfileFullName">@(Model?.FullName ?? "Đang tải...")</h4>
+                <div class="font-monospace small text-dim mb-2">@@<span id="pageProfileUsername">@(Model?.Username ?? "username")</span></div>
                 
                 <div class="d-flex justify-content-center gap-2 mb-3">
-                    <span class="badge bg-secondary" id="pageProfileRoleBadge">Member</span>
-                    <span class="badge bg-dark border border-secondary" id="pageProfileTierBadge">Gói Free</span>
+                    @if (primaryRole == "Admin")
+                    {
+                        <span class="badge bg-danger" id="pageProfileRoleBadge"><i class="fas fa-shield-halved me-1"></i> Admin</span>
+                    }
+                    else if (primaryRole == "Producer")
+                    {
+                        <span class="badge badge-premium-gold" id="pageProfileRoleBadge"><i class="fas fa-headphones me-1"></i> Producer</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary" id="pageProfileRoleBadge">Thành Viên</span>
+                    }
+
+                    @if (primaryRole == "Admin")
+                    {
+                        <span class="badge bg-danger text-white" id="pageProfileTierBadge"><i class="fas fa-infinity me-1"></i> Toàn Quyền Quản Trị</span>
+                    }
+                    else if (primaryRole == "Producer")
+                    {
+                        <span class="badge bg-warning text-dark" id="pageProfileTierBadge"><i class="fas fa-infinity me-1"></i> Producer Studio</span>
+                    }
+                    else if (tier == "premium")
+                    {
+                        <span class="badge badge-premium-gold" id="pageProfileTierBadge"><i class="fas fa-crown me-1"></i> Gói Premium VIP</span>
+                    }
+                    else if (tier == "standard")
+                    {
+                        <span class="badge badge-standard-red" id="pageProfileTierBadge"><i class="fas fa-certificate me-1"></i> Gói Standard VIP</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary" id="pageProfileTierBadge"><i class="fas fa-user me-1"></i> Gói Free</span>
+                    }
                 </div>
 
                 <hr class="border-secondary border-opacity-25 my-3" />
@@ -60,21 +94,50 @@
                 <div class="text-start small d-flex flex-column gap-2 mb-3">
                     <div class="d-flex justify-content-between text-dim">
                         <span><i class="fas fa-envelope text-danger me-2"></i> Email:</span>
-                        <strong class="text-white" id="pageProfileEmailSummary">--</strong>
+                        <strong class="text-white" id="pageProfileEmailSummary">@(Model?.Email ?? "--")</strong>
                     </div>
                     <div class="d-flex justify-content-between text-dim">
                         <span><i class="fas fa-phone text-warning me-2"></i> Số điện thoại:</span>
-                        <strong class="text-white" id="pageProfilePhoneSummary">--</strong>
+                        <strong class="text-white" id="pageProfilePhoneSummary">@(string.IsNullOrEmpty(Model?.PhoneNumber) ? "Chưa cập nhật" : Model.PhoneNumber)</strong>
                     </div>
                     <div class="d-flex justify-content-between text-dim">
                         <span><i class="fas fa-building-columns text-info me-2"></i> Ngân hàng:</span>
-                        <strong class="text-info" id="pageProfileBankSummary">--</strong>
+                        <strong class="text-info" id="pageProfileBankSummary">@(string.IsNullOrEmpty(Model?.BankName) ? "Chưa cập nhật" : Model.BankName)</strong>
                     </div>
                 </div>
 
                 <!-- Navigation Shortcuts for Roles -->
                 <div class="d-grid gap-2 pt-2" id="pageProfileRoleActions">
-                    <!-- Injected via JS based on role -->
+                    @if (primaryRole == "Admin")
+                    {
+                        <a href="/Admin" class="btn btn-outline-danger fw-bold rounded-pill py-2 text-decoration-none">
+                            <i class="fas fa-shield-halved me-2"></i> Mở Trung Tâm Admin
+                        </a>
+                    }
+                    else if (primaryRole == "Producer")
+                    {
+                        <a href="/Producer/UploadTrack" class="btn btn-outline-warning fw-bold rounded-pill py-2 text-decoration-none">
+                            <i class="fas fa-headphones me-2"></i> Mở Studio Producer
+                        </a>
+                    }
+                    else if (tier == "standard")
+                    {
+                        <a href="/Payment/Checkout?package=Premium" class="btn btn-shimmer-gold rounded-pill py-2 text-dark fw-bold">
+                            <i class="fas fa-crown me-2"></i> Nâng Cấp Lên Premium VIP
+                        </a>
+                    }
+                    else if (tier == "premium")
+                    {
+                        <a href="/Payment/Checkout?package=Premium" class="btn btn-outline-warning rounded-pill py-2 fw-bold">
+                            <i class="fas fa-rotate-right me-2"></i> Gia Hạn Gói Premium VIP
+                        </a>
+                    }
+                    else
+                    {
+                        <a href="/Payment/Checkout?package=Standard" class="btn btn-shimmer-ruby rounded-pill py-2 fw-bold">
+                            <i class="fas fa-gem me-2"></i> Nâng Cấp Gói VIP
+                        </a>
+                    }
                 </div>
             </div>
         </div>
@@ -95,7 +158,7 @@
                                 <small class="text-uppercase tracking-wider text-warning fw-bold font-monospace" style="letter-spacing: 2px;">
                                     <i class="fas fa-building-columns me-1"></i> TLONGMUSIC VIETNAM REVENUE
                                 </small>
-                                <h5 class="fw-bold mb-0 text-white mt-1" id="cardBankNamePreview">NGÂN HÀNG (CHƯA CHỌN)</h5>
+                                <h5 class="fw-bold mb-0 text-white mt-1" id="cardBankNamePreview">@(string.IsNullOrEmpty(Model?.BankName) ? "NGÂN HÀNG (CHƯA CHỌN)" : Model.BankName.ToUpper())</h5>
                             </div>
                             <i class="fas fa-wifi fa-rotate-90 text-white opacity-75 fa-lg"></i>
                         </div>
@@ -103,14 +166,14 @@
                         <div class="mb-4 position-relative">
                             <small class="text-white-50 d-block mb-1" style="font-size: 0.75rem;">SỐ TÀI KHOẢN NHẬN TIỀN</small>
                             <div class="fs-4 font-monospace fw-bold tracking-widest text-warning" id="cardAccountNumberPreview" style="letter-spacing: 3px;">
-                                •••• •••• •••• ••••
+                                @(string.IsNullOrEmpty(Model?.BankAccountNumber) ? "•••• •••• •••• ••••" : Model.BankAccountNumber)
                             </div>
                         </div>
 
                         <div class="d-flex justify-content-between align-items-end position-relative">
                             <div>
                                 <small class="text-white-50 d-block" style="font-size: 0.75rem;">CHỦ TÀI KHOẢN</small>
-                                <span class="fw-bold text-uppercase font-monospace fs-6" id="cardAccountHolderPreview">CHƯA CẬP NHẬT</span>
+                                <span class="fw-bold text-uppercase font-monospace fs-6" id="cardAccountHolderPreview">@(string.IsNullOrEmpty(Model?.BankAccountHolder) ? "CHƯA CẬP NHẬT" : Model.BankAccountHolder.ToUpper())</span>
                             </div>
                             <div>
                                 <span class="badge bg-warning text-dark fw-bold px-3 py-2 rounded-pill shadow-sm">
@@ -131,20 +194,21 @@
                     
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label text-dim small">Tên đăng nhập (Username cố định):</label>
-                            <input type="text" id="editUsername" class="form-control bg-dark text-dim border-secondary" readonly disabled />
+                            <label class="form-label text-white small">Tên đăng nhập (Username): <span class="text-danger">*</span></label>
+                            <input type="text" id="editUsername" name="username" class="form-control bg-dark text-white border-secondary font-monospace" required minlength="3" maxlength="50" placeholder="Nhập tên đăng nhập..." value="@(Model?.Username ?? "")" />
+                            <small class="text-dim d-block mt-1" style="font-size: 0.72rem;">Từ 3-50 ký tự, không chứa dấu cách (chỉ dùng chữ cái, số, _, .)</small>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label text-white small">Họ và tên hiển thị: <span class="text-danger">*</span></label>
-                            <input type="text" id="editFullName" name="fullName" class="form-control bg-dark text-white border-secondary" required />
+                            <input type="text" id="editFullName" name="fullName" class="form-control bg-dark text-white border-secondary" required value="@(Model?.FullName ?? "")" />
                         </div>
                         <div class="col-md-6">
                             <label class="form-label text-white small">Địa chỉ Email: <span class="text-danger">*</span></label>
-                            <input type="email" id="editEmail" name="email" class="form-control bg-dark text-white border-secondary" required />
+                            <input type="email" id="editEmail" name="email" class="form-control bg-dark text-white border-secondary" required value="@(Model?.Email ?? "")" />
                         </div>
                         <div class="col-md-6">
                             <label class="form-label text-white small">Số điện thoại / Zalo liên hệ:</label>
-                            <input type="text" id="editPhone" name="phoneNumber" class="form-control bg-dark text-white border-secondary" placeholder="09xxxxxxxx" />
+                            <input type="text" id="editPhone" name="phoneNumber" class="form-control bg-dark text-white border-secondary" placeholder="09xxxxxxxx" value="@(Model?.PhoneNumber ?? "")" />
                         </div>
                         <div class="col-12">
                             <label class="form-label text-white small d-flex justify-content-between align-items-center">
@@ -155,7 +219,7 @@
                                 <div class="d-flex flex-wrap align-items-center gap-3">
                                     <!-- Mini preview -->
                                     <div class="position-relative">
-                                        <img id="avatarFilePreviewThumbnail" src="/images/logo.png" alt="Preview" 
+                                        <img id="avatarFilePreviewThumbnail" src="@(Model?.AvatarUrl ?? "/images/logo.png")" alt="Preview" 
                                              class="rounded-circle border border-info" 
                                              style="width: 56px; height: 56px; object-fit: cover; box-shadow: 0 0 10px rgba(0, 200, 255, 0.3);"
                                              onerror="this.src='/images/logo.png'" />
@@ -173,7 +237,7 @@
                                     </button>
                                 </div>
                             </div>
-                            <input type="hidden" id="editAvatarUrl" name="avatarUrl" />
+                            <input type="hidden" id="editAvatarUrl" name="avatarUrl" value="@(Model?.AvatarUrl ?? "")" />
                         </div>
                     </div>
                 </div>
@@ -195,6 +259,7 @@
                             <input list="vietnamBanksFull" type="text" id="editBankName" name="bankName" 
                                    class="form-control bg-dark text-white border-warning border-opacity-50" 
                                    placeholder="Ví dụ: MB Bank, Vietcombank, Techcombank..." 
+                                   value="@(Model?.BankName ?? "")"
                                    oninput="updateCardPreview()" />
                             <datalist id="vietnamBanksFull">
                                 <option value="MB Bank (Quân Đội)"></option>
@@ -234,13 +299,17 @@
                             <label class="form-label text-white small">Số tài khoản ngân hàng: <span class="text-danger">*</span></label>
                             <input type="text" id="editBankAccountNumber" name="bankAccountNumber" 
                                    class="form-control bg-dark text-warning fw-bold border-warning border-opacity-50 font-monospace fs-5" 
-                                   placeholder="0912345678" oninput="updateCardPreview()" />
+                                   placeholder="0912345678" 
+                                   value="@(Model?.BankAccountNumber ?? "")"
+                                   oninput="updateCardPreview()" />
                         </div>
                         <div class="col-12">
                             <label class="form-label text-white small">Tên chủ tài khoản (In hoa không dấu): <span class="text-danger">*</span></label>
                             <input type="text" id="editBankAccountHolder" name="bankAccountHolder" 
                                    class="form-control bg-dark text-white fw-bold border-warning border-opacity-50 text-uppercase" 
-                                   placeholder="NGUYEN VAN A" oninput="this.value = this.value.toUpperCase(); updateCardPreview();" />
+                                   placeholder="NGUYEN VAN A" 
+                                   value="@(Model?.BankAccountHolder ?? "")"
+                                   oninput="this.value = this.value.toUpperCase(); updateCardPreview();" />
                             <small class="text-dim">Lưu ý: Tên chủ tài khoản phải khớp chính xác với tên đăng ký tại ngân hàng để tránh sai sót khi chuyển tiền.</small>
                         </div>
                     </div>
@@ -287,30 +356,58 @@
 
 @section Scripts {
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        initProfilePage();
-    });
+    // Server-rendered initial user model
+    const serverUserData = @Html.Raw(Model != null ? System.Text.Json.JsonSerializer.Serialize(Model, new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase }) : "null");
 
     async function initProfilePage() {
-        // Ensure user is loaded
-        let user = window.TLongPlayer ? window.TLongPlayer.currentUser : null;
+        // Step 1: Immediate populate from server or cached user so there's zero delay/blank state
+        let user = serverUserData || (window.TLongPlayer ? window.TLongPlayer.currentUser : null);
         if (!user) {
-            try {
-                const res = await fetch('/Auth/CurrentUser');
-                const data = await res.json();
-                if (data.isAuthenticated && data.user) {
-                    user = data.user;
-                    if (window.TLongPlayer) {
-                        window.TLongPlayer.currentUser = data.user;
-                    }
-                }
-            } catch (e) {
-                console.error("Could not fetch user:", e);
+            const saved = localStorage.getItem('tlong_current_user');
+            if (saved) {
+                try { 
+                    user = JSON.parse(saved); 
+                } catch(e) {}
             }
         }
 
+        if (user) {
+            populateProfileData(user);
+            if (window.TLongPlayer && !window.TLongPlayer.currentUser) {
+                window.TLongPlayer.currentUser = user;
+            }
+        }
+
+        // Step 2: Always fetch fresh profile info from backend /Auth/CurrentUser
+        try {
+            const res = await fetch('/Auth/CurrentUser');
+            const data = await res.json();
+            if (data.isAuthenticated && data.user) {
+                user = data.user;
+                if (window.TLongPlayer) {
+                    window.TLongPlayer.currentUser = data.user;
+                }
+                localStorage.setItem('tlong_current_user', JSON.stringify(data.user));
+                populateProfileData(data.user);
+                return;
+            } else if (!user) {
+                // Not authenticated on backend AND no local/server user
+                showProfileUnauthenticatedState();
+                return;
+            }
+        } catch (e) {
+            console.warn("Could not fetch user from backend, using available local/server data:", e);
+        }
+
         if (!user) {
-            document.getElementById('profilePageContent').innerHTML = `
+            showProfileUnauthenticatedState();
+        }
+    }
+
+    function showProfileUnauthenticatedState() {
+        const contentEl = document.getElementById('profilePageContent');
+        if (contentEl) {
+            contentEl.innerHTML = `
                 <div class="col-12 py-5 text-center">
                     <div class="p-5 rounded-4 border border-secondary border-opacity-25" style="background: rgba(18, 19, 32, 0.9);">
                         <i class="fas fa-lock text-danger fa-3x mb-3"></i>
@@ -322,13 +419,21 @@
                     </div>
                 </div>
             `;
-            return;
         }
-
-        populateProfileData(user);
     }
 
     function populateProfileData(user) {
+        if (!user) return;
+
+        const primaryRole = user.primaryRole || user.role || (user.roles && user.roles.includes('Admin') ? 'Admin' : user.roles && user.roles.includes('Producer') ? 'Producer' : 'Member');
+        const phone = user.phoneNumber || user.phone || '';
+        const bankName = user.bankName || user.bank || '';
+        const bankAccNo = user.bankAccountNumber || user.bankAccount || user.accountNumber || '';
+        const bankHolder = user.bankAccountHolder || user.accountHolder || user.fullName || '';
+        const avatar = user.avatarUrl || '/images/logo.png';
+        const fullName = user.fullName || user.username || '';
+        const email = user.email || '';
+
         // Left Column Card
         const avatarEl = document.getElementById('pageProfileAvatar');
         const fullNameEl = document.getElementById('pageProfileFullName');
@@ -340,14 +445,12 @@
         const bankSummaryEl = document.getElementById('pageProfileBankSummary');
         const roleActionsEl = document.getElementById('pageProfileRoleActions');
 
-        const primaryRole = user.primaryRole || user.role || (user.roles && user.roles.includes('Admin') ? 'Admin' : user.roles && user.roles.includes('Producer') ? 'Producer' : 'Member');
-
-        if (avatarEl) avatarEl.src = user.avatarUrl || '/images/logo.png';
-        if (fullNameEl) fullNameEl.textContent = user.fullName || user.username;
+        if (avatarEl) avatarEl.src = avatar;
+        if (fullNameEl) fullNameEl.textContent = fullName;
         if (usernameEl) usernameEl.textContent = user.username;
-        if (emailSummaryEl) emailSummaryEl.textContent = user.email;
-        if (phoneSummaryEl) phoneSummaryEl.textContent = user.phoneNumber || 'Chưa cập nhật';
-        if (bankSummaryEl) bankSummaryEl.textContent = user.bankName ? `${user.bankName}` : 'Chưa cập nhật';
+        if (emailSummaryEl) emailSummaryEl.textContent = email || '--';
+        if (phoneSummaryEl) phoneSummaryEl.textContent = phone || 'Chưa cập nhật';
+        if (bankSummaryEl) bankSummaryEl.textContent = bankName || 'Chưa cập nhật';
 
         if (roleBadgeEl) {
             if (primaryRole === 'Admin') {
@@ -395,7 +498,7 @@
                 `;
             } else if (primaryRole === 'Producer') {
                 actionsHtml += `
-                    <a href="/Producer/Upload" class="btn btn-outline-warning fw-bold rounded-pill py-2 text-decoration-none">
+                    <a href="/Producer/UploadTrack" class="btn btn-outline-warning fw-bold rounded-pill py-2 text-decoration-none">
                         <i class="fas fa-headphones me-2"></i> Mở Studio Producer
                     </a>
                 `;
@@ -425,19 +528,31 @@
         }
 
         // Form Fields
-        document.getElementById('editUsername').value = user.username || '';
-        document.getElementById('editFullName').value = user.fullName || '';
-        document.getElementById('editEmail').value = user.email || '';
-        document.getElementById('editPhone').value = user.phoneNumber || '';
-        document.getElementById('editAvatarUrl').value = user.avatarUrl || '';
-        document.getElementById('editBankName').value = user.bankName || '';
-        document.getElementById('editBankAccountNumber').value = user.bankAccountNumber || '';
-        document.getElementById('editBankAccountHolder').value = user.bankAccountHolder || '';
-        document.getElementById('editOldPassword').value = '';
-        document.getElementById('editNewPassword').value = '';
+        const uEl = document.getElementById('editUsername');
+        const fnEl = document.getElementById('editFullName');
+        const emEl = document.getElementById('editEmail');
+        const phEl = document.getElementById('editPhone');
+        const avEl = document.getElementById('editAvatarUrl');
+        const bnEl = document.getElementById('editBankName');
+        const baEl = document.getElementById('editBankAccountNumber');
+        const bhEl = document.getElementById('editBankAccountHolder');
+
+        if (uEl) uEl.value = user.username || '';
+        if (fnEl) fnEl.value = fullName;
+        if (emEl) emEl.value = email;
+        if (phEl) phEl.value = phone;
+        if (avEl) avEl.value = user.avatarUrl || '';
+        if (bnEl) bnEl.value = bankName;
+        if (baEl) baEl.value = bankAccNo;
+        if (bhEl) bhEl.value = bankHolder;
+
+        const oldPass = document.getElementById('editOldPassword');
+        const newPass = document.getElementById('editNewPassword');
+        if (oldPass) oldPass.value = '';
+        if (newPass) newPass.value = '';
 
         const thumb = document.getElementById('avatarFilePreviewThumbnail');
-        if (thumb) thumb.src = user.avatarUrl || '/images/logo.png';
+        if (thumb) thumb.src = avatar;
         const clearBtn = document.getElementById('clearAvatarFileBtn');
         if (clearBtn) clearBtn.classList.add('d-none');
         const fileInput = document.getElementById('editAvatarFile');
@@ -447,22 +562,26 @@
     }
 
     function updateCardPreview() {
-        const bankName = document.getElementById('editBankName').value.trim();
-        const accNumber = document.getElementById('editBankAccountNumber').value.trim();
-        const accHolder = document.getElementById('editBankAccountHolder').value.trim();
+        const bankNameInput = document.getElementById('editBankName');
+        const accNumberInput = document.getElementById('editBankAccountNumber');
+        const accHolderInput = document.getElementById('editBankAccountHolder');
+
+        const bankName = bankNameInput ? bankNameInput.value.trim() : '';
+        const accNumber = accNumberInput ? accNumberInput.value.trim() : '';
+        const accHolder = accHolderInput ? accHolderInput.value.trim() : '';
 
         const bankNamePreview = document.getElementById('cardBankNamePreview');
         const accNumberPreview = document.getElementById('cardAccountNumberPreview');
         const accHolderPreview = document.getElementById('cardAccountHolderPreview');
 
         if (bankNamePreview) {
-            bankNamePreview.textContent = bankName || 'NGÂN HÀNG (CHƯA CHỌN)';
+            bankNamePreview.textContent = bankName ? bankName.toUpperCase() : 'NGÂN HÀNG (CHƯA CHỌN)';
         }
         if (accNumberPreview) {
             accNumberPreview.textContent = accNumber || '•••• •••• •••• ••••';
         }
         if (accHolderPreview) {
-            accHolderPreview.textContent = accHolder || 'CHƯA CẬP NHẬT';
+            accHolderPreview.textContent = accHolder ? accHolder.toUpperCase() : 'CHƯA CẬP NHẬT';
         }
     }
 
@@ -515,6 +634,9 @@
         }
 
         const formData = new FormData();
+        if (form.username && form.username.value) {
+            formData.append('username', form.username.value.trim());
+        }
         formData.append('fullName', form.fullName.value.trim());
         formData.append('email', form.email.value.trim());
         if (form.phoneNumber && form.phoneNumber.value) {
@@ -573,5 +695,13 @@
             }
         }
     }
+
+    // Run immediately if DOM ready, or on DOMContentLoaded
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initProfilePage);
+    } else {
+        initProfilePage();
+    }
+    window.initProfilePage = initProfilePage;
 </script>
 }

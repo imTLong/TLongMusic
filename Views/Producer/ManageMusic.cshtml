@@ -1,0 +1,1409 @@
+@{
+    ViewData["Title"] = "Studio Quản Lý Kho Nhạc - TLongMusic DJ Portal";
+}
+
+<!-- IMPORT FONT & CUSTOM STUDIO CSS -->
+<style>
+    /* STUDIO GLOW & AURORA PALETTE */
+    .studio-dashboard-wrap {
+        position: relative;
+        z-index: 2;
+    }
+
+    .studio-hero-deck {
+        background: radial-gradient(circle at 10% 20%, rgba(255, 19, 74, 0.15), transparent 40%),
+                    radial-gradient(circle at 90% 80%, rgba(0, 223, 216, 0.12), transparent 45%),
+                    linear-gradient(135deg, rgba(16, 18, 32, 0.95), rgba(10, 11, 20, 0.98));
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 26px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(30px);
+    }
+
+    /* MASTER METRIC STRIP (DẢI THỐNG KÊ LIỀN KHỐI BỐ CỤC NGANG CHUYÊN NGHIỆP) */
+    .studio-metric-strip {
+        background: linear-gradient(135deg, rgba(20, 22, 38, 0.92), rgba(12, 13, 24, 0.96));
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 22px;
+        backdrop-filter: blur(30px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+        overflow: hidden;
+    }
+
+    .studio-metric-item {
+        padding: 1.25rem 1.4rem;
+        transition: all 0.25s ease;
+        position: relative;
+    }
+
+    .studio-metric-item:hover {
+        background: rgba(255, 255, 255, 0.035);
+    }
+
+    .studio-metric-item::after {
+        content: '';
+        position: absolute;
+        bottom: 0; left: 1.4rem; right: 1.4rem;
+        height: 2px;
+        background: transparent;
+        transition: all 0.3s ease;
+    }
+
+    .studio-metric-item.metric-purple::after { background: linear-gradient(90deg, #7928ca, #ff0080); }
+    .studio-metric-item.metric-cyan::after { background: linear-gradient(90deg, #0070f3, #00dfd8); }
+    .studio-metric-item.metric-gold::after { background: linear-gradient(90deg, #f5a623, #ffd166); }
+    .studio-metric-item.metric-green::after { background: linear-gradient(90deg, #0575e6, #00f260); }
+    .studio-metric-item.metric-ruby::after { background: linear-gradient(90deg, #ff0844, #ffb199); }
+
+    .studio-icon-bubble {
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        flex-shrink: 0;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    /* SEGMENTED STUDIO TABS */
+    .studio-tab-bar {
+        background: rgba(8, 9, 16, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 50px;
+        padding: 5px;
+        display: inline-flex;
+    }
+
+    .studio-tab-btn {
+        background: transparent;
+        border: none;
+        color: rgba(255, 255, 255, 0.7);
+        font-weight: 700;
+        font-size: 0.88rem;
+        padding: 10px 24px;
+        border-radius: 50px;
+        transition: all 0.25s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+    }
+
+    .studio-tab-btn.active {
+        background: linear-gradient(135deg, rgba(255, 19, 74, 0.3), rgba(255, 209, 102, 0.2));
+        color: #ffffff !important;
+        border: 1px solid rgba(255, 209, 102, 0.45);
+        box-shadow: 0 0 20px rgba(255, 19, 74, 0.35);
+    }
+
+    .studio-tab-btn:hover:not(.active) {
+        color: #ffffff;
+        background: rgba(255, 255, 255, 0.06);
+    }
+
+    /* GLASS PANEL & COLOR-CODED TRACK ROWS */
+    .studio-glass-panel {
+        background: rgba(14, 15, 26, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 26px;
+        backdrop-filter: blur(35px);
+        box-shadow: 0 15px 45px rgba(0, 0, 0, 0.6);
+    }
+
+    /* HỆ MÀU TRACK: SLOT (VÀNG) - NHÓM (ĐỎ) - LỌT (CYAN) */
+    .studio-row-track {
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        position: relative;
+    }
+
+    /* 1. MÀU VÀNG: CẤP SLOT VIP ĐỘC QUYỀN */
+    .track-color-slot {
+        border-left: 4px solid #ffd166 !important;
+        background: linear-gradient(90deg, rgba(255, 209, 102, 0.08) 0%, rgba(255, 209, 102, 0.015) 35%, transparent 100%) !important;
+    }
+    .track-color-slot:hover {
+        background: linear-gradient(90deg, rgba(255, 209, 102, 0.15) 0%, rgba(255, 209, 102, 0.04) 45%, transparent 100%) !important;
+    }
+    .track-color-slot .studio-thumb-wrapper {
+        border: 2px solid #ffd166 !important;
+        box-shadow: 0 0 12px rgba(255, 209, 102, 0.4) !important;
+    }
+    .track-color-slot .track-title-link:hover {
+        color: #ffd166 !important;
+    }
+
+    /* 2. MÀU ĐỎ: CẤP NHÓM VIP HỘI VIÊN */
+    .track-color-nhom {
+        border-left: 4px solid #ff134a !important;
+        background: linear-gradient(90deg, rgba(255, 19, 74, 0.08) 0%, rgba(255, 19, 74, 0.015) 35%, transparent 100%) !important;
+    }
+    .track-color-nhom:hover {
+        background: linear-gradient(90deg, rgba(255, 19, 74, 0.15) 0%, rgba(255, 19, 74, 0.04) 45%, transparent 100%) !important;
+    }
+    .track-color-nhom .studio-thumb-wrapper {
+        border: 2px solid #ff134a !important;
+        box-shadow: 0 0 12px rgba(255, 19, 74, 0.4) !important;
+    }
+    .track-color-nhom .track-title-link:hover {
+        color: #ff4d6d !important;
+    }
+
+    /* 3. MÀU XANH: CẤP LỌT PHỔ THÔNG FREE */
+    .track-color-lot {
+        border-left: 4px solid #00dfd8 !important;
+        background: linear-gradient(90deg, rgba(0, 223, 216, 0.07) 0%, rgba(0, 223, 216, 0.015) 35%, transparent 100%) !important;
+    }
+    .track-color-lot:hover {
+        background: linear-gradient(90deg, rgba(0, 223, 216, 0.14) 0%, rgba(0, 223, 216, 0.04) 45%, transparent 100%) !important;
+    }
+    .track-color-lot .studio-thumb-wrapper {
+        border: 2px solid #00dfd8 !important;
+        box-shadow: 0 0 10px rgba(0, 223, 216, 0.35) !important;
+    }
+    .track-color-lot .track-title-link:hover {
+        color: #00dfd8 !important;
+    }
+
+    .studio-thumb-wrapper {
+        position: relative;
+        width: 52px;
+        height: 52px;
+        border-radius: 12px;
+        overflow: hidden;
+        flex-shrink: 0;
+        transition: all 0.25s ease;
+    }
+
+    .studio-thumb-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .studio-row-track:hover .studio-thumb-img {
+        transform: scale(1.08);
+    }
+
+    .studio-play-overlay {
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0, 0, 0, 0.55);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+        backdrop-filter: blur(2px);
+        cursor: pointer;
+    }
+
+    .studio-thumb-wrapper:hover .studio-play-overlay {
+        opacity: 1;
+    }
+
+    .studio-pulse-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+        box-shadow: 0 0 10px currentColor;
+    }
+
+    .dot-green {
+        background-color: #00f260;
+        color: #00f260;
+        animation: pulseNeon 2s infinite;
+    }
+
+    .dot-gray {
+        background-color: #8892b0;
+        color: #8892b0;
+    }
+
+    @@keyframes pulseNeon {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.3); opacity: 0.6; }
+    }
+
+    /* BADGES */
+    .badge-camelot {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.72rem;
+        font-weight: 700;
+        padding: 4px 8px;
+        border-radius: 8px;
+        background: rgba(255, 209, 102, 0.12);
+        color: #ffd166;
+        border: 1px solid rgba(255, 209, 102, 0.35);
+    }
+
+    .badge-bpm {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.72rem;
+        font-weight: 700;
+        padding: 4px 8px;
+        border-radius: 8px;
+        background: rgba(0, 223, 216, 0.12);
+        color: #00dfd8;
+        border: 1px solid rgba(0, 223, 216, 0.35);
+    }
+
+    /* STUDIO FILTER TOOLBAR & CONTROLS */
+    .studio-filter-toolbar {
+        background: linear-gradient(135deg, rgba(20, 22, 38, 0.75), rgba(12, 14, 24, 0.88));
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 18px;
+        padding: 12px 16px;
+        backdrop-filter: blur(25px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .studio-search-group {
+        position: relative;
+        display: flex;
+        align-items: center;
+        width: 100%;
+    }
+
+    .studio-search-group .search-icon {
+        position: absolute;
+        left: 15px;
+        color: rgba(255, 255, 255, 0.4);
+        font-size: 0.95rem;
+        pointer-events: none;
+        transition: color 0.25s ease;
+        z-index: 2;
+    }
+
+    .studio-filter-search {
+        background: rgba(8, 9, 16, 0.75) !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        color: #ffffff !important;
+        border-radius: 12px !important;
+        padding: 10px 16px 10px 42px !important;
+        font-size: 0.88rem;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        width: 100%;
+    }
+
+    .studio-filter-search::placeholder {
+        color: rgba(255, 255, 255, 0.35);
+        font-size: 0.85rem;
+    }
+
+    .studio-filter-search:focus {
+        background: rgba(13, 16, 28, 0.95) !important;
+        border-color: #00dfd8 !important;
+        box-shadow: 0 0 16px rgba(0, 223, 216, 0.28) !important;
+        outline: none;
+    }
+
+    .studio-search-group:focus-within .search-icon {
+        color: #00dfd8;
+    }
+
+    .studio-filter-select {
+        background-color: rgba(8, 9, 16, 0.75) !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        color: rgba(255, 255, 255, 0.92) !important;
+        border-radius: 12px !important;
+        font-size: 0.86rem;
+        font-weight: 500;
+        padding: 10px 36px 10px 14px !important;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%238892b0' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
+        background-repeat: no-repeat !important;
+        background-position: right 14px center !important;
+        background-size: 13px 9px !important;
+        width: 100%;
+    }
+
+    .studio-filter-select:hover {
+        border-color: rgba(255, 255, 255, 0.25) !important;
+        background-color: rgba(16, 18, 30, 0.85) !important;
+        color: #ffffff !important;
+    }
+
+    .studio-filter-select:focus {
+        border-color: #ffd166 !important;
+        box-shadow: 0 0 16px rgba(255, 209, 102, 0.25) !important;
+        outline: none;
+    }
+
+    .studio-filter-select option {
+        background: #0f111e;
+        color: #ffffff;
+        padding: 8px 12px;
+    }
+
+    /* ACTION BUTTONS */
+    .btn-studio-action {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: rgba(255, 255, 255, 0.85);
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .btn-studio-action:hover {
+        transform: translateY(-2px);
+        color: #ffffff;
+    }
+
+    .btn-studio-action.btn-act-edit:hover {
+        background: rgba(255, 209, 102, 0.25);
+        border-color: #ffd166;
+        color: #ffd166;
+        box-shadow: 0 0 12px rgba(255, 209, 102, 0.4);
+    }
+
+    .btn-studio-action.btn-act-toggle:hover {
+        background: rgba(0, 223, 216, 0.25);
+        border-color: #00dfd8;
+        color: #00dfd8;
+        box-shadow: 0 0 12px rgba(0, 223, 216, 0.4);
+    }
+
+    .btn-studio-action.btn-act-del:hover {
+        background: rgba(255, 19, 74, 0.3);
+        border-color: #ff134a;
+        color: #ff134a;
+        box-shadow: 0 0 12px rgba(255, 19, 74, 0.5);
+    }
+</style>
+
+<div class="container-fluid px-3 px-xl-5 py-4 studio-dashboard-wrap" style="max-width: 1720px;">
+
+    <!-- 1. STUDIO DJ COMMAND DECK (HEADER BANNER) -->
+    <div class="studio-hero-deck p-4 p-md-5 mb-4">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-7 col-xl-8">
+                <!-- Badges Status -->
+                <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
+                    <span class="btn-producer-studio-rainbow text-white px-3 py-1 rounded-pill fw-bold text-uppercase d-inline-flex align-items-center gap-1.5 shadow" style="font-size: 0.72rem; letter-spacing: 0.8px;">
+                        <i class="fas fa-wand-magic-sparkles"></i> PRODUCER STUDIO
+                    </span>
+                    <span class="badge px-3 py-1.5 rounded-pill font-monospace" style="background: rgba(255, 209, 102, 0.15); color: #ffd166; border: 1px solid rgba(255, 209, 102, 0.4);" id="producerStageNameBadge">
+                        <i class="fas fa-circle-check text-warning me-1"></i> Nghệ Sĩ Được Ủy Quyền
+                    </span>
+                    <span class="badge px-3 py-1.5 rounded-pill text-dim small" style="background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.1);">
+                        <i class="fas fa-sliders-simple me-1 text-info"></i> Audio Engine v2.0
+                    </span>
+                </div>
+
+                <h1 class="text-white fw-bold mb-2 display-6" style="letter-spacing: -0.5px;">
+                    QUẢN LÝ KHO NHẠC & TÁC PHẨM
+                </h1>
+                <p class="text-dim mb-0" style="max-width: 820px; font-size: 0.95rem; line-height: 1.65;">
+                    Trang trung tâm dành cho Producer: Quản lý chi tiết toàn bộ các bản thu <strong class="text-white">Track Lẻ</strong> và <strong class="text-white">Nonstop Mix</strong>, chỉnh sửa thông số phòng thu (BPM, Camelot Key, Thể loại), kiểm soát lượt nghe và trạng thái phát hành trực tiếp.
+                </p>
+            </div>
+
+            <!-- Quick Action Buttons -->
+            <div class="col-lg-5 col-xl-4 text-lg-end">
+                <div class="d-flex flex-wrap justify-content-lg-end align-items-center gap-2.5">
+                    <a href="/Producer/UploadTrack" class="btn btn-outline-info rounded-pill px-3.5 py-2.5 fw-bold d-inline-flex align-items-center gap-2 shadow-sm text-decoration-none" style="border-width: 1.5px;">
+                        <i class="fas fa-compact-disc"></i> <span>+ Đăng Track Lẻ</span>
+                    </a>
+                    <a href="/Producer/UploadNonstop" class="btn btn-outline-warning rounded-pill px-3.5 py-2.5 fw-bold d-inline-flex align-items-center gap-2 shadow-sm text-decoration-none" style="border-width: 1.5px;">
+                        <i class="fas fa-fire-flame-curved"></i> <span>+ Đăng Nonstop</span>
+                    </a>
+                    <button class="btn btn-glass-crystal rounded-pill px-3 py-2.5 text-white d-inline-flex align-items-center gap-1.5 shadow-sm" onclick="loadProducerMusicData()" title="Cập nhật dữ liệu mới">
+                        <i class="fas fa-rotate" id="refreshProducerIcon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. STUDIO METRIC STRIP (DẢI BĂNG ĐIỀU KHIỂN THỐNG KÊ LIỀN KHỐI - BỐ CỤC NGANG CÂN ĐỐI) -->
+    <div class="studio-metric-strip mb-4">
+        <div class="row g-0">
+            <!-- Cột 1: Tổng bài -->
+            <div class="col-12 col-sm-6 col-lg border-end border-secondary border-opacity-25">
+                <div class="studio-metric-item metric-purple d-flex align-items-center gap-3">
+                    <div class="studio-icon-bubble" style="background: rgba(121, 40, 202, 0.22); color: #d684ff; border: 1px solid rgba(121, 40, 202, 0.45);">
+                        <i class="fas fa-music"></i>
+                    </div>
+                    <div>
+                        <div class="text-dim small fw-bold text-uppercase" style="letter-spacing: 0.8px; font-size: 0.72rem;">TỔNG TÁC PHẨM</div>
+                        <div class="text-white fw-bold font-monospace my-0.5" style="font-size: 1.85rem; line-height: 1;" id="statTotalTracks">0</div>
+                        <div class="text-dim small" style="font-size: 0.72rem;">Toàn bộ kho nhạc</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cột 2: Track Lẻ -->
+            <div class="col-12 col-sm-6 col-lg border-end border-secondary border-opacity-25">
+                <div class="studio-metric-item metric-cyan d-flex align-items-center gap-3">
+                    <div class="studio-icon-bubble" style="background: rgba(0, 223, 216, 0.22); color: #00dfd8; border: 1px solid rgba(0, 223, 216, 0.45);">
+                        <i class="fas fa-compact-disc"></i>
+                    </div>
+                    <div>
+                        <div class="small fw-bold text-uppercase" style="letter-spacing: 0.8px; font-size: 0.72rem; color: #00dfd8;">TRACK LẺ DJ</div>
+                        <div class="text-info fw-bold font-monospace my-0.5" style="font-size: 1.85rem; line-height: 1;" id="statSingleTracks">0</div>
+                        <div class="text-dim small" style="font-size: 0.72rem;">Bản phối đơn lẻ</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cột 3: Nonstop Mix -->
+            <div class="col-12 col-sm-6 col-lg border-end border-secondary border-opacity-25">
+                <div class="studio-metric-item metric-gold d-flex align-items-center gap-3">
+                    <div class="studio-icon-bubble" style="background: rgba(255, 209, 102, 0.22); color: #ffd166; border: 1px solid rgba(255, 209, 102, 0.45);">
+                        <i class="fas fa-fire-flame-curved"></i>
+                    </div>
+                    <div>
+                        <div class="small fw-bold text-uppercase" style="letter-spacing: 0.8px; font-size: 0.72rem; color: #ffd166;">NONSTOP MIX</div>
+                        <div class="text-warning fw-bold font-monospace my-0.5" style="font-size: 1.85rem; line-height: 1;" id="statNonstopTracks">0</div>
+                        <div class="text-dim small" style="font-size: 0.72rem;">Set mix & mixtape</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cột 4: Tổng Lượt Nghe -->
+            <div class="col-12 col-sm-6 col-lg border-end border-secondary border-opacity-25">
+                <div class="studio-metric-item metric-green d-flex align-items-center gap-3">
+                    <div class="studio-icon-bubble" style="background: rgba(0, 242, 96, 0.22); color: #00f260; border: 1px solid rgba(0, 242, 96, 0.45);">
+                        <i class="fas fa-headphones"></i>
+                    </div>
+                    <div>
+                        <div class="small fw-bold text-uppercase" style="letter-spacing: 0.8px; font-size: 0.72rem; color: #00f260;">TỔNG LƯỢT NGHE</div>
+                        <div class="text-success fw-bold font-monospace my-0.5" style="font-size: 1.85rem; line-height: 1;" id="statTotalPlays">0</div>
+                        <div class="text-dim small" style="font-size: 0.72rem;">Lượt phát tích lũy</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cột 5: Tổng Lượt Tải -->
+            <div class="col-12 col-lg">
+                <div class="studio-metric-item metric-ruby d-flex align-items-center gap-3">
+                    <div class="studio-icon-bubble" style="background: rgba(255, 19, 74, 0.22); color: #ff134a; border: 1px solid rgba(255, 19, 74, 0.45);">
+                        <i class="fas fa-download"></i>
+                    </div>
+                    <div>
+                        <div class="small fw-bold text-uppercase" style="letter-spacing: 0.8px; font-size: 0.72rem; color: #ff134a;">TỔNG LƯỢT TẢI</div>
+                        <div class="text-danger fw-bold font-monospace my-0.5" style="font-size: 1.85rem; line-height: 1;" id="statTotalDownloads">0</div>
+                        <div class="text-dim small" style="font-size: 0.72rem;">File Master & 320k</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. MAIN STUDIO PANEL (CHIA 2 PHẦN: TRACK LẺ & NONSTOP) -->
+    <div class="studio-glass-panel p-3 p-md-4 mb-5">
+
+        <!-- HEADER SWITCH TABS -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-3 pb-3 border-bottom border-secondary border-opacity-25">
+            <div>
+                <div class="studio-tab-bar" role="tablist">
+                    <button class="studio-tab-btn active" id="tab-tracks-btn" data-bs-toggle="pill" data-bs-target="#tab-tracks-pane" type="button" role="tab">
+                        <i class="fas fa-compact-disc text-info"></i>
+                        <span>QUẢN LÝ TRACK LẺ</span>
+                        <span class="badge bg-dark border border-secondary text-info font-monospace ms-1" id="badgeTrackCount">0</span>
+                    </button>
+                    <button class="studio-tab-btn" id="tab-nonstop-btn" data-bs-toggle="pill" data-bs-target="#tab-nonstop-pane" type="button" role="tab">
+                        <i class="fas fa-fire-flame-curved text-warning"></i>
+                        <span>QUẢN LÝ NONSTOP</span>
+                        <span class="badge bg-dark border border-secondary text-warning font-monospace ms-1" id="badgeNonstopCount">0</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- CHÚ THÍCH HỆ MÀU BẢN THU (COLOR LEGEND) -->
+            <div class="d-flex align-items-center gap-3 flex-wrap px-3 py-1.5 rounded-pill" style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1);">
+                <span class="text-dim small fw-bold" style="font-size: 0.7rem; letter-spacing: 0.5px;">
+                    <i class="fas fa-palette me-1 text-warning"></i> NHẬN DIỆN MÀU:
+                </span>
+                <span class="d-inline-flex align-items-center gap-1.5 small" style="color: #ffd166; font-size: 0.75rem;">
+                    <span style="width: 10px; height: 10px; border-radius: 3px; background: #ffd166; box-shadow: 0 0 6px #ffd166;"></span>
+                    <strong>Slot VIP</strong>
+                </span>
+                <span class="d-inline-flex align-items-center gap-1.5 small" style="color: #ff4d6d; font-size: 0.75rem;">
+                    <span style="width: 10px; height: 10px; border-radius: 3px; background: #ff134a; box-shadow: 0 0 6px #ff134a;"></span>
+                    <strong>Nhóm VIP</strong>
+                </span>
+                <span class="d-inline-flex align-items-center gap-1.5 small" style="color: #00dfd8; font-size: 0.75rem;">
+                    <span style="width: 10px; height: 10px; border-radius: 3px; background: #00dfd8; box-shadow: 0 0 6px #00dfd8;"></span>
+                    <strong>Lọt Free</strong>
+                </span>
+            </div>
+        </div>
+
+        <!-- TAB CONTENT -->
+        <div class="tab-content" id="producerTabsContent">
+
+            <!-- ==============================================
+                 PHẦN 1: QUẢN LÝ TRACK LẺ (SINGLE TRACKS)
+                 ============================================== -->
+            <div class="tab-pane fade show active" id="tab-tracks-pane" role="tabpanel">
+
+                <!-- TOOLBAR LỌC & TÌM KIẾM CHO TRACK -->
+                <div class="studio-filter-toolbar mb-3">
+                    <div class="row g-2.5 align-items-center">
+                        <div class="col-12 col-lg-4">
+                            <div class="studio-search-group">
+                                <i class="fas fa-search search-icon"></i>
+                                <input type="text" id="searchTrackInput" class="form-control studio-filter-search" placeholder="Tìm theo tên bài, ca sĩ, BPM, Key..." oninput="renderTracksTable()" />
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-4 col-lg-3">
+                            <select id="filterTrackTier" class="form-select studio-filter-select" onchange="renderTracksTable()">
+                                <option value="ALL">⭐️ Tất cả cấp bậc</option>
+                                <option value="TrackSlot">⭐️ Track Slot (VIP Độc Quyền)</option>
+                                <option value="TrackNhom">💎 Track Nhóm (VIP Hội Viên)</option>
+                                <option value="TrackLot">🎵 Track Lọt (Phổ Thông Free)</option>
+                            </select>
+                        </div>
+                        <div class="col-6 col-md-4 col-lg-2">
+                            <select id="filterTrackStatus" class="form-select studio-filter-select" onchange="renderTracksTable()">
+                                <option value="ALL">⚡️ Tất cả trạng thái</option>
+                                <option value="Published">🟢 Đang phát hành</option>
+                                <option value="Hidden">⚪ Tạm ẩn khỏi sàn</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-4 col-lg-3">
+                            <select id="sortTrackSelect" class="form-select studio-filter-select" onchange="renderTracksTable()">
+                                <option value="NEWEST">⏳ Mới đăng nhất</option>
+                                <option value="OLDEST">⌛️ Cũ nhất</option>
+                                <option value="MOST_PLAYS">🎧 Lượt nghe nhiều nhất</option>
+                                <option value="MOST_DOWNLOADS">⬇️ Lượt tải nhiều nhất</option>
+                                <option value="TITLE_AZ">🔤 Tên bài hát (A-Z)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TABLE TRACKS -->
+                <div class="table-responsive rounded-4 border border-secondary border-opacity-25" style="background: rgba(0, 0, 0, 0.25);">
+                    <table class="table table-dark table-hover align-middle mb-0 crystal-table">
+                        <thead style="background: rgba(255, 255, 255, 0.05); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                            <tr>
+                                <th style="width: 50px;" class="text-center">#</th>
+                                <th>BẢN THU TRACK LẺ</th>
+                                <th style="width: 140px;">CẤP BẬC</th>
+                                <th style="width: 150px;">BPM & CAMELOT KEY</th>
+                                <th style="width: 120px;" class="text-center">LƯỢT NGHE / TẢI</th>
+                                <th style="width: 130px;">TRẠNG THÁI</th>
+                                <th style="width: 110px;">NGÀY ĐĂNG</th>
+                                <th style="width: 170px;" class="text-center">THAO TÁC</th>
+                            </tr>
+                        </thead>
+                        <tbody id="trackTableBody">
+                            <tr>
+                                <td colspan="8" class="text-center py-5 text-dim">
+                                    <i class="fas fa-spinner fa-spin fa-2x mb-2 text-info"></i>
+                                    <br />Đang tải dữ liệu Track lẻ...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ==============================================
+                 PHẦN 2: QUẢN LÝ NONSTOP (SET MIX)
+                 ============================================== -->
+            <div class="tab-pane fade" id="tab-nonstop-pane" role="tabpanel">
+
+                <!-- TOOLBAR LỌC & TÌM KIẾM CHO NONSTOP -->
+                <div class="studio-filter-toolbar mb-3">
+                    <div class="row g-2.5 align-items-center">
+                        <div class="col-12 col-lg-4">
+                            <div class="studio-search-group">
+                                <i class="fas fa-search search-icon"></i>
+                                <input type="text" id="searchNonstopInput" class="form-control studio-filter-search" placeholder="Tìm theo tiêu đề bản mix, DJ, thể loại..." oninput="renderNonstopTable()" />
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-4 col-lg-3">
+                            <select id="filterNonstopTier" class="form-select studio-filter-select" onchange="renderNonstopTable()">
+                                <option value="ALL">⭐️ Tất cả cấp bậc</option>
+                                <option value="NonstopSlot">⭐️ Nonstop Slot (VIP Độc Quyền)</option>
+                                <option value="NonstopNhom">💎 Nonstop Nhóm (VIP Hội Viên)</option>
+                                <option value="NonstopLot">🎵 Nonstop Lọt (Phổ Thông Free)</option>
+                            </select>
+                        </div>
+                        <div class="col-6 col-md-4 col-lg-2">
+                            <select id="filterNonstopStatus" class="form-select studio-filter-select" onchange="renderNonstopTable()">
+                                <option value="ALL">⚡️ Tất cả trạng thái</option>
+                                <option value="Published">🟢 Đang phát hành</option>
+                                <option value="Hidden">⚪ Tạm ẩn khỏi sàn</option>
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-4 col-lg-3">
+                            <select id="sortNonstopSelect" class="form-select studio-filter-select" onchange="renderNonstopTable()">
+                                <option value="NEWEST">⏳ Mới đăng nhất</option>
+                                <option value="OLDEST">⌛️ Cũ nhất</option>
+                                <option value="MOST_PLAYS">🎧 Lượt nghe nhiều nhất</option>
+                                <option value="MOST_DOWNLOADS">⬇️ Lượt tải nhiều nhất</option>
+                                <option value="TITLE_AZ">🔤 Tên tiêu đề (A-Z)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TABLE NONSTOP -->
+                <div class="table-responsive rounded-4 border border-secondary border-opacity-25" style="background: rgba(0, 0, 0, 0.25);">
+                    <table class="table table-dark table-hover align-middle mb-0 crystal-table">
+                        <thead style="background: rgba(255, 255, 255, 0.05); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                            <tr>
+                                <th style="width: 50px;" class="text-center">#</th>
+                                <th>BẢN MIX NONSTOP</th>
+                                <th style="width: 140px;">CẤP BẬC</th>
+                                <th style="width: 120px;">THỜI LƯỢNG</th>
+                                <th style="width: 120px;" class="text-center">LƯỢT NGHE / TẢI</th>
+                                <th style="width: 130px;">TRẠNG THÁI</th>
+                                <th style="width: 110px;">NGÀY ĐĂNG</th>
+                                <th style="width: 170px;" class="text-center">THAO TÁC</th>
+                            </tr>
+                        </thead>
+                        <tbody id="nonstopTableBody">
+                            <tr>
+                                <td colspan="8" class="text-center py-5 text-dim">
+                                    <i class="fas fa-spinner fa-spin fa-2x mb-2 text-warning"></i>
+                                    <br />Đang tải dữ liệu Nonstop...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- ==============================================
+     MODAL CHỈNH SỬA TÁC PHẨM (STUDIO EDIT SUITE)
+     ============================================== -->
+<div class="modal fade" id="modalEditProducerTrack" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-secondary border-opacity-50 text-white shadow-lg"
+             style="background: rgba(16, 18, 30, 0.98); backdrop-filter: blur(35px); border-radius: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.85);">
+            <div class="modal-header border-secondary border-opacity-25 py-3.5 px-4">
+                <div class="d-flex align-items-center gap-2.5">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background: rgba(255, 209, 102, 0.2); color: #ffd166; border: 1px solid rgba(255, 209, 102, 0.4);">
+                        <i class="fas fa-pen-to-square"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold text-white mb-0" id="editModalHeaderTitle">Chỉnh Sửa Tác Phẩm Phòng Thu</h5>
+                        <small class="text-dim" style="font-size: 0.72rem;">Cập nhật metadata hiển thị trên toàn bộ sàn nhạc</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="formEditTrack" onsubmit="submitEditTrack(event)">
+                    <input type="hidden" id="editMusicId" />
+                    <input type="hidden" id="editMusicType" />
+
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label text-dim small fw-bold">Tiêu đề bản thu / Tên bài hát <span class="text-danger">*</span></label>
+                            <input type="text" id="editTitle" class="form-control bg-dark text-white border-secondary rounded-3 py-2" required />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label text-dim small fw-bold">Nghệ sĩ / DJ thể hiện <span class="text-danger">*</span></label>
+                            <input type="text" id="editArtist" class="form-control bg-dark text-white border-secondary rounded-3 py-2" required />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label text-dim small fw-bold">Thể loại nhạc</label>
+                            <select id="editGenre" class="form-select bg-dark text-white border-secondary rounded-3 py-2">
+                                <option value="Vinahouse">Vinahouse</option>
+                                <option value="Club Remix">Club Remix</option>
+                                <option value="Progressive House">Progressive House</option>
+                                <option value="Electro">Electro</option>
+                                <option value="Trance">Trance</option>
+                                <option value="Hardstyle">Hardstyle</option>
+                                <option value="Tech House">Tech House</option>
+                                <option value="VietMix">VietMix</option>
+                                <option value="Other">Khác</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label text-dim small fw-bold">Cấp bậc truy cập (Quyền hội viên) <span class="text-danger">*</span></label>
+                            <select id="editCategoryCode" class="form-select bg-dark text-white border-secondary rounded-3 py-2" required>
+                                <!-- Populated dynamically based on Type -->
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label text-dim small fw-bold">Trạng thái phát hành</label>
+                            <select id="editStatus" class="form-select bg-dark text-white border-secondary rounded-3 py-2">
+                                <option value="Published">🟢 Đang phát hành (Công khai)</option>
+                                <option value="Hidden">⚪ Tạm ẩn khỏi sàn nhạc</option>
+                            </select>
+                        </div>
+
+                        <!-- Chỉ hiện BPM & Key khi là Track lẻ -->
+                        <div class="col-md-6" id="editBpmGroup">
+                            <label class="form-label text-dim small fw-bold">Nhịp độ (BPM)</label>
+                            <input type="number" id="editBpm" class="form-control bg-dark text-white border-secondary rounded-3 py-2" min="60" max="220" />
+                        </div>
+
+                        <div class="col-md-6" id="editKeyGroup">
+                            <label class="form-label text-dim small fw-bold">Tone nhạc chuẩn (Camelot Key)</label>
+                            <select id="editMusicalKey" class="form-select bg-dark text-white border-secondary rounded-3 py-2 font-monospace">
+                                <option value="1A">1A (Abm)</option>
+                                <option value="2A">2A (Ebm)</option>
+                                <option value="3A">3A (Bbm)</option>
+                                <option value="4A">4A (Fm)</option>
+                                <option value="5A">5A (Cm)</option>
+                                <option value="6A">6A (Gm)</option>
+                                <option value="7A">7A (Dm)</option>
+                                <option value="8A">8A (Am)</option>
+                                <option value="9A">9A (Em)</option>
+                                <option value="10A">10A (Bm)</option>
+                                <option value="11A">11A (F#m)</option>
+                                <option value="12A">12A (C#m)</option>
+                                <option value="1B">1B (B)</option>
+                                <option value="2B">2B (F#)</option>
+                                <option value="3B">3B (Db)</option>
+                                <option value="4B">4B (Ab)</option>
+                                <option value="5B">5B (Eb)</option>
+                                <option value="6B">6B (Bb)</option>
+                                <option value="7B">7B (F)</option>
+                                <option value="8B">8B (C)</option>
+                                <option value="9B">9B (G)</option>
+                                <option value="10B">10B (D)</option>
+                                <option value="11B">11B (A)</option>
+                                <option value="12B">12B (E)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top border-secondary border-opacity-25">
+                        <button type="button" class="btn btn-outline-light rounded-pill px-4" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-warning fw-bold text-dark rounded-pill px-4 shadow" id="btnSaveTrackEdit">
+                            <i class="fas fa-check me-1"></i> Lưu Thay Đổi
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==============================================
+     MODAL XÁC NHẬN XÓA TÁC PHẨM (DANGER ZONE MODAL)
+     ============================================== -->
+<div class="modal fade" id="modalDeleteProducerTrack" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-danger border-opacity-40 text-white shadow-lg"
+             style="background: rgba(22, 12, 18, 0.98); backdrop-filter: blur(35px); border-radius: 24px; box-shadow: 0 20px 60px rgba(255, 19, 74, 0.3);">
+            <div class="modal-header border-danger border-opacity-25 py-3.5 px-4">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="fas fa-triangle-exclamation text-danger fs-5"></i>
+                    <h5 class="modal-title fw-bold text-danger mb-0">Xác Nhận Xóa Tác Phẩm</h5>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <div class="text-danger mb-3">
+                    <div class="rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 70px; height: 70px; background: rgba(255, 19, 74, 0.15); border: 1px solid rgba(255, 19, 74, 0.4);">
+                        <i class="fas fa-trash-can fa-2x"></i>
+                    </div>
+                </div>
+                <h5 class="text-white fw-bold mb-2" id="deleteTrackTitlePreview">...</h5>
+                <p class="text-dim small mb-0" style="line-height: 1.6;">
+                    Thao tác này sẽ gỡ bỏ bản thu khỏi CSDL và <strong class="text-danger">xóa vĩnh viễn tệp âm thanh gốc</strong> trên máy chủ. Hành động này không thể hoàn tác!
+                </p>
+                <input type="hidden" id="deleteMusicId" />
+            </div>
+            <div class="modal-footer border-danger border-opacity-25 justify-content-center py-3">
+                <button type="button" class="btn btn-outline-light rounded-pill px-4" data-bs-dismiss="modal">Không, Quay Lại</button>
+                <button type="button" class="btn btn-danger fw-bold rounded-pill px-4 shadow" id="btnConfirmDelete" onclick="confirmDeleteTrack()">
+                    <i class="fas fa-trash me-1"></i> Đồng Ý Xóa Vĩnh Viễn
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let allProducerMusics = [];
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadProducerMusicData();
+});
+
+async function loadProducerMusicData() {
+    const refreshIcon = document.getElementById('refreshProducerIcon');
+    if (refreshIcon) refreshIcon.classList.add('fa-spin');
+
+    try {
+        const res = await fetch('/Producer/MyTracks');
+        const json = await res.json();
+
+        if (json.success && json.data) {
+            allProducerMusics = json.data;
+            if (json.stageName) {
+                const stageNameEl = document.getElementById('producerStageNameBadge');
+                if (stageNameEl) stageNameEl.innerHTML = `<i class="fas fa-circle-check text-warning me-1"></i> Nghệ Sĩ: ${json.stageName}`;
+            }
+
+            calculateProducerStats();
+            renderTracksTable();
+            renderNonstopTable();
+        } else {
+            showToastNotification('⚠️ ' + (json.message || 'Không thể tải dữ liệu kho nhạc'));
+        }
+    } catch (err) {
+        console.error('Error loading producer tracks:', err);
+        showToastNotification('❌ Lỗi kết nối khi tải danh sách bài hát!');
+    } finally {
+        if (refreshIcon) refreshIcon.classList.remove('fa-spin');
+    }
+}
+
+function calculateProducerStats() {
+    const singleTracks = allProducerMusics.filter(m => m.type !== 'Nonstop');
+    const nonstopTracks = allProducerMusics.filter(m => m.type === 'Nonstop');
+
+    const totalPlays = allProducerMusics.reduce((sum, m) => sum + (m.playsCount || 0), 0);
+    const totalDownloads = allProducerMusics.reduce((sum, m) => sum + (m.downloadsCount || 0), 0);
+
+    const statTotalEl = document.getElementById('statTotalTracks');
+    const statSingleEl = document.getElementById('statSingleTracks');
+    const statNonstopEl = document.getElementById('statNonstopTracks');
+    const statPlaysEl = document.getElementById('statTotalPlays');
+    const statDownloadsEl = document.getElementById('statTotalDownloads');
+
+    const badgeTrackCount = document.getElementById('badgeTrackCount');
+    const badgeNonstopCount = document.getElementById('badgeNonstopCount');
+
+    if (statTotalEl) statTotalEl.textContent = allProducerMusics.length;
+    if (statSingleEl) statSingleEl.textContent = singleTracks.length;
+    if (statNonstopEl) statNonstopEl.textContent = nonstopTracks.length;
+    if (statPlaysEl) statPlaysEl.textContent = totalPlays.toLocaleString();
+    if (statDownloadsEl) statDownloadsEl.textContent = totalDownloads.toLocaleString();
+
+    if (badgeTrackCount) badgeTrackCount.textContent = singleTracks.length;
+    if (badgeNonstopCount) badgeNonstopCount.textContent = nonstopTracks.length;
+}
+
+// ------------------------------------------
+// 1. RENDER BẢNG TRACK LẺ THEO HỆ MÀU
+// ------------------------------------------
+function renderTracksTable() {
+    const tbody = document.getElementById('trackTableBody');
+    if (!tbody) return;
+
+    let items = allProducerMusics.filter(m => m.type !== 'Nonstop');
+
+    // Lọc theo Search
+    const searchVal = (document.getElementById('searchTrackInput')?.value || '').toLowerCase().trim();
+    if (searchVal) {
+        items = items.filter(m => 
+            (m.title && m.title.toLowerCase().includes(searchVal)) ||
+            (m.artist && m.artist.toLowerCase().includes(searchVal)) ||
+            (m.genre && m.genre.toLowerCase().includes(searchVal)) ||
+            (m.musicalKey && m.musicalKey.toLowerCase().includes(searchVal)) ||
+            (m.bpm && m.bpm.toString().includes(searchVal))
+        );
+    }
+
+    // Lọc theo Cấp độ
+    const tierVal = document.getElementById('filterTrackTier')?.value || 'ALL';
+    if (tierVal !== 'ALL') {
+        items = items.filter(m => (m.categoryCode || '').toLowerCase() === tierVal.toLowerCase());
+    }
+
+    // Lọc theo Trạng thái
+    const statusVal = document.getElementById('filterTrackStatus')?.value || 'ALL';
+    if (statusVal !== 'ALL') {
+        items = items.filter(m => (m.status || 'Published').toLowerCase() === statusVal.toLowerCase());
+    }
+
+    // Sắp xếp
+    const sortVal = document.getElementById('sortTrackSelect')?.value || 'NEWEST';
+    items = sortItems(items, sortVal);
+
+    if (items.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" class="text-center py-5 text-dim">
+                    <i class="fas fa-compact-disc fa-3x mb-3 text-secondary opacity-50"></i>
+                    <p class="mb-2">Không tìm thấy bản Track lẻ nào phù hợp với bộ lọc!</p>
+                    <a href="/Producer/UploadTrack" class="btn btn-outline-info rounded-pill btn-sm px-3 mt-1 text-decoration-none">
+                        <i class="fas fa-plus me-1"></i> Đăng Track Lẻ Mới
+                    </a>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    tbody.innerHTML = items.map((item, index) => {
+        const cover = item.coverUrl || '/images/logo.png';
+        const isSlot = (item.categoryCode || '').includes('Slot');
+        const isNhom = (item.categoryCode || '').includes('Nhom');
+        
+        let catBadge = '';
+        let rowColorClass = 'track-color-lot'; // Mặc định Lọt Free (Xanh)
+        let playBtnColor = 'text-info';
+
+        if (isSlot) {
+            rowColorClass = 'track-color-slot'; // Slot VIP (Vàng)
+            playBtnColor = 'text-warning';
+            catBadge = '<span class="badge fw-bold px-2.5 py-1 rounded-pill" style="background: rgba(255, 209, 102, 0.2); color: #ffd166; border: 1px solid rgba(255, 209, 102, 0.5);"><i class="fas fa-star me-1"></i>Slot VIP</span>';
+        } else if (isNhom) {
+            rowColorClass = 'track-color-nhom'; // Nhóm VIP (Đỏ)
+            playBtnColor = 'text-danger';
+            catBadge = '<span class="badge fw-bold px-2.5 py-1 rounded-pill" style="background: rgba(255, 19, 74, 0.2); color: #ff4d6d; border: 1px solid rgba(255, 19, 74, 0.5);"><i class="fas fa-certificate me-1"></i>Nhóm VIP</span>';
+        } else {
+            catBadge = '<span class="badge fw-bold px-2.5 py-1 rounded-pill" style="background: rgba(0, 223, 216, 0.15); color: #00dfd8; border: 1px solid rgba(0, 223, 216, 0.4);">Lọt Free</span>';
+        }
+
+        const isPublished = (item.status || 'Published') === 'Published';
+        const statusBadge = isPublished
+            ? '<span class="d-inline-flex align-items-center gap-1.5 small text-success fw-bold"><span class="studio-pulse-dot dot-green"></span> Phát hành</span>'
+            : '<span class="d-inline-flex align-items-center gap-1.5 small text-dim"><span class="studio-pulse-dot dot-gray"></span> Tạm ẩn</span>';
+
+        const dateStr = item.createdAt ? new Date(item.createdAt).toLocaleDateString('vi-VN') : '---';
+
+        return `
+            <tr class="studio-row-track ${rowColorClass}">
+                <td class="text-center text-dim font-monospace small">${index + 1}</td>
+                <td>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="studio-thumb-wrapper">
+                            <img src="${cover}" class="studio-thumb-img" alt="${item.title}" />
+                            <div class="studio-play-overlay" title="Nghe thử ngay" onclick="previewProducerTrack('${item.musicId}')">
+                                <i class="fas fa-play ${playBtnColor}" style="font-size: 0.95rem;"></i>
+                            </div>
+                        </div>
+                        <div class="overflow-hidden" style="max-width: 320px;">
+                            <a href="/Track/Detail/${item.musicId}" class="text-white fw-bold text-truncate d-block text-decoration-none track-title-link" title="${item.title}" style="transition: color 0.2s ease;">
+                                ${item.title}
+                            </a>
+                            <div class="text-dim small text-truncate" style="font-size: 0.78rem;">
+                                <i class="fas fa-user-music text-dim me-1"></i>${item.artist || 'DJ TLong'} 
+                                <span class="mx-1">•</span> 
+                                <span class="font-monospace text-dim">${formatTime(item.durationSeconds || 0)}</span>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    ${catBadge}
+                    <div class="text-dim small mt-1" style="font-size: 0.75rem;">${item.genre || 'Vinahouse'}</div>
+                </td>
+                <td>
+                    <div class="d-flex align-items-center gap-1.5">
+                        <span class="badge-bpm">${item.bpm ? item.bpm + ' BPM' : '140 BPM'}</span>
+                        <span class="badge-camelot">${item.musicalKey || '8A'}</span>
+                    </div>
+                </td>
+                <td class="text-center font-monospace">
+                    <div class="text-success small fw-bold" title="Lượt nghe"><i class="fas fa-headphones me-1"></i>${(item.playsCount || 0).toLocaleString()}</div>
+                    <div class="text-danger small" title="Lượt tải"><i class="fas fa-download me-1"></i>${(item.downloadsCount || 0).toLocaleString()}</div>
+                </td>
+                <td>
+                    ${statusBadge}
+                </td>
+                <td class="font-monospace text-dim small">
+                    ${dateStr}
+                </td>
+                <td class="text-center">
+                    <div class="d-flex align-items-center justify-content-center gap-1.5">
+                        <button class="btn-studio-action btn-act-edit" title="Chỉnh sửa thông tin" onclick="openEditModal('${item.musicId}')">
+                            <i class="fas fa-pen" style="font-size: 0.82rem;"></i>
+                        </button>
+                        <button class="btn-studio-action btn-act-toggle" title="${isPublished ? 'Tạm ẩn khỏi sàn' : 'Công khai phát hành'}" onclick="toggleTrackStatus('${item.musicId}')">
+                            <i class="fas ${isPublished ? 'fa-eye-slash' : 'fa-eye'}" style="font-size: 0.82rem;"></i>
+                        </button>
+                        <button class="btn-studio-action btn-act-del" title="Xóa vĩnh viễn" onclick="openDeleteModal('${item.musicId}', '${encodeURIComponent(item.title)}')">
+                            <i class="fas fa-trash" style="font-size: 0.82rem;"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+// ------------------------------------------
+// 2. RENDER BẢNG NONSTOP THEO HỆ MÀU
+// ------------------------------------------
+function renderNonstopTable() {
+    const tbody = document.getElementById('nonstopTableBody');
+    if (!tbody) return;
+
+    let items = allProducerMusics.filter(m => m.type === 'Nonstop');
+
+    // Lọc theo Search
+    const searchVal = (document.getElementById('searchNonstopInput')?.value || '').toLowerCase().trim();
+    if (searchVal) {
+        items = items.filter(m => 
+            (m.title && m.title.toLowerCase().includes(searchVal)) ||
+            (m.artist && m.artist.toLowerCase().includes(searchVal)) ||
+            (m.genre && m.genre.toLowerCase().includes(searchVal))
+        );
+    }
+
+    // Lọc theo Cấp độ
+    const tierVal = document.getElementById('filterNonstopTier')?.value || 'ALL';
+    if (tierVal !== 'ALL') {
+        items = items.filter(m => (m.categoryCode || '').toLowerCase() === tierVal.toLowerCase());
+    }
+
+    // Lọc theo Trạng thái
+    const statusVal = document.getElementById('filterNonstopStatus')?.value || 'ALL';
+    if (statusVal !== 'ALL') {
+        items = items.filter(m => (m.status || 'Published').toLowerCase() === statusVal.toLowerCase());
+    }
+
+    // Sắp xếp
+    const sortVal = document.getElementById('sortNonstopSelect')?.value || 'NEWEST';
+    items = sortItems(items, sortVal);
+
+    if (items.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" class="text-center py-5 text-dim">
+                    <i class="fas fa-fire fa-3x mb-3 text-secondary opacity-50"></i>
+                    <p class="mb-2">Không tìm thấy bản Nonstop nào phù hợp với bộ lọc!</p>
+                    <a href="/Producer/UploadNonstop" class="btn btn-outline-warning rounded-pill btn-sm px-3 mt-1 text-decoration-none">
+                        <i class="fas fa-plus me-1"></i> Đăng Nonstop Mới
+                    </a>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    tbody.innerHTML = items.map((item, index) => {
+        const cover = item.coverUrl || '/images/logo.png';
+        const isSlot = (item.categoryCode || '').includes('Slot');
+        const isNhom = (item.categoryCode || '').includes('Nhom');
+        
+        let catBadge = '';
+        let rowColorClass = 'track-color-lot'; // Mặc định Lọt Free (Xanh)
+        let playBtnColor = 'text-info';
+
+        if (isSlot) {
+            rowColorClass = 'track-color-slot'; // Slot VIP (Vàng)
+            playBtnColor = 'text-warning';
+            catBadge = '<span class="badge fw-bold px-2.5 py-1 rounded-pill" style="background: rgba(255, 209, 102, 0.2); color: #ffd166; border: 1px solid rgba(255, 209, 102, 0.5);"><i class="fas fa-star me-1"></i>Nonstop Slot</span>';
+        } else if (isNhom) {
+            rowColorClass = 'track-color-nhom'; // Nhóm VIP (Đỏ)
+            playBtnColor = 'text-danger';
+            catBadge = '<span class="badge fw-bold px-2.5 py-1 rounded-pill" style="background: rgba(255, 19, 74, 0.2); color: #ff4d6d; border: 1px solid rgba(255, 19, 74, 0.5);"><i class="fas fa-fire me-1"></i>Nonstop Nhóm</span>';
+        } else {
+            catBadge = '<span class="badge fw-bold px-2.5 py-1 rounded-pill" style="background: rgba(0, 223, 216, 0.15); color: #00dfd8; border: 1px solid rgba(0, 223, 216, 0.4);">Nonstop Lọt</span>';
+        }
+
+        const isPublished = (item.status || 'Published') === 'Published';
+        const statusBadge = isPublished
+            ? '<span class="d-inline-flex align-items-center gap-1.5 small text-success fw-bold"><span class="studio-pulse-dot dot-green"></span> Phát hành</span>'
+            : '<span class="d-inline-flex align-items-center gap-1.5 small text-dim"><span class="studio-pulse-dot dot-gray"></span> Tạm ẩn</span>';
+
+        const dateStr = item.createdAt ? new Date(item.createdAt).toLocaleDateString('vi-VN') : '---';
+
+        return `
+            <tr class="studio-row-track ${rowColorClass}">
+                <td class="text-center text-dim font-monospace small">${index + 1}</td>
+                <td>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="studio-thumb-wrapper">
+                            <img src="${cover}" class="studio-thumb-img" alt="${item.title}" />
+                            <div class="studio-play-overlay" title="Nghe thử ngay" onclick="previewProducerTrack('${item.musicId}')">
+                                <i class="fas fa-play ${playBtnColor}" style="font-size: 0.95rem;"></i>
+                            </div>
+                        </div>
+                        <div class="overflow-hidden" style="max-width: 360px;">
+                            <a href="/Track/Detail/${item.musicId}" class="text-white fw-bold text-truncate d-block text-decoration-none track-title-link" title="${item.title}" style="transition: color 0.2s ease;">
+                                ${item.title}
+                            </a>
+                            <div class="text-dim small text-truncate" style="font-size: 0.78rem;">
+                                <i class="fas fa-headphones text-dim me-1"></i>${item.artist || 'DJ TLong Studio'}
+                            </div>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    ${catBadge}
+                    <div class="text-dim small mt-1" style="font-size: 0.75rem;">${item.genre || 'Nonstop Mix'}</div>
+                </td>
+                <td class="font-monospace text-warning fw-bold small">
+                    <i class="fas fa-clock me-1 text-dim"></i>${formatTime(item.durationSeconds || 0)}
+                </td>
+                <td class="text-center font-monospace">
+                    <div class="text-success small fw-bold" title="Lượt nghe"><i class="fas fa-headphones me-1"></i>${(item.playsCount || 0).toLocaleString()}</div>
+                    <div class="text-danger small" title="Lượt tải"><i class="fas fa-download me-1"></i>${(item.downloadsCount || 0).toLocaleString()}</div>
+                </td>
+                <td>
+                    ${statusBadge}
+                </td>
+                <td class="font-monospace text-dim small">
+                    ${dateStr}
+                </td>
+                <td class="text-center">
+                    <div class="d-flex align-items-center justify-content-center gap-1.5">
+                        <button class="btn-studio-action btn-act-edit" title="Chỉnh sửa thông tin" onclick="openEditModal('${item.musicId}')">
+                            <i class="fas fa-pen" style="font-size: 0.82rem;"></i>
+                        </button>
+                        <button class="btn-studio-action btn-act-toggle" title="${isPublished ? 'Tạm ẩn khỏi sàn' : 'Công khai phát hành'}" onclick="toggleTrackStatus('${item.musicId}')">
+                            <i class="fas ${isPublished ? 'fa-eye-slash' : 'fa-eye'}" style="font-size: 0.82rem;"></i>
+                        </button>
+                        <button class="btn-studio-action btn-act-del" title="Xóa vĩnh viễn" onclick="openDeleteModal('${item.musicId}', '${encodeURIComponent(item.title)}')">
+                            <i class="fas fa-trash" style="font-size: 0.82rem;"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+// ------------------------------------------
+// HÀM TIỆN ÍCH SẮP XẾP
+// ------------------------------------------
+function sortItems(arr, sortMode) {
+    const list = [...arr];
+    switch (sortMode) {
+        case 'OLDEST':
+            return list.sort((a, b) => new Date(a.createdAt || 0) - new Date(b.createdAt || 0));
+        case 'MOST_PLAYS':
+            return list.sort((a, b) => (b.playsCount || 0) - (a.playsCount || 0));
+        case 'MOST_DOWNLOADS':
+            return list.sort((a, b) => (b.downloadsCount || 0) - (a.downloadsCount || 0));
+        case 'TITLE_AZ':
+            return list.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+        case 'NEWEST':
+        default:
+            return list.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+    }
+}
+
+// ------------------------------------------
+// 3. NGHE THỬ TÁC PHẨM TRỰC TIẾP
+// ------------------------------------------
+function previewProducerTrack(musicId) {
+    const track = allProducerMusics.find(m => m.musicId === musicId);
+    if (!track) return;
+
+    if (typeof playTrackDirect === 'function') {
+        playTrackDirect({
+            id: track.musicId,
+            title: track.title,
+            artist: track.artist,
+            coverUrl: track.coverUrl || '/images/logo.png',
+            audioUrl: track.sourceUrl || `/Music/Play/${track.musicId}`,
+            bpm: track.bpm,
+            key: track.musicalKey,
+            quality: track.qualityAvailable || '320kbps',
+            durationSeconds: track.durationSeconds || 240,
+            categoryCode: track.categoryCode,
+            type: track.type
+        });
+        showToastNotification(`🎧 Đang phát kiểm âm: ${track.title}`);
+    } else {
+        window.location.href = `/Track/Detail/${track.musicId}`;
+    }
+}
+
+// ------------------------------------------
+// 4. CHỈNH SỬA TÁC PHẨM (EDIT)
+// ------------------------------------------
+function openEditModal(musicId) {
+    const track = allProducerMusics.find(m => m.musicId === musicId);
+    if (!track) return;
+
+    document.getElementById('editMusicId').value = track.musicId;
+    document.getElementById('editMusicType').value = track.type || 'Track';
+    document.getElementById('editTitle').value = track.title || '';
+    document.getElementById('editArtist').value = track.artist || '';
+    document.getElementById('editGenre').value = track.genre || 'Vinahouse';
+    document.getElementById('editStatus').value = track.status || 'Published';
+
+    const isNonstop = track.type === 'Nonstop';
+    const catSelect = document.getElementById('editCategoryCode');
+    const bpmGroup = document.getElementById('editBpmGroup');
+    const keyGroup = document.getElementById('editKeyGroup');
+    const headerTitle = document.getElementById('editModalHeaderTitle');
+
+    if (isNonstop) {
+        if (headerTitle) headerTitle.textContent = 'Chỉnh Sửa Bản Mix Nonstop';
+        if (bpmGroup) bpmGroup.style.display = 'none';
+        if (keyGroup) keyGroup.style.display = 'none';
+        catSelect.innerHTML = `
+            <option value="NonstopSlot">⭐️ Nonstop Slot (VIP Độc Quyền - Viền Vàng)</option>
+            <option value="NonstopNhom">💎 Nonstop Nhóm (VIP Hội Viên - Viền Đỏ)</option>
+            <option value="NonstopLot">🎵 Nonstop Lọt (Phổ Thông Free - Viền Xanh)</option>
+        `;
+    } else {
+        if (headerTitle) headerTitle.textContent = 'Chỉnh Sửa Bản Phối Track Lẻ';
+        if (bpmGroup) bpmGroup.style.display = '';
+        if (keyGroup) keyGroup.style.display = '';
+        document.getElementById('editBpm').value = track.bpm || 140;
+        document.getElementById('editMusicalKey').value = track.musicalKey || '8A';
+        catSelect.innerHTML = `
+            <option value="TrackSlot">⭐️ Track Slot (VIP Độc Quyền - Viền Vàng)</option>
+            <option value="TrackNhom">💎 Track Nhóm (VIP Hội Viên - Viền Đỏ)</option>
+            <option value="TrackLot">🎵 Track Lọt (Phổ Thông Free - Viền Xanh)</option>
+        `;
+    }
+
+    catSelect.value = track.categoryCode || (isNonstop ? 'NonstopNhom' : 'TrackNhom');
+
+    const modal = new bootstrap.Modal(document.getElementById('modalEditProducerTrack'));
+    modal.show();
+}
+
+async function submitEditTrack(e) {
+    e.preventDefault();
+    const musicId = document.getElementById('editMusicId').value;
+    const isNonstop = document.getElementById('editMusicType').value === 'Nonstop';
+
+    const payload = {
+        title: document.getElementById('editTitle').value.trim(),
+        artist: document.getElementById('editArtist').value.trim(),
+        genre: document.getElementById('editGenre').value,
+        categoryCode: document.getElementById('editCategoryCode').value,
+        status: document.getElementById('editStatus').value,
+        bpm: isNonstop ? null : parseInt(document.getElementById('editBpm').value) || 140,
+        musicalKey: isNonstop ? null : document.getElementById('editMusicalKey').value
+    };
+
+    const saveBtn = document.getElementById('btnSaveTrackEdit');
+    if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Đang lưu...';
+    }
+
+    try {
+        const res = await fetch(`/Producer/UpdateTrack/${musicId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const json = await res.json();
+
+        if (res.ok && json.success) {
+            showToastNotification('🎉 ' + json.message);
+            const modalEl = document.getElementById('modalEditProducerTrack');
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) modal.hide();
+
+            // Cập nhật lại trong mảng local
+            const index = allProducerMusics.findIndex(m => m.musicId === musicId);
+            if (index !== -1) {
+                allProducerMusics[index] = {
+                    ...allProducerMusics[index],
+                    title: payload.title,
+                    artist: payload.artist,
+                    genre: payload.genre,
+                    categoryCode: payload.categoryCode,
+                    status: payload.status,
+                    bpm: payload.bpm || allProducerMusics[index].bpm,
+                    musicalKey: payload.musicalKey || allProducerMusics[index].musicalKey
+                };
+            }
+            renderTracksTable();
+            renderNonstopTable();
+        } else {
+            showToastNotification('❌ ' + (json.message || 'Không thể lưu thay đổi!'));
+        }
+    } catch (err) {
+        console.error('Error saving track edit:', err);
+        showToastNotification('❌ Lỗi kết nối khi lưu bài hát!');
+    } finally {
+        if (saveBtn) {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = '<i class="fas fa-check me-1"></i> Lưu Thay Đổi';
+        }
+    }
+}
+
+// ------------------------------------------
+// 5. BẬT/TẮT ẨN BÀI HÁT (TOGGLE STATUS)
+// ------------------------------------------
+async function toggleTrackStatus(musicId) {
+    try {
+        const res = await fetch(`/Producer/ToggleStatus/${musicId}`, { method: 'POST' });
+        const json = await res.json();
+
+        if (res.ok && json.success) {
+            showToastNotification('⚡ ' + json.message);
+            const item = allProducerMusics.find(m => m.musicId === musicId);
+            if (item) {
+                item.status = json.status;
+            }
+            renderTracksTable();
+            renderNonstopTable();
+        } else {
+            showToastNotification('❌ ' + (json.message || 'Không thể thay đổi trạng thái!'));
+        }
+    } catch (err) {
+        console.error('Error toggling status:', err);
+        showToastNotification('❌ Lỗi kết nối máy chủ!');
+    }
+}
+
+// ------------------------------------------
+// 6. XÓA VĨNH VIỄN TÁC PHẨM (DELETE)
+// ------------------------------------------
+function openDeleteModal(musicId, encodedTitle) {
+    const title = decodeURIComponent(encodedTitle);
+    document.getElementById('deleteMusicId').value = musicId;
+    document.getElementById('deleteTrackTitlePreview').textContent = title;
+
+    const modal = new bootstrap.Modal(document.getElementById('modalDeleteProducerTrack'));
+    modal.show();
+}
+
+async function confirmDeleteTrack() {
+    const musicId = document.getElementById('deleteMusicId').value;
+    const btn = document.getElementById('btnConfirmDelete');
+
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Đang xóa...';
+    }
+
+    try {
+        const res = await fetch(`/Producer/DeleteTrack/${musicId}`, { method: 'POST' });
+        const json = await res.json();
+
+        if (res.ok && json.success) {
+            showToastNotification('🗑️ ' + json.message);
+            const modalEl = document.getElementById('modalDeleteProducerTrack');
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) modal.hide();
+
+            allProducerMusics = allProducerMusics.filter(m => m.musicId !== musicId);
+            calculateProducerStats();
+            renderTracksTable();
+            renderNonstopTable();
+        } else {
+            showToastNotification('❌ ' + (json.message || 'Không thể xóa bài hát!'));
+        }
+    } catch (err) {
+        console.error('Error deleting track:', err);
+        showToastNotification('❌ Lỗi kết nối máy chủ!');
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-trash me-1"></i> Đồng Ý Xóa';
+        }
+    }
+}
+</script>

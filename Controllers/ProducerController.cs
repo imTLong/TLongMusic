@@ -314,6 +314,7 @@ namespace TLongMusic.Controllers
                     m.Bpm,
                     m.MusicalKey,
                     m.DurationSeconds,
+                    m.CoverUrl,
                     m.QualityAvailable,
                     m.SourceType,
                     m.SourceUrl,
@@ -325,6 +326,99 @@ namespace TLongMusic.Controllers
                 .ToListAsync();
 
             return Ok(new { success = true, data = list, stageName = producer.StageName });
+        }
+
+        // UPDATE OWN MUSIC (Producer can edit title, artist, genre, bpm, key, category, status)
+        [HttpPost("UpdateTrack/{id}")]
+        public async Task<IActionResult> UpdateTrack(Guid id, [FromBody] ProducerUpdateTrackDto dto)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized(new { success = false, message = "Vui lòng đăng nhập!" });
+            }
+
+            var music = await _context.Musics.FindAsync(id);
+            if (music == null)
+            {
+                return NotFound(new { success = false, message = "Bài hát không tồn tại!" });
+            }
+
+            var producer = await _context.Producers.FirstOrDefaultAsync(p => p.UserId == userId);
+            if (!User.IsInRole("Admin") && (producer == null || music.ProducerId != producer.ProducerId))
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new { success = false, message = "Bạn chỉ có quyền chỉnh sửa bài nhạc do chính mình đăng tải!" });
+            }
+
+            if (!string.IsNullOrWhiteSpace(dto.Title)) music.Title = dto.Title.Trim();
+            if (!string.IsNullOrWhiteSpace(dto.Artist)) music.Artist = dto.Artist.Trim();
+            if (!string.IsNullOrWhiteSpace(dto.Genre)) music.Genre = dto.Genre.Trim();
+            if (dto.Bpm.HasValue && dto.Bpm.Value > 0) music.Bpm = dto.Bpm.Value;
+            if (!string.IsNullOrWhiteSpace(dto.MusicalKey)) music.MusicalKey = dto.MusicalKey.Trim();
+
+            if (!string.IsNullOrWhiteSpace(dto.CategoryCode))
+            {
+                var newCat = dto.CategoryCode.Trim();
+                // Validate category code matches type
+                if (music.Type == "Nonstop")
+                {
+                    if (newCat.StartsWith("Nonstop", StringComparison.OrdinalIgnoreCase))
+                    {
+                        music.CategoryCode = newCat;
+                    }
+                }
+                else
+                {
+                    if (newCat.StartsWith("Track", StringComparison.OrdinalIgnoreCase))
+                    {
+                        music.CategoryCode = newCat;
+                    }
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(dto.Status))
+            {
+                var status = dto.Status.Trim();
+                if (status == "Published" || status == "Hidden")
+                {
+                    music.Status = status;
+                }
+            }
+
+            music.UpdatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+
+            return Ok(new { success = true, message = $"Cập nhật bản thu '{music.Title}' thành công!" });
+        }
+
+        // TOGGLE STATUS (Publish / Hide quickly)
+        [HttpPost("ToggleStatus/{id}")]
+        public async Task<IActionResult> ToggleStatus(Guid id)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized(new { success = false, message = "Vui lòng đăng nhập!" });
+            }
+
+            var music = await _context.Musics.FindAsync(id);
+            if (music == null)
+            {
+                return NotFound(new { success = false, message = "Bài hát không tồn tại!" });
+            }
+
+            var producer = await _context.Producers.FirstOrDefaultAsync(p => p.UserId == userId);
+            if (!User.IsInRole("Admin") && (producer == null || music.ProducerId != producer.ProducerId))
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new { success = false, message = "Bạn chỉ có quyền quản lý bài nhạc do chính mình đăng tải!" });
+            }
+
+            music.Status = music.Status == "Published" ? "Hidden" : "Published";
+            music.UpdatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+
+            var statusMsg = music.Status == "Published" ? "Đã công khai phát hành" : "Đã tạm ẩn bài hát";
+            return Ok(new { success = true, status = music.Status, message = $"{statusMsg} '{music.Title}' thành công!" });
         }
 
         // FR-PRO-03 & 05: DELETE OWN MUSIC (Cannot delete others' music)

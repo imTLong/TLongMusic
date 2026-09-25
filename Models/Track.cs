@@ -77,6 +77,15 @@ namespace TLongMusic.Models
         public bool IsAdminOrProducer { get; set; }
     }
 
+    public class MembershipViewModel
+    {
+        public List<SubscriptionPlan> Plans { get; set; } = new();
+        public string? CurrentUserTier { get; set; }
+        public bool IsPremiumUser { get; set; }
+        public bool IsStandardUser { get; set; }
+        public bool IsAdminOrProducer { get; set; }
+    }
+
     public class SongCommentItem
     {
         public string UserName { get; set; } = string.Empty;

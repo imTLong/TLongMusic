@@ -1,0 +1,366 @@
+@model TLongMusic.Models.MembershipViewModel
+@{
+    ViewData["Title"] = "Gói Hội Viên Record Pool & Bảng So Sánh Quyền Hạn VIP";
+}
+
+<div class="container py-4" style="max-width: 1200px;">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb mb-0 py-2 px-3 rounded-pill bg-dark bg-opacity-50 border border-secondary border-opacity-20 d-inline-flex align-items-center">
+            <li class="breadcrumb-item"><a href="/" class="text-dim text-decoration-none hover-white"><i class="fas fa-house me-1"></i>Trang Chủ</a></li>
+            <li class="breadcrumb-item active text-white fw-semibold" aria-current="page"><i class="fas fa-gem text-danger me-1"></i>Gói Hội Viên</li>
+        </ol>
+    </nav>
+
+    <!-- Hero Header Studio -->
+    <div class="text-center mb-5 position-relative">
+        <div class="d-inline-flex align-items-center gap-2 px-3 py-1.5 rounded-pill mb-3 border" style="background: rgba(255, 19, 74, 0.12); border-color: rgba(255, 19, 74, 0.35);">
+            <span class="live-dot-pulse"></span>
+            <span class="text-white font-monospace fw-bold" style="font-size: 0.78rem; letter-spacing: 0.5px;">RECORD POOL VIP MEMBERSHIP • TAI NHAC 24-BIT MASTER</span>
+        </div>
+        <h1 class="text-white fw-bold mb-3 display-5" style="letter-spacing: -0.5px;">
+            HẠNG HỘI VIÊN & <span class="text-gradient-shimmer">ĐẶC QUYỀN STUDIO</span>
+        </h1>
+        <p class="text-dim mx-auto" style="max-width: 720px; font-size: 1.05rem; line-height: 1.6;">
+            Trở thành hội viên chính thức để tải nhạc <strong>Lossless Master WAV 24-bit</strong> nguyên bản, mở khóa toàn bộ kho <strong>Track Nhóm</strong> và <strong>Track Slot VIP độc quyền</strong> dành riêng cho DJ biểu diễn và phòng thu.
+        </p>
+    </div>
+
+    <!-- 3 Pricing Cards -->
+    <div class="row g-4 justify-content-center mb-5">
+        @foreach (var plan in Model.Plans)
+        {
+            var isStandard = plan.TierCode == "standard";
+            var isPremium = plan.TierCode == "premium";
+            var isFree = plan.TierCode == "free";
+
+            var cardTierClass = "crystal-pricing-card h-100 d-flex flex-column justify-content-between p-4 rounded-4 position-relative border";
+            if (isStandard) { cardTierClass += " card-tier-standard border-danger border-opacity-40"; }
+            else if (isPremium) { cardTierClass += " card-tier-premium border-warning border-opacity-50 shadow-gold"; }
+            else { cardTierClass += " border-secondary border-opacity-25"; }
+
+            var isCurrentPlan = (isPremium && Model.IsPremiumUser) ||
+                                (isStandard && Model.IsStandardUser && !Model.IsPremiumUser) ||
+                                (isFree && !Model.IsStandardUser && !Model.IsPremiumUser);
+
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="@cardTierClass" style="background: @(isPremium ? "linear-gradient(145deg, rgba(20, 16, 10, 0.85) 0%, rgba(10, 11, 18, 0.95) 100%)" : isStandard ? "linear-gradient(145deg, rgba(22, 10, 14, 0.85) 0%, rgba(10, 11, 18, 0.95) 100%)" : "rgba(10, 11, 18, 0.85)");">
+                    <div>
+                        <!-- Top Badges -->
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="badge @(isPremium ? "badge-premium-gold" : isStandard ? "badge-standard-red" : "bg-secondary") px-3 py-1.5 font-monospace fw-bold" style="font-size: 0.72rem;">
+                                @if (isPremium) { <i class="fas fa-crown me-1"></i> }
+                                else if (isStandard) { <i class="fas fa-fire me-1"></i> }
+                                @plan.BadgeText
+                            </span>
+
+                            @if (isCurrentPlan)
+                            {
+                                <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50 px-2.5 py-1 font-monospace" style="font-size: 0.7rem;">
+                                    <i class="fas fa-circle-check me-1"></i>GÓI HIỆN TẠI
+                                </span>
+                            }
+                        </div>
+
+                        <!-- Title -->
+                        <h3 class="fw-bold mb-1 @(isPremium ? "text-warning" : isStandard ? "text-danger" : "text-white")" style="font-size: 1.4rem;">
+                            @plan.Name
+                        </h3>
+                        <p class="text-dim small mb-3">
+                            @(isFree ? "Trải nghiệm nghe thử và tải các bản nhạc lọt thông thường." :
+                              isStandard ? "Tải Full kho Track Nhóm & Nonstop Nhóm chuẩn 320kbps MP3 HD." :
+                              "Mở khóa toàn bộ 100% kho Slot VIP & tải Full Master Lossless WAV 24-Bit.")
+                        </p>
+
+                        <!-- Price -->
+                        <div class="d-flex align-items-baseline gap-1 my-3 pb-3 border-bottom border-secondary border-opacity-20">
+                            <span class="font-monospace fw-bold @(isPremium ? "text-warning" : isStandard ? "text-danger" : "text-white")" style="font-size: 2.2rem; letter-spacing: -1px;">
+                                @plan.Price.ToString("N0")đ
+                            </span>
+                            <span class="text-dim small font-monospace">@plan.BillingPeriod</span>
+                        </div>
+
+                        <!-- Feature List -->
+                        <ul class="list-unstyled d-flex flex-column gap-2.5 my-3 small text-dim">
+                            @foreach (var feature in plan.Features)
+                            {
+                                <li class="d-flex align-items-center gap-2">
+                                    @if (isPremium)
+                                    {
+                                        <i class="fas fa-circle-check text-warning flex-shrink-0"></i>
+                                        <span class="text-white">@feature</span>
+                                    }
+                                    else if (isStandard)
+                                    {
+                                        <i class="fas fa-circle-check text-danger flex-shrink-0"></i>
+                                        <span class="text-white">@feature</span>
+                                    }
+                                    else
+                                    {
+                                        <i class="fas fa-check text-secondary flex-shrink-0"></i>
+                                        <span>@feature</span>
+                                    }
+                                </li>
+                            }
+                        </ul>
+                    </div>
+
+                    <!-- Call To Action Button -->
+                    <div class="mt-4 pt-2">
+                        @if (isFree)
+                        {
+                            <button class="btn btn-outline-secondary w-100 py-2.5 rounded-3 fw-bold disabled" style="opacity: 0.6; font-size: 0.9rem;">
+                                <i class="fas fa-check me-1"></i> @(isCurrentPlan ? "Đang Sử Dụng" : "Mặc Định")
+                            </button>
+                        }
+                        else if (isStandard)
+                        {
+                            <button class="btn btn-shimmer-ruby w-100 py-2.5 rounded-3 fw-bold d-flex align-items-center justify-content-center gap-2"
+                                    onclick="openCheckoutModal('Standard VIP', 99000)"
+                                    style="font-size: 0.92rem;">
+                                <i class="fas fa-gem"></i>
+                                <span>@(isCurrentPlan ? "Gia Hạn Standard (99.000đ)" : "Nâng Cấp Standard VIP")</span>
+                            </button>
+                        }
+                        else
+                        {
+                            <button class="btn btn-shimmer-gold w-100 py-2.5 rounded-3 fw-bold d-flex align-items-center justify-content-center gap-2"
+                                    onclick="openCheckoutModal('Premium VIP', 199000)"
+                                    style="font-size: 0.92rem; color: #0b0c10 !important; background: linear-gradient(135deg, #ffd166 0%, #ff9f1c 100%) !important;">
+                                <i class="fas fa-crown"></i>
+                                <span>@(isCurrentPlan ? "Gia Hạn Premium (199.000đ)" : "Nâng Cấp Premium VIP")</span>
+                            </button>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- ==========================================
+         BẢNG SO SÁNH QUYỀN HẠN CHI TIẾT (FULL MATRIX)
+         ========================================== -->
+    <div class="crystal-card p-4 p-md-5 mb-5 rounded-4 border border-secondary border-opacity-25" style="background: rgba(10, 11, 18, 0.9);">
+        <div class="text-center mb-4">
+            <span class="badge badge-shimmer-cyan px-3 py-1 font-monospace mb-2">DETAILED FEATURE COMPARISON</span>
+            <h2 class="text-white fw-bold display-6" style="font-size: 1.85rem;">
+                BẢNG SO SÁNH <span class="text-gradient-shimmer">CHI TIẾT ĐẶC QUYỀN</span>
+            </h2>
+            <p class="text-dim small mb-0">Đối chiếu chi tiết quyền lợi giữa từng gói hội viên trên hệ thống TLongMusic Record Pool</p>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-dark table-hover align-middle mb-0" style="background: transparent;">
+                <thead>
+                    <tr class="border-bottom border-secondary border-opacity-25 text-uppercase" style="font-size: 0.82rem; letter-spacing: 0.5px;">
+                        <th style="width: 38%; padding: 16px 14px;" class="text-white fw-bold">Tính Năng / Đặc Quyền</th>
+                        <th style="width: 20%; padding: 16px 14px;" class="text-center text-secondary">Tài Khoản Free</th>
+                        <th style="width: 21%; padding: 16px 14px;" class="text-center text-danger"><i class="fas fa-gem me-1"></i>Standard VIP</th>
+                        <th style="width: 21%; padding: 16px 14px;" class="text-center text-warning"><i class="fas fa-crown me-1"></i>Premium VIP</th>
+                    </tr>
+                </thead>
+                <tbody style="font-size: 0.88rem;">
+                    <!-- 1. Nghe trực tuyến toàn bộ -->
+                    <tr class="border-bottom border-secondary border-opacity-10">
+                        <td class="text-white py-3 px-3">
+                            <div class="fw-semibold"><i class="fas fa-headphones text-info me-2"></i>Nghe trực tuyến toàn thư viện</div>
+                            <div class="text-dim small">Nghe trực tiếp trên trình phát web không tải về</div>
+                        </td>
+                        <td class="text-center py-3">
+                            <span class="badge bg-secondary bg-opacity-40 text-light font-monospace">Lọt Full / Slot Demo 30s</span>
+                        </td>
+                        <td class="text-center py-3">
+                            <span class="badge bg-danger bg-opacity-20 text-white border border-danger border-opacity-30 font-monospace">Nhóm Full / Slot Demo 30s</span>
+                        </td>
+                        <td class="text-center py-3">
+                            <span class="badge badge-premium-gold font-monospace"><i class="fas fa-check me-1"></i>Mở Khóa 100% Full</span>
+                        </td>
+                    </tr>
+
+                    <!-- 2. Kho Track Lọt (Free) -->
+                    <tr class="border-bottom border-secondary border-opacity-10">
+                        <td class="text-white py-3 px-3">
+                            <div class="fw-semibold"><i class="fas fa-compact-disc text-secondary me-2"></i>Kho Track DJ Lọt</div>
+                            <div class="text-dim small">Các bản thu lọt được phát hành đại trà</div>
+                        </td>
+                        <td class="text-center py-3 text-success"><i class="fas fa-circle-check fs-5"></i></td>
+                        <td class="text-center py-3 text-success"><i class="fas fa-circle-check fs-5"></i></td>
+                        <td class="text-center py-3 text-success"><i class="fas fa-circle-check fs-5"></i></td>
+                    </tr>
+
+                    <!-- 3. Kho Track Nhóm VIP -->
+                    <tr class="border-bottom border-secondary border-opacity-10">
+                        <td class="text-white py-3 px-3">
+                            <div class="fw-semibold"><i class="fas fa-certificate text-danger me-2"></i>Kho Track Nhóm VIP</div>
+                            <div class="text-dim small">Kho bài hát độc quyền nhóm cập nhật hàng ngày</div>
+                        </td>
+                        <td class="text-center py-3 text-muted">
+                            <span class="badge bg-dark text-dim border border-secondary border-opacity-20">Demo 30s</span>
+                        </td>
+                        <td class="text-center py-3">
+                            <span class="badge badge-standard-red font-monospace"><i class="fas fa-check me-1"></i>Nghe & Tải Full</span>
+                        </td>
+                        <td class="text-center py-3">
+                            <span class="badge badge-premium-gold font-monospace"><i class="fas fa-check me-1"></i>Nghe & Tải Full</span>
+                        </td>
+                    </tr>
+
+                    <!-- 4. Kho Track Slot VIP (Độc Quyền Cao Cấp) -->
+                    <tr class="border-bottom border-secondary border-opacity-10" style="background: rgba(255, 209, 102, 0.03);">
+                        <td class="text-white py-3 px-3">
+                            <div class="fw-semibold text-warning"><i class="fas fa-crown text-warning me-2"></i>Kho Track Slot VIP (Độc Quyền Studio)</div>
+                            <div class="text-dim small">Bản phối đỉnh cao chỉ dành cho Pro DJ & Bar Club</div>
+                        </td>
+                        <td class="text-center py-3 text-muted">
+                            <i class="fas fa-lock text-secondary fs-6"></i>
+                        </td>
+                        <td class="text-center py-3 text-muted">
+                            <i class="fas fa-lock text-secondary fs-6"></i>
+                        </td>
+                        <td class="text-center py-3">
+                            <span class="badge badge-premium-gold font-monospace py-1 px-2.5"><i class="fas fa-crown me-1"></i>TOÀN QUYỀN 100%</span>
+                        </td>
+                    </tr>
+
+                    <!-- 5. Kho Nonstop Nhóm -->
+                    <tr class="border-bottom border-secondary border-opacity-10">
+                        <td class="text-white py-3 px-3">
+                            <div class="fw-semibold"><i class="fas fa-layer-group text-danger me-2"></i>Kho Nonstop Nhóm</div>
+                            <div class="text-dim small">Set nhạc dài 30-90 phút cho phòng bay</div>
+                        </td>
+                        <td class="text-center py-3 text-muted">
+                            <span class="badge bg-dark text-dim border border-secondary border-opacity-20">Demo 30s</span>
+                        </td>
+                        <td class="text-center py-3">
+                            <span class="badge badge-standard-red font-monospace"><i class="fas fa-check me-1"></i>Mở Full 100%</span>
+                        </td>
+                        <td class="text-center py-3">
+                            <span class="badge badge-premium-gold font-monospace"><i class="fas fa-check me-1"></i>Mở Full 100%</span>
+                        </td>
+                    </tr>
+
+                    <!-- 6. Kho Nonstop Slot VIP -->
+                    <tr class="border-bottom border-secondary border-opacity-10" style="background: rgba(255, 209, 102, 0.03);">
+                        <td class="text-white py-3 px-3">
+                            <div class="fw-semibold text-warning"><i class="fas fa-fire-flame-curved text-warning me-2"></i>Kho Nonstop Slot VIP (Độc Quyền)</div>
+                            <div class="text-dim small">Set nhạc tuyển chọn của các DJ hàng đầu</div>
+                        </td>
+                        <td class="text-center py-3 text-muted"><i class="fas fa-lock text-secondary fs-6"></i></td>
+                        <td class="text-center py-3 text-muted"><i class="fas fa-lock text-secondary fs-6"></i></td>
+                        <td class="text-center py-3">
+                            <span class="badge badge-premium-gold font-monospace py-1 px-2.5"><i class="fas fa-crown me-1"></i>TOÀN QUYỀN 100%</span>
+                        </td>
+                    </tr>
+
+                    <!-- Giới hạn lượt tải -->
+                    <tr class="border-bottom border-secondary border-opacity-10">
+                        <td class="text-white py-3 px-3">
+                            <div class="fw-semibold"><i class="fas fa-download text-success me-2"></i>Giới hạn số lượt tải mỗi ngày</div>
+                            <div class="text-dim small">Số lượng bản thu tối đa được phép tải về máy</div>
+                        </td>
+                        <td class="text-center py-3 text-dim font-monospace">3 lượt / ngày</td>
+                        <td class="text-center py-3 text-white fw-bold font-monospace">KHÔNG GIỚI HẠN</td>
+                        <td class="text-center py-3 text-warning fw-bold font-monospace">KHÔNG GIỚI HẠN</td>
+                    </tr>
+
+                    <!-- Huy hiệu hồ sơ -->
+                    <tr>
+                        <td class="text-white py-3 px-3">
+                            <div class="fw-semibold"><i class="fas fa-shield-halved text-primary me-2"></i>Huy hiệu nhận diện hồ sơ</div>
+                            <div class="text-dim small">Hiển thị cạnh tên tài khoản khi bình luận và trên thanh điều hướng</div>
+                        </td>
+                        <td class="text-center py-3">
+                            <span class="badge bg-secondary font-monospace">FREE</span>
+                        </td>
+                        <td class="text-center py-3">
+                            <span class="badge badge-standard-red font-monospace">STANDARD VIP</span>
+                        </td>
+                        <td class="text-center py-3">
+                            <span class="badge badge-premium-gold font-monospace">PREMIUM VIP 👑</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- FAQ Accordion (Câu Hỏi Thường Gặp) -->
+    <div class="row justify-content-center mb-5">
+        <div class="col-12 col-lg-10">
+            <div class="text-center mb-4">
+                <span class="badge badge-shimmer-ruby px-3 py-1 font-monospace mb-2">FAQ & SUPPORT</span>
+                <h3 class="text-white fw-bold" style="font-size: 1.6rem;">CÂU HỎI THƯỜNG GẶP</h3>
+            </div>
+
+            <div class="accordion accordion-flush d-flex flex-column gap-3" id="membershipFaqAccordion">
+                <!-- FAQ 1 -->
+                <div class="accordion-item bg-dark bg-opacity-60 border border-secondary border-opacity-25 rounded-3 overflow-hidden">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed bg-transparent text-white fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                            <i class="fas fa-circle-question text-danger me-2"></i> Sự khác biệt giữa Track Nhóm và Track Slot là gì?
+                        </button>
+                    </h2>
+                    <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#membershipFaqAccordion">
+                        <div class="accordion-body text-dim small" style="line-height: 1.65;">
+                            <strong>Track Nhóm</strong> là các bài phối dành cho hội viên Standard VIP và Premium VIP sử dụng hàng ngày (định dạng 320kbps MP3 HD).<br />
+                            <strong>Track Slot VIP</strong> là những bản thu Master độc quyền chuẩn studio, định dạng Lossless Master 24-Bit / 48kHz WAV, chỉ phát hành cho hội viên Premium VIP để biểu diễn tại các Club, Bar, Sân khấu chuyên nghiệp.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ 2 -->
+                <div class="accordion-item bg-dark bg-opacity-60 border border-secondary border-opacity-25 rounded-3 overflow-hidden">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed bg-transparent text-white fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                            <i class="fas fa-qrcode text-warning me-2"></i> Sau khi chuyển khoản bao lâu thì tài khoản được kích hoạt?
+                        </button>
+                    </h2>
+                    <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#membershipFaqAccordion">
+                        <div class="accordion-body text-dim small" style="line-height: 1.65;">
+                            Hệ thống TLongMusic sử dụng công nghệ quét mã <strong>VietQR tự động</strong>. Sau khi chuyển khoản đúng mã đơn hàng hiển thị trên màn hình thanh toán, tài khoản của bạn sẽ được kích hoạt tức thì sau <strong>5 đến 30 giây</strong> mà không cần liên hệ duyệt thủ công!
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ 3 -->
+                <div class="accordion-item bg-dark bg-opacity-60 border border-secondary border-opacity-25 rounded-3 overflow-hidden">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed bg-transparent text-white fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                            <i class="fas fa-shield-check text-success me-2"></i> Gói hội viên có tự động trừ tiền ngân hàng hàng tháng không?
+                        </button>
+                    </h2>
+                    <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#membershipFaqAccordion">
+                        <div class="accordion-body text-dim small" style="line-height: 1.65;">
+                            <strong>Hoàn toàn KHÔNG!</strong> Hệ thống của chúng tôi không lưu giữ thông tin thẻ ngân hàng của bạn. Bạn chủ động nạp từng tháng theo nhu cầu, hết hạn nếu không gia hạn sẽ tự động chuyển về tài khoản Free an toàn tuyệt đối.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ 4 -->
+                <div class="accordion-item bg-dark bg-opacity-60 border border-secondary border-opacity-25 rounded-3 overflow-hidden">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed bg-transparent text-white fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+                            <i class="fas fa-arrow-up-right-dots text-info me-2"></i> Tôi đang dùng Standard VIP muốn nâng cấp lên Premium VIP được không?
+                        </button>
+                    </h2>
+                    <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#membershipFaqAccordion">
+                        <div class="accordion-body text-dim small" style="line-height: 1.65;">
+                            Được! Bạn có thể ấn nút "Nâng Cấp Premium VIP" bất cứ lúc nào. Hệ thống sẽ kích hoạt ngay lập tức cấp độ Premium VIP cho tài khoản của bạn.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    // Đồng bộ nút kích hoạt gói theo user hiện tại nếu có
+    document.addEventListener('DOMContentLoaded', () => {
+        if (typeof updateTierUI === 'function') {
+            updateTierUI();
+        }
+    });
+</script>
+}

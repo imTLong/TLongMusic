@@ -218,20 +218,13 @@
                 </div>
 
                 <!-- RADAR QUÉT REALTIME -->
-                <div class="mt-4 p-3 rounded-4 border border-secondary border-opacity-25 d-flex flex-column flex-md-row justify-content-between align-items-center gap-3"
+                <div class="mt-4 p-3 rounded-4 border border-secondary border-opacity-25 d-flex align-items-center gap-3"
                      style="background: rgba(0, 0, 0, 0.35);">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="spinner-grow text-danger spinner-grow-sm" role="status"></div>
-                        <div>
-                            <strong class="text-white small d-block" id="pollingStatusText">Đang chờ nhận tiền chuyển khoản...</strong>
-                            <span class="text-dim" style="font-size: 0.75rem;">Hệ thống tự động kiểm tra mỗi 2.5 giây. Gói sẽ kích hoạt ngay khi tiền vào.</span>
-                        </div>
+                    <div class="spinner-grow text-danger spinner-grow-sm flex-shrink-0" role="status"></div>
+                    <div>
+                        <strong class="text-white small d-block" id="pollingStatusText">Đang chờ nhận tiền chuyển khoản...</strong>
+                        <span class="text-dim" style="font-size: 0.75rem;">Hệ thống tự động kiểm tra mỗi 2.5 giây. Gói VIP sẽ kích hoạt tự động ngay khi tiền vào tài khoản.</span>
                     </div>
-
-                    <!-- NÚT MÔ PHỎNG DÀNH CHO TEST NHANH -->
-                    <button class="btn btn-outline-warning btn-sm rounded-pill px-3 fw-bold text-nowrap" onclick="triggerSimulateTransfer()">
-                        <i class="fas fa-bolt me-1"></i> ⚡ Giả Lập Tiền Vào (Test Nhanh)
-                    </button>
                 </div>
             </div>
 
@@ -283,7 +276,9 @@
     </div>
 </div>
 
+@section Scripts {
 <script>
+(function() {
     let currentSelectedPackage = '@selectedPackage';
     let currentOrderCode = '';
     let currentOrderAmount = 0;
@@ -291,30 +286,37 @@
     let countdownSeconds = 900; // 15 phút
     let countdownInterval = null;
 
-    document.addEventListener('DOMContentLoaded', async () => {
+    async function initCheckoutPage() {
+        if (pollingInterval) clearInterval(pollingInterval);
+        if (countdownInterval) clearInterval(countdownInterval);
+
         // Kiểm tra thông tin người dùng
         const user = window.TLongPlayer?.currentUser;
         const isStaff = user && (user.role === 'Admin' || user.primaryRole === 'Admin' || user.role === 'Producer' || user.primaryRole === 'Producer' || (user.roles && (user.roles.includes('Admin') || user.roles.includes('Producer'))));
-        if (user) {
-            if (isStaff) {
-                document.getElementById('checkoutUserDisplay').innerHTML = `
-                    <span class="badge ${user.role === 'Admin' || user.primaryRole === 'Admin' ? 'bg-danger' : 'bg-warning text-dark'} fw-bold px-3 py-1">
-                        <i class="fas fa-shield-check me-1"></i> ${user.primaryRole || user.role}: Toàn Quyền Hệ Thống
-                    </span>
-                `;
+        const userDisplay = document.getElementById('checkoutUserDisplay');
+        if (userDisplay) {
+            if (user) {
+                if (isStaff) {
+                    userDisplay.innerHTML = `
+                        <span class="badge ${user.role === 'Admin' || user.primaryRole === 'Admin' ? 'bg-danger' : 'bg-warning text-dark'} fw-bold px-3 py-1">
+                            <i class="fas fa-shield-check me-1"></i> ${user.primaryRole || user.role}: Toàn Quyền Hệ Thống
+                        </span>
+                    `;
+                } else {
+                    userDisplay.textContent = `${user.fullName || user.username} (${user.username})`;
+                }
             } else {
-                document.getElementById('checkoutUserDisplay').textContent = `${user.fullName} (${user.username})`;
+                userDisplay.innerHTML = `<span class="text-warning">Chưa đăng nhập (Vui lòng đăng nhập trước)</span>`;
             }
-        } else {
-            document.getElementById('checkoutUserDisplay').innerHTML = `<span class="text-warning">Chưa đăng nhập (Vui lòng đăng nhập trước)</span>`;
         }
 
         // Tự động tạo đơn hàng theo gói ban đầu
         await initOrder(currentSelectedPackage);
         startTimer();
-    });
+    }
+    window.initCheckoutPage = initCheckoutPage;
 
-    async function selectCheckoutPackage(pkg) {
+    window.selectCheckoutPackage = async function(pkg) {
         if (currentSelectedPackage === pkg && currentOrderCode) return;
         currentSelectedPackage = pkg;
 
@@ -485,6 +487,8 @@
         }, 1000);
     }
 
+    window.triggerSimulateTransfer = triggerSimulateTransfer;
+
     function copyText(elemId, successMsg) {
         const text = document.getElementById(elemId)?.textContent;
         if (text) {
@@ -492,6 +496,7 @@
             showToastNotification("📋 " + successMsg);
         }
     }
+    window.copyText = copyText;
 
     function copyAmount() {
         if (currentOrderAmount > 0) {
@@ -499,4 +504,14 @@
             showToastNotification("📋 Đã copy số tiền: " + Number(currentOrderAmount).toLocaleString('vi-VN') + "đ");
         }
     }
+    window.copyAmount = copyAmount;
+
+    // Kích hoạt ngay lập tức nếu DOM đã sẵn sàng (đặc biệt khi điều hướng mượt mà SPA)
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initCheckoutPage);
+    } else {
+        initCheckoutPage();
+    }
+})();
 </script>
+}

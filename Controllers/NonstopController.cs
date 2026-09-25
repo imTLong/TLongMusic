@@ -119,13 +119,7 @@ public class NonstopController : Controller
             viewModel.CurrentUserTier = currentUserTier;
             viewModel.IsPremiumUser = isPremiumUser;
             viewModel.IsVipUser = isVipUser;
-
-            // Nếu tài khoản Standard và chưa chọn tier filter nào: Mặc định hiển thị Nonstop của Nhóm
-            if (string.IsNullOrWhiteSpace(tier) && currentUserTier == "standard")
-            {
-                tier = "nhom";
-                viewModel.SelectedTier = "nhom";
-            }
+            viewModel.SelectedTier = tier ?? "all";
 
             // Lọc theo tier nếu có
             if (!string.IsNullOrWhiteSpace(tier) && tier != "all")
@@ -143,6 +137,27 @@ public class NonstopController : Controller
                 else if (tier.Equals("lot", StringComparison.OrdinalIgnoreCase))
                 {
                     // Chỉ hiển thị Nonstop Lọt (Free) - Tuyệt đối không lẫn Slot hay Nhóm
+                    nonstopList = nonstopList.Where(IsNonstopLot).ToList();
+                }
+            }
+            else
+            {
+                // Ở MỤC "TẤT CẢ" (tier == null hoặc tier == "all"):
+                // - Tài khoản Standard: Bỏ phần Nonstop Slot (chỉ gồm Nonstop Nhóm + Nonstop Lọt)
+                // - Tài khoản Free (hoặc chưa đăng nhập): Chỗ Tất Cả chỉ hiện Nonstop Lọt
+                // - Tài khoản Premium / Admin / Producer: Hiển thị đầy đủ tất cả
+                if (isPremiumUser || isAdminOrProducer)
+                {
+                    // Giữ nguyên toàn bộ (Slot + Nhóm + Lọt)
+                }
+                else if (currentUserTier == "standard")
+                {
+                    // Standard: Bỏ phần Nonstop slot
+                    nonstopList = nonstopList.Where(t => !IsNonstopSlot(t)).ToList();
+                }
+                else
+                {
+                    // Free: Chỉ hiện Nonstop lọt
                     nonstopList = nonstopList.Where(IsNonstopLot).ToList();
                 }
             }

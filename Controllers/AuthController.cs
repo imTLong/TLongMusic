@@ -32,6 +32,7 @@ namespace TLongMusic.Controllers
             var user = await _context.Users
                 .Include(u => u.UserRoles)
                     .ThenInclude(ur => ur.Role)
+                .Include(u => u.ProducerProfile)
                 .Include(u => u.Subscriptions)
                     .ThenInclude(s => s.Package)
                 .FirstOrDefaultAsync(u => u.Username == model.UsernameOrEmail || u.Email == model.UsernameOrEmail);
@@ -92,10 +93,10 @@ namespace TLongMusic.Controllers
                 Username = user.Username,
                 FullName = user.FullName ?? user.Username,
                 Email = user.Email,
-                PhoneNumber = user.PhoneNumber,
-                BankName = user.BankName,
-                BankAccountNumber = user.BankAccountNumber,
-                BankAccountHolder = user.BankAccountHolder,
+                PhoneNumber = user.PhoneNumber ?? user.ProducerProfile?.PhoneNumber,
+                BankName = user.BankName ?? user.ProducerProfile?.BankName,
+                BankAccountNumber = user.BankAccountNumber ?? user.ProducerProfile?.BankAccountNumber,
+                BankAccountHolder = user.BankAccountHolder ?? user.ProducerProfile?.BankAccountHolder,
                 AvatarUrl = user.AvatarUrl ?? "/images/logo.png",
                 Roles = roles,
                 PrimaryRole = primaryRole,
@@ -259,6 +260,7 @@ namespace TLongMusic.Controllers
 
             var user = await _context.Users
                 .Include(u => u.UserRoles)
+                .Include(u => u.ProducerProfile)
                 .Include(u => u.Subscriptions)
                     .ThenInclude(s => s.Package)
                 .FirstOrDefaultAsync(u => u.UserId == userId);
@@ -289,10 +291,10 @@ namespace TLongMusic.Controllers
                 Username = user.Username,
                 FullName = user.FullName ?? user.Username,
                 Email = user.Email,
-                PhoneNumber = user.PhoneNumber,
-                BankName = user.BankName,
-                BankAccountNumber = user.BankAccountNumber,
-                BankAccountHolder = user.BankAccountHolder,
+                PhoneNumber = user.PhoneNumber ?? user.ProducerProfile?.PhoneNumber,
+                BankName = user.BankName ?? user.ProducerProfile?.BankName,
+                BankAccountNumber = user.BankAccountNumber ?? user.ProducerProfile?.BankAccountNumber,
+                BankAccountHolder = user.BankAccountHolder ?? user.ProducerProfile?.BankAccountHolder,
                 AvatarUrl = user.AvatarUrl ?? "/images/logo.png",
                 Roles = roles,
                 PrimaryRole = primaryRole,
@@ -329,6 +331,7 @@ namespace TLongMusic.Controllers
                 var form = await Request.ReadFormAsync();
                 model = new UpdateProfileDto
                 {
+                    Username = form["username"].ToString(),
                     FullName = form["fullName"].ToString(),
                     Email = form["email"].ToString(),
                     PhoneNumber = form["phoneNumber"].ToString(),
@@ -365,6 +368,29 @@ namespace TLongMusic.Controllers
             if (user == null || user.Status != "Active")
             {
                 return StatusCode(StatusCodes.Status403Forbidden, new { success = false, message = "Tài khoản không tồn tại hoặc đã bị khóa!" });
+            }
+
+            // Check and update username if changed
+            if (!string.IsNullOrWhiteSpace(model.Username) && !model.Username.Trim().Equals(user.Username, StringComparison.OrdinalIgnoreCase))
+            {
+                var cleanUsername = model.Username.Trim();
+                if (cleanUsername.Length < 3 || cleanUsername.Length > 50)
+                {
+                    return BadRequest(new { success = false, message = "Tên đăng nhập phải có độ dài từ 3 đến 50 ký tự!" });
+                }
+
+                if (cleanUsername.Contains(" ") || !System.Text.RegularExpressions.Regex.IsMatch(cleanUsername, @"^[a-zA-Z0-9_\.]+$"))
+                {
+                    return BadRequest(new { success = false, message = "Tên đăng nhập chỉ được chứa chữ cái, chữ số, dấu gạch dưới (_) hoặc dấu chấm (.), không chứa khoảng trắng!" });
+                }
+
+                var usernameExists = await _context.Users.AnyAsync(u => u.UserId != userId && u.Username == cleanUsername);
+                if (usernameExists)
+                {
+                    return BadRequest(new { success = false, message = "Tên đăng nhập này đã được sử dụng bởi tài khoản khác!" });
+                }
+
+                user.Username = cleanUsername;
             }
 
             // Check email uniqueness if changed
@@ -470,16 +496,40 @@ namespace TLongMusic.Controllers
             var tier = activeSub?.PackageId ?? "Free";
             var pkg = activeSub?.Package ?? await _context.Packages.FindAsync("Free");
 
+            // Refresh cookie claims with updated username / profile
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.GivenName, user.FullName ?? user.Username),
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim("Tier", tier)
+            };
+
+            foreach (var r in roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, r));
+            }
+
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var principal = new ClaimsPrincipal(identity);
+
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, new AuthenticationProperties
+            {
+                IsPersistent = true,
+                ExpiresUtc = DateTime.UtcNow.AddDays(30)
+            });
+
             var sessionData = new UserSessionDto
             {
                 UserId = user.UserId,
                 Username = user.Username,
                 FullName = user.FullName ?? user.Username,
                 Email = user.Email,
-                PhoneNumber = user.PhoneNumber,
-                BankName = user.BankName,
-                BankAccountNumber = user.BankAccountNumber,
-                BankAccountHolder = user.BankAccountHolder,
+                PhoneNumber = user.PhoneNumber ?? user.ProducerProfile?.PhoneNumber,
+                BankName = user.BankName ?? user.ProducerProfile?.BankName,
+                BankAccountNumber = user.BankAccountNumber ?? user.ProducerProfile?.BankAccountNumber,
+                BankAccountHolder = user.BankAccountHolder ?? user.ProducerProfile?.BankAccountHolder,
                 AvatarUrl = user.AvatarUrl ?? "/images/logo.png",
                 Roles = roles,
                 PrimaryRole = primaryRole,

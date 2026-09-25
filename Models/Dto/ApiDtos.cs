@@ -55,6 +55,9 @@ namespace TLongMusic.Models.Dto
 
     public class UpdateProfileDto
     {
+        [StringLength(50, MinimumLength = 3, ErrorMessage = "Tên đăng nhập phải từ 3 đến 50 ký tự")]
+        public string? Username { get; set; }
+
         [Required(ErrorMessage = "Vui lòng nhập họ và tên")]
         public string FullName { get; set; } = string.Empty;
 
@@ -200,5 +203,22 @@ namespace TLongMusic.Models.Dto
     {
         [Required(ErrorMessage = "Danh sách ID bài hát không được để trống")]
         public List<Guid> MusicIds { get; set; } = new List<Guid>();
+    }
+
+    public class AdminClearSubscriptionsDto
+    {
+        [Required(ErrorMessage = "Vui lòng chọn tài khoản người dùng")]
+        public Guid UserId { get; set; }
+    }
+
+    public class ProducerUpdateTrackDto
+    {
+        public string? Title { get; set; }
+        public string? Artist { get; set; }
+        public string? Genre { get; set; }
+        public string? CategoryCode { get; set; }
+        public int? Bpm { get; set; }
+        public string? MusicalKey { get; set; }
+        public string? Status { get; set; }
     }
 }

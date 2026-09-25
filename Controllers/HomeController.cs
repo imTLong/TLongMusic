@@ -237,9 +237,63 @@ public class HomeController : Controller
 
     [HttpGet("/Profile")]
     [HttpGet("/Account/Profile")]
-    public IActionResult Profile()
+    public async Task<IActionResult> Profile()
     {
-        return View();
+        TLongMusic.Models.Dto.UserSessionDto? sessionData = null;
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (Guid.TryParse(userIdClaim, out var userId))
+            {
+                var user = await _context.Users
+                    .Include(u => u.UserRoles)
+                    .Include(u => u.ProducerProfile)
+                    .Include(u => u.Subscriptions)
+                        .ThenInclude(s => s.Package)
+                    .FirstOrDefaultAsync(u => u.UserId == userId);
+
+                if (user != null && user.Status == "Active")
+                {
+                    var roles = user.UserRoles.Select(ur => ur.RoleId).ToList();
+                    var primaryRole = roles.Contains("Admin") ? "Admin" 
+                                    : roles.Contains("Producer") ? "Producer" 
+                                    : "Member";
+
+                    var activeSub = user.Subscriptions
+                        .Where(s => s.Status == "Active" && s.EndDate >= DateTime.UtcNow)
+                        .OrderByDescending(s => s.Package != null ? s.Package.Price : (s.PackageId == "Premium" ? 199000 : s.PackageId == "Standard" ? 99000 : 0))
+                        .ThenByDescending(s => s.EndDate)
+                        .FirstOrDefault();
+
+                    var tier = activeSub?.PackageId ?? "Free";
+                    var pkg = activeSub?.Package ?? await _context.Packages.FindAsync("Free");
+
+                    sessionData = new TLongMusic.Models.Dto.UserSessionDto
+                    {
+                        UserId = user.UserId,
+                        Username = user.Username,
+                        FullName = user.FullName ?? user.Username,
+                        Email = user.Email,
+                        PhoneNumber = user.PhoneNumber ?? user.ProducerProfile?.PhoneNumber,
+                        BankName = user.BankName ?? user.ProducerProfile?.BankName,
+                        BankAccountNumber = user.BankAccountNumber ?? user.ProducerProfile?.BankAccountNumber,
+                        BankAccountHolder = user.BankAccountHolder ?? user.ProducerProfile?.BankAccountHolder,
+                        AvatarUrl = user.AvatarUrl ?? "/images/logo.png",
+                        Roles = roles,
+                        PrimaryRole = primaryRole,
+                        Tier = tier,
+                        TierExpiresAt = activeSub?.EndDate,
+                        IsVipActive = tier == "Standard" || tier == "Premium",
+                        CanDownloadLot = pkg?.CanDownloadLot ?? true,
+                        CanDownloadNhom = pkg?.CanDownloadNhom ?? false,
+                        CanDownloadSlot = pkg?.CanDownloadSlot ?? false,
+                        SlotDemoLimitSeconds = pkg?.SlotDemoLimitSeconds ?? 30
+                    };
+                }
+            }
+        }
+
+        return View(sessionData);
     }
 
     [HttpGet("/Admin")]
@@ -269,6 +323,94 @@ public class HomeController : Controller
     public IActionResult ProducerUpload()
     {
         return Redirect("/Producer/UploadTrack");
+    }
+
+    [HttpGet("/Producer/ManageMusic")]
+    [HttpGet("/Producer/Manage")]
+    public IActionResult ProducerManageMusic()
+    {
+        return View("~/Views/Producer/ManageMusic.cshtml");
+    }
+
+    [HttpGet("/Goi-Hoi-Vien")]
+    [HttpGet("/Membership")]
+    public async Task<IActionResult> Membership()
+    {
+        var model = new MembershipViewModel();
+
+        string? currentUserTier = null;
+        bool isPremiumUser = false;
+        bool isStandardUser = false;
+        bool isAdminOrProducer = User.IsInRole("Admin") || User.IsInRole("Producer");
+
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (Guid.TryParse(userIdClaim, out var userId))
+            {
+                var activeSub = await _context.Subscriptions
+                    .Include(s => s.Package)
+                    .Where(s => s.UserId == userId && s.Status == "Active" && s.EndDate > DateTime.UtcNow)
+                    .OrderByDescending(s => s.EndDate)
+                    .FirstOrDefaultAsync();
+
+                if (activeSub != null)
+                {
+                    currentUserTier = activeSub.PackageId.ToLowerInvariant();
+                }
+            }
+        }
+
+        if (isAdminOrProducer)
+        {
+            isPremiumUser = true;
+            isStandardUser = true;
+        }
+        else if (currentUserTier == "premium")
+        {
+            isPremiumUser = true;
+            isStandardUser = true;
+        }
+        else if (currentUserTier == "standard")
+        {
+            isStandardUser = true;
+        }
+
+        model.CurrentUserTier = currentUserTier;
+        model.IsPremiumUser = isPremiumUser;
+        model.IsStandardUser = isStandardUser;
+        model.IsAdminOrProducer = isAdminOrProducer;
+
+        var dbPackages = await _context.Packages
+            .Where(p => p.Status == "Active")
+            .OrderBy(p => p.Price)
+            .ToListAsync();
+
+        if (dbPackages.Any())
+        {
+            model.Plans = dbPackages.Select(p => new SubscriptionPlan
+            {
+                Name = p.Name,
+                TierCode = p.PackageId.ToLower(),
+                Price = p.Price,
+                BillingPeriod = p.DurationDays > 0 ? $"/ {p.DurationDays} ngày" : "/ vĩnh viễn",
+                BadgeText = p.BadgeText ?? (p.PackageId == "Standard" ? "PHỔ BIẾN NHẤT" : p.PackageId == "Premium" ? "DÀNH CHO PRO DJ" : "MẶC ĐỊNH"),
+                IsPopular = p.PackageId == "Standard",
+                Features = GetFeaturesForPackage(p),
+                ButtonText = p.PackageId == "Free" ? "Đang Sử Dụng" : $"Nâng Cấp {p.Name}"
+            }).ToList();
+        }
+        else
+        {
+            model.Plans = new List<SubscriptionPlan>
+            {
+                new() { Name = "TÀI KHOẢN FREE", TierCode = "free", Price = 0, BillingPeriod = "/ vĩnh viễn", BadgeText = "MẶC ĐỊNH", IsPopular = false, Features = new() { "Nghe Nonstop lọt", "Tải Track Lọt", "Demo 30s Slot & Nhóm" }, ButtonText = "Đang Sử Dụng" },
+                new() { Name = "STANDARD VIP", TierCode = "standard", Price = 99000, BillingPeriod = "/ 30 ngày", BadgeText = "PHỔ BIẾN NHẤT", IsPopular = true, Features = new() { "Điểm nhấn ĐỎ Ruby", "Tải Track Nhóm MP3 320k", "Nghe & tải Nonstop Nhóm", "Demo 30s Track Slot" }, ButtonText = "Nâng Cấp Standard" },
+                new() { Name = "PREMIUM VIP ĐỘC QUYỀN", TierCode = "premium", Price = 199000, BillingPeriod = "/ 30 ngày", BadgeText = "DÀNH CHO PRO DJ", IsPopular = false, Features = new() { "Điểm nhấn VÀNG Hoàng Gia", "Tải Full WAV 24-Bit Track Slot", "Toàn quyền kho Nhóm & Lọt", "Băng thông Ultra-Fast VIP" }, ButtonText = "Nâng Cấp Premium" }
+            };
+        }
+
+        return View(model);
     }
 
     [HttpGet("/Checkout")]

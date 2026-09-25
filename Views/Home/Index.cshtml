@@ -25,13 +25,13 @@
                 </p>
 
                 <div class="d-flex flex-wrap gap-3">
-                    <a href="#masterTrackContainer" onclick="switchMusicSectionView('track')" class="btn btn-shimmer-ruby">
+                    <button type="button" onclick="switchMusicSectionView('track'); document.getElementById('masterTrackContainer')?.scrollIntoView({behavior:'smooth'});" class="btn btn-shimmer-ruby">
                         <i class="fas fa-compact-disc me-2"></i> 🎵 Khám Phá Kho Track
-                    </a>
-                    <a href="#masterNonstopContainer" onclick="switchMusicSectionView('nonstop')" class="btn btn-shimmer-gold">
+                    </button>
+                    <button type="button" onclick="switchMusicSectionView('nonstop'); document.getElementById('masterNonstopContainer')?.scrollIntoView({behavior:'smooth'});" class="btn btn-shimmer-gold">
                         <i class="fas fa-fire-flame-curved me-2"></i> 🔥 Khám Phá Kho Nonstop
-                    </a>
-                    <a href="#pricingSection" id="heroUpgradeVipBtn" class="btn btn-glass-crystal">
+                    </button>
+                    <a href="/Goi-Hoi-Vien" id="heroUpgradeVipBtn" class="btn btn-glass-crystal">
                         <i class="fas fa-gem me-2"></i> Nâng Cấp Gói VIP
                     </a>
                 </div>
@@ -205,7 +205,6 @@
                             <th>BPM</th>
                             <th class="d-none d-sm-table-cell">Camelot Key</th>
                             <th class="d-none d-lg-table-cell">Thời Lượng</th>
-                            <th>Chất Lượng</th>
                             <th class="d-none d-md-table-cell">Yêu Cầu Tải</th>
                             <th class="text-end" style="width: 120px;">Hành Động</th>
                         </tr>
@@ -295,16 +294,6 @@
                                 </td>
                                 <td class="d-none d-lg-table-cell text-dim small font-monospace">
                                     @track.FormattedDuration
-                                </td>
-                                <td>
-                                    @if (isWav)
-                                    {
-                                        <span class="badge badge-premium-gold font-monospace fw-bold" style="font-size: 0.72rem; padding: 2px 8px; letter-spacing: 0.5px;">WAV</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge badge-standard-red font-monospace fw-bold" style="font-size: 0.72rem; padding: 2px 8px; letter-spacing: 0.5px;">MP3</span>
-                                    }
                                 </td>
                                 <td class="d-none d-md-table-cell">
                                     @if (isTrackSlot)
@@ -459,7 +448,7 @@
                         }
                         else
                         {
-                            <a href="#pricingSection" class="btn btn-sm btn-shimmer-gold"><i class="fas fa-unlock me-1"></i> Mở Khóa Master WAV</a>
+                            <a href="/Goi-Hoi-Vien" class="btn btn-sm btn-shimmer-gold"><i class="fas fa-unlock me-1"></i> Mở Khóa Master WAV</a>
                         }
                     </div>
 
@@ -587,7 +576,7 @@
                         }
                         else
                         {
-                            <a href="#pricingSection" class="btn btn-sm btn-shimmer-ruby"><i class="fas fa-gem me-1"></i> Nâng Cấp Standard</a>
+                            <a href="/Goi-Hoi-Vien" class="btn btn-sm btn-shimmer-ruby"><i class="fas fa-gem me-1"></i> Nâng Cấp Standard</a>
                         }
                     </div>
 

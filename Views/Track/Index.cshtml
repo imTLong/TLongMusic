@@ -197,10 +197,9 @@
                                 <th class="d-none d-md-table-cell">Thể Loại</th>
                                 <th>BPM</th>
                                 <th class="d-none d-sm-table-cell">Camelot Key</th>
-                                <th class="d-none d-lg-table-cell">Thời Lượng</th>
-                                <th>Chất Lượng</th>
-                                <th class="d-none d-md-table-cell">Quyền Tải</th>
-                                <th class="text-end" style="width: 120px;">Hành Động</th>
+                                 <th class="d-none d-lg-table-cell">Thời Lượng</th>
+                                 <th class="d-none d-md-table-cell">Quyền Tải</th>
+                                 <th class="text-end" style="width: 120px;">Hành Động</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -285,16 +284,6 @@
                                     </td>
                                     <td class="d-none d-lg-table-cell text-dim small font-monospace">
                                         @track.FormattedDuration
-                                    </td>
-                                    <td>
-                                        @if (isWav)
-                                        {
-                                            <span class="badge badge-premium-gold font-monospace fw-bold" style="font-size: 0.72rem; padding: 2px 8px; letter-spacing: 0.5px;">WAV</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge badge-standard-red font-monospace fw-bold" style="font-size: 0.72rem; padding: 2px 8px; letter-spacing: 0.5px;">MP3</span>
-                                        }
                                     </td>
                                     <td class="d-none d-md-table-cell">
                                         @if (track.TierRequiredToDownload == TLongMusic.Models.RequiredTier.Premium)
