@@ -361,26 +361,50 @@
          PHẦN 2: KHO NONSTOP (BẢN MIX DÀI)
          ========================================== -->
     <!-- ==========================================
-         PHẦN 2: KHO NONSTOP VIỆT MIX (BẢN MIX DÀI)
+         PHẦN 2: KHO NONSTOP (BẢN MIX DÀI)
          ========================================== -->
     <div id="masterNonstopContainer" class="master-category-container mb-5">
-        <div class="p-3 mb-4 rounded-4 d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3" 
-             style="background: linear-gradient(90deg, rgba(255, 107, 139, 0.15), rgba(18, 19, 32, 0.95)); border-left: 5px solid #ff6b8b; border: 1px solid rgba(255, 107, 139, 0.35); box-shadow: 0 10px 30px rgba(255, 107, 139, 0.1);">
-            <div class="d-flex align-items-center gap-3">
-                <div class="p-3 rounded-circle" style="background: rgba(255, 107, 139, 0.2); color: #ff6b8b;">
-                    <i class="fas fa-fire-flame-curved fa-2x"></i>
+        <div class="p-2.5 p-sm-3 mb-4 rounded-4 d-flex flex-column flex-lg-row align-items-start align-items-lg-center justify-content-between gap-3 position-relative overflow-hidden" 
+             style="background: linear-gradient(135deg, rgba(255, 107, 139, 0.16) 0%, rgba(18, 19, 32, 0.96) 65%); border-left: 5px solid #ff6b8b; border: 1px solid rgba(255, 107, 139, 0.35); box-shadow: 0 10px 30px rgba(255, 107, 139, 0.12);">
+            
+            <!-- Cụm thông tin & tiêu đề -->
+            <div class="d-flex align-items-center gap-2.5 gap-sm-3 w-100 w-lg-auto">
+                <div class="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0" 
+                     style="width: 46px; height: 46px; background: rgba(255, 107, 139, 0.2); color: #ff6b8b; border: 1px solid rgba(255, 107, 139, 0.4); box-shadow: 0 0 15px rgba(255, 107, 139, 0.25);">
+                    <i class="fas fa-fire-flame-curved fa-lg"></i>
                 </div>
-                <div>
-                    <div class="d-flex align-items-center gap-2">
-                        <span class="badge bg-danger text-white fw-bold px-2 py-1" style="font-size: 0.75rem;">PHẦN 2</span>
-                        <h2 class="h4 text-white font-weight-bold mb-0">KHO NONSTOP VIỆT MIX (BẢN MIX DÀI 30 - 90 PHÚT)</h2>
+                <div class="flex-grow-1" style="min-width: 0;">
+                    <div class="d-flex align-items-center gap-1.5 gap-sm-2 flex-wrap mb-1">
+                        <span class="badge bg-danger text-white fw-bold px-2 py-0.5 rounded-pill" style="font-size: 0.7rem; letter-spacing: 0.5px;">PHẦN 2</span>
+                        <h2 class="text-white font-weight-bold mb-0 text-truncate" style="font-size: clamp(0.95rem, 3.2vw, 1.25rem); letter-spacing: -0.2px;">
+                            KHO NONSTOP <span class="fw-normal text-dim" style="font-size: 0.8em;">(BẢN MIX DÀI 30 – 90 PHÚT)</span>
+                        </h2>
                     </div>
-                    <span class="text-dim small">Phân loại chuẩn 3 cấp độ tương tự Track: <strong>Nonstop Slot (Viền Vàng)</strong>, <strong>Nonstop Nhóm (Viền Đỏ)</strong> & <strong>Nonstop Lọt (Free)</strong></span>
+                    <!-- Legend 3 cấp độ dạng mini badges logic & dễ nhìn trên mobile -->
+                    <div class="d-flex align-items-center gap-1.5 flex-wrap" style="font-size: 0.72rem;">
+                        <span class="text-dim d-none d-sm-inline">Phân loại:</span>
+                        <span class="badge px-2 py-0.5 rounded-pill font-monospace" style="background: rgba(255, 209, 102, 0.15); color: #ffd166; border: 1px solid rgba(255, 209, 102, 0.35);">
+                            <i class="fas fa-crown me-1"></i>Slot VIP (Vàng)
+                        </span>
+                        <span class="badge px-2 py-0.5 rounded-pill font-monospace" style="background: rgba(255, 19, 74, 0.15); color: #ff134a; border: 1px solid rgba(255, 19, 74, 0.35);">
+                            <i class="fas fa-gem me-1"></i>Nhóm VIP (Đỏ)
+                        </span>
+                        <span class="badge px-2 py-0.5 rounded-pill font-monospace" style="background: rgba(255, 255, 255, 0.08); color: #8e9aaf; border: 1px solid rgba(255, 255, 255, 0.18);">
+                            <i class="fas fa-music me-1"></i>Lọt (Free)
+                        </span>
+                    </div>
                 </div>
             </div>
-            <div class="d-flex align-items-center gap-2">
-                <a href="/Nonstop" class="btn btn-sm btn-glass-crystal"><i class="fas fa-calendar-day me-1 text-warning"></i> Xem Theo Ngày</a>
-                <span class="badge badge-shimmer-ruby px-3 py-2 fw-bold">@Model.AllNonstops.Count Bản Nonstop Sẵn Sàng</span>
+
+            <!-- Cụm nút hành động bên phải: Mobile chia đều 2 bên, desktop căn phải -->
+            <div class="d-flex align-items-center gap-2 w-100 w-lg-auto justify-content-between justify-content-lg-end pt-2 pt-lg-0 border-top border-lg-0 border-secondary border-opacity-25">
+                <a href="/Nonstop" class="btn btn-sm btn-glass-crystal flex-grow-1 flex-lg-grow-0 d-flex align-items-center justify-content-center gap-1.5 py-1.5 px-3 rounded-pill text-nowrap" style="font-size: 0.8rem;">
+                    <i class="fas fa-calendar-day text-warning"></i>
+                    <span>Xem Theo Ngày</span>
+                </a>
+                <span class="badge badge-shimmer-ruby flex-grow-1 flex-lg-grow-0 d-flex align-items-center justify-content-center py-2 px-3 fw-bold rounded-pill text-nowrap" style="font-size: 0.78rem;">
+                    <i class="fas fa-layer-group me-1.5 d-none d-sm-inline"></i> @Model.AllNonstops.Count Bản Sẵn Sàng
+                </span>
             </div>
         </div>
 

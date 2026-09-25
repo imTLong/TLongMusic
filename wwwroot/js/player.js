@@ -225,7 +225,10 @@ function restorePlaybackState() {
         const currentTimeElem = document.getElementById('playerCurrentTime');
         const seekSlider = document.getElementById('playerSeekSlider');
 
-        if (titleEl) titleEl.textContent = track.title;
+        if (titleEl) {
+            titleEl.textContent = track.title;
+            checkAndApplyMarquee();
+        }
         const titleLink = document.getElementById('playerTrackTitleLink');
         if (titleLink && track.id) titleLink.href = `/Track/Detail/${track.id}`;
         const coverLink = document.getElementById('playerTrackCoverLink');
@@ -1815,7 +1818,60 @@ function switchToLoginModal() {
         }
     }
 }
-window.switchToLoginModal = switchToLoginModal;
+// Tự động kiểm tra và chạy chữ theo vòng tròn chậm vô tận khi tên bài dài
+function checkAndApplyMarquee() {
+    const titleEl = document.getElementById('playerTrackTitle');
+    const duplicateEl = document.getElementById('playerTrackTitleDuplicate');
+    const track = document.getElementById('playerMarqueeTrack');
+    const container = document.getElementById('playerTitleMarqueeContainer');
+    if (!titleEl || !container) return;
+
+    // Reset trạng thái để đo kích thước tự nhiên
+    if (track) {
+        track.classList.remove('is-looping');
+        track.style.removeProperty('--marquee-loop-distance');
+        track.style.removeProperty('--marquee-loop-speed');
+    }
+    if (duplicateEl) {
+        duplicateEl.classList.add('d-none');
+        duplicateEl.textContent = '';
+    }
+    container.classList.remove('has-overflow');
+
+    requestAnimationFrame(() => {
+        const containerW = container.clientWidth;
+        const textW = titleEl.scrollWidth;
+
+        // Nếu chiều dài tên bài hát vượt quá chiều rộng khung hiển thị
+        if (textW > containerW + 4 && track && duplicateEl) {
+            container.classList.add('has-overflow');
+            
+            // Kích hoạt bản sao thứ hai nối đuôi với ký tự phân cách tinh tế
+            duplicateEl.textContent = ' ✦ ' + titleEl.textContent;
+            duplicateEl.classList.remove('d-none');
+
+            // Đo chiều rộng bản 1 để tính chính xác quãng đường 1 vòng lặp
+            const primaryWidth = titleEl.offsetWidth;
+            const loopDistance = primaryWidth + 32; // 32px padding-left của bản sao
+
+            // Tốc độ chậm rãi, êm ái: khoảng 18px / giây, thời gian tối thiểu 16s
+            const durationSec = Math.max(16, loopDistance / 18);
+
+            track.style.setProperty('--marquee-loop-distance', `-${loopDistance}px`);
+            track.style.setProperty('--marquee-loop-speed', `${durationSec.toFixed(1)}s`);
+            track.classList.add('is-looping');
+        }
+    });
+}
+window.checkAndApplyMarquee = checkAndApplyMarquee;
+
+window.addEventListener('resize', () => {
+    if (window._marqueeResizeTimer) clearTimeout(window._marqueeResizeTimer);
+    window._marqueeResizeTimer = setTimeout(checkAndApplyMarquee, 120);
+});
+window.addEventListener('orientationchange', () => {
+    setTimeout(checkAndApplyMarquee, 200);
+});
 
 function updateDemoBadge() {
     const demoBadge = document.getElementById('playerDemoBadge');
@@ -1876,7 +1932,10 @@ function playTrack(trackData) {
     stopBeatSynthesizer();
 
     const titleEl = document.getElementById('playerTrackTitle');
-    if (titleEl) titleEl.textContent = trackData.title;
+    if (titleEl) {
+        titleEl.textContent = trackData.title;
+        checkAndApplyMarquee();
+    }
     // Handle BPM & Key display for Nonstop vs Track
     const bpmElem = document.getElementById('playerTrackBpm');
     const keyElem = document.getElementById('playerTrackKey');

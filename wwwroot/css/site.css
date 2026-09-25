@@ -1030,6 +1030,90 @@ body.playing-lot .crystal-table-row.active-track .track-play-inline-btn {
     margin-bottom: 5px;
 }
 
+/* ========================================================
+   CIRCULAR CONTINUOUS MARQUEE (CHỮ DÀI CHẠY VÒNG TRÒN CHẬM)
+   ======================================================== */
+.marquee-track-container {
+    overflow: hidden !important;
+    white-space: nowrap !important;
+    position: relative !important;
+    max-width: 100% !important;
+    width: 100% !important;
+}
+
+.marquee-track-container.has-overflow {
+    mask-image: linear-gradient(90deg, #000 86%, transparent 100%) !important;
+    -webkit-mask-image: linear-gradient(90deg, #000 86%, transparent 100%) !important;
+}
+
+.marquee-circular-track {
+    display: inline-flex !important;
+    align-items: center !important;
+    white-space: nowrap !important;
+    will-change: transform !important;
+}
+
+@keyframes marqueeCircularLoop {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(var(--marquee-loop-distance, -50%));
+    }
+}
+
+.marquee-circular-track.is-looping {
+    animation: marqueeCircularLoop var(--marquee-loop-speed, 18s) linear infinite !important;
+}
+
+.marquee-duplicate-text {
+    display: inline-block !important;
+    padding-left: 32px !important;
+    white-space: nowrap !important;
+    opacity: 0.95 !important;
+}
+
+/* ========================================================
+   PLAYER DOWNLOAD BUTTON: CHUẨN FORM VIÊN THUỐC ĐỎ RUBY
+   ======================================================== */
+.player-download-pill-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 7px !important;
+    background: linear-gradient(135deg, #ff134a 0%, #e00034 50%, #b80028 100%) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.45) !important;
+    border-radius: 50px !important;
+    padding: 7px 18px !important;
+    font-size: 0.82rem !important;
+    line-height: 1.2 !important;
+    letter-spacing: 0.3px !important;
+    box-shadow: 0 4px 18px rgba(255, 19, 74, 0.55), inset 0 1px 2px rgba(255, 255, 255, 0.4) !important;
+    cursor: pointer !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease, filter 0.2s ease !important;
+    text-decoration: none !important;
+}
+
+.player-download-pill-btn i {
+    font-size: 0.92rem !important;
+    line-height: 1 !important;
+}
+
+.player-download-pill-btn:hover {
+    color: #ffffff !important;
+    transform: translateY(-2px) scale(1.04) !important;
+    box-shadow: 0 6px 24px rgba(255, 19, 74, 0.85), inset 0 1px 2px rgba(255, 255, 255, 0.6) !important;
+    filter: brightness(1.12) !important;
+}
+
+.player-download-pill-btn:active {
+    transform: translateY(0) scale(0.98) !important;
+}
+
 /* NÚT PLAY/PAUSE MASTER CHÍNH: HÀO QUANG ĐỎ RUBY */
 .player-btn-main {
     width: 42px;
@@ -2062,7 +2146,7 @@ html, body {
     }
 
     /* Horizontal swipeable pill buttons */
-    #packageFilterPills, #mainTypeTabs {
+    #packageFilterPills, #mainTypeTabs, #nonstopFilterPills {
         display: flex !important;
         flex-wrap: nowrap !important;
         overflow-x: auto !important;
@@ -2074,12 +2158,14 @@ html, body {
     }
 
     #packageFilterPills::-webkit-scrollbar,
-    #mainTypeTabs::-webkit-scrollbar {
+    #mainTypeTabs::-webkit-scrollbar,
+    #nonstopFilterPills::-webkit-scrollbar {
         display: none !important;
     }
 
     #packageFilterPills button,
-    #mainTypeTabs button {
+    #mainTypeTabs button,
+    #nonstopFilterPills button {
         flex-shrink: 0 !important;
         white-space: nowrap !important;
         font-size: 0.76rem !important;
@@ -2244,49 +2330,56 @@ html, body {
         margin: 0 auto !important;
     }
 
-    /* 7. BOTTOM STICKY PLAYER BAR - KÉO LÊN CAO THÊM 1CM (KHOẢNG 38PX - 40PX) */
+    /* 7. BOTTOM STICKY PLAYER BAR - MOBILE PRO DESIGN */
     .tlong-player-bar {
         height: auto !important;
-        min-height: 105px !important;
+        min-height: 100px !important;
         padding-top: 10px !important;
-        padding-left: 14px !important;
-        padding-right: 14px !important;
-        padding-bottom: 38px !important;
-        padding-bottom: calc(38px + env(safe-area-inset-bottom, 0px)) !important;
-        box-shadow: 0 -10px 35px rgba(0, 0, 0, 0.9), 0 -2px 16px rgba(255, 19, 74, 0.25) !important;
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+        padding-bottom: 34px !important;
+        padding-bottom: calc(34px + env(safe-area-inset-bottom, 0px)) !important;
+        box-shadow: 0 -10px 35px rgba(0, 0, 0, 0.92), 0 -2px 18px rgba(255, 19, 74, 0.25) !important;
     }
 
     .player-ctrl-row {
-        gap: 12px !important;
+        gap: 10px !important;
+        margin-top: 2px !important;
         margin-bottom: 6px !important;
     }
 
     .player-seek-row {
-        margin-top: 6px !important;
-        margin-bottom: 8px !important;
-        padding: 0 4px !important;
+        margin-top: 4px !important;
+        margin-bottom: 6px !important;
+        padding: 0 2px !important;
     }
 
     .player-track-cover {
-        width: 35px !important;
-        height: 35px !important;
-        border-radius: 6px !important;
+        width: 38px !important;
+        height: 38px !important;
+        border-radius: 8px !important;
     }
 
     #playerTrackTitle {
-        font-size: 0.78rem !important;
+        font-size: 0.82rem !important;
         line-height: 1.25 !important;
     }
 
     #playerTrackArtist {
-        font-size: 0.66rem !important;
+        font-size: 0.68rem !important;
     }
 
     .player-btn-main {
-        width: 34px !important;
-        height: 34px !important;
-        font-size: 0.85rem !important;
+        width: 36px !important;
+        height: 36px !important;
+        font-size: 0.88rem !important;
         margin: 0 3px !important;
+    }
+
+    .player-btn-step {
+        width: 30px !important;
+        height: 30px !important;
+        font-size: 0.8rem !important;
     }
 
     .player-btn-ctrl {
@@ -2294,23 +2387,28 @@ html, body {
         font-size: 0.82rem !important;
     }
 
-    .player-btn-skip {
-        padding: 4px 7px !important;
+    /* Nút Tải trên Mobile: Chuẩn form viên thuốc căng tròn, nổi bật */
+    .player-download-pill-btn {
+        padding: 5px 13px !important;
+        font-size: 0.76rem !important;
+        border-radius: 50px !important;
+        gap: 5px !important;
+        box-shadow: 0 3px 14px rgba(255, 19, 74, 0.6) !important;
     }
 
-    .player-btn-skip span {
-        font-size: 0.68rem !important;
+    .player-download-pill-btn i {
+        font-size: 0.85rem !important;
     }
 
     #playerCurrentTime,
     #playerDuration {
         font-size: 0.68rem !important;
-        min-width: 28px !important;
+        min-width: 30px !important;
     }
 
     .seek-slider {
         height: 4px !important;
-        margin: 4px 0 !important;
+        margin: 2px 0 !important;
         cursor: pointer;
     }
 

@@ -141,22 +141,28 @@
         <div class="container-fluid px-3 px-xl-4" style="max-width: 1760px;">
             <div class="row align-items-center g-2 g-lg-3">
                 <!-- VÙNG 1: THÔNG TIN BÀI HÁT & THÔNG SỐ STUDIO (LEFT) -->
-                <div class="col-7 col-md-4 col-xl-3 d-flex align-items-center gap-2.5">
+                <div class="col-7 col-md-4 col-xl-3 d-flex align-items-center gap-2 gap-sm-2.5">
                     <a id="playerTrackCoverLink" href="javascript:void(0)" onclick="navigateToCurrentTrackDetail(event)" title="Xem trang chi tiết bài hát" class="player-cover-anchor">
                         <img id="playerTrackCover" src="~/images/logo.png" alt="Cover" class="player-track-cover" />
                         <div class="player-cover-glow"></div>
                     </a>
-                    <div class="player-track-meta d-flex flex-column justify-content-center" style="min-width: 0; flex-grow: 1;">
-                        <div class="d-flex align-items-center gap-1.5">
-                            <a id="playerTrackTitleLink" href="javascript:void(0)" onclick="navigateToCurrentTrackDetail(event)" title="Xem chi tiết bài hát" class="text-white text-decoration-none hover-gold text-truncate d-inline-block" style="cursor: pointer; max-width: 100%;">
-                                <h6 id="playerTrackTitle" class="text-white mb-0 text-truncate fw-bold" style="font-size: 0.88rem; line-height: 1.25;">
-                                    Chọn bài để phát
-                                </h6>
-                            </a>
+                    <div class="player-track-meta d-flex flex-column justify-content-center" style="min-width: 0; flex-grow: 1; overflow: hidden;">
+                        <div class="d-flex align-items-center gap-1.5" style="overflow: hidden; max-width: 100%;">
+                            <!-- Container Chữ Chạy Vòng Tròn Chậm -->
+                            <div id="playerTitleMarqueeContainer" class="marquee-track-container" style="overflow: hidden; white-space: nowrap; flex-grow: 1; min-width: 0;">
+                                <div id="playerMarqueeTrack" class="marquee-circular-track">
+                                    <a id="playerTrackTitleLink" href="javascript:void(0)" onclick="navigateToCurrentTrackDetail(event)" title="Xem chi tiết bài hát" class="text-white text-decoration-none hover-gold d-inline-block">
+                                        <h6 id="playerTrackTitle" class="text-white mb-0 fw-bold marquee-primary-text" style="font-size: 0.88rem; line-height: 1.25; display: inline-block; white-space: nowrap;">
+                                            Chọn bài để phát
+                                        </h6>
+                                    </a>
+                                    <span id="playerTrackTitleDuplicate" class="marquee-duplicate-text text-white fw-bold d-none" style="font-size: 0.88rem; line-height: 1.25; white-space: nowrap;"></span>
+                                </div>
+                            </div>
                             <span id="playerDemoBadge" class="badge-shimmer-ruby d-none flex-shrink-0" style="font-size: 0.58rem; padding: 1px 5px;">DEMO 30S</span>
                         </div>
-                        <div class="d-flex align-items-center gap-1.5 mt-1 flex-wrap">
-                            <span id="playerTrackArtist" class="text-dim text-truncate" style="max-width: 120px; font-size: 0.74rem;">TLong Studio</span>
+                        <div class="d-flex align-items-center gap-1.5 mt-0.5 mt-sm-1 flex-wrap">
+                            <span id="playerTrackArtist" class="text-dim text-truncate" style="max-width: 110px; font-size: 0.74rem;">TLong Studio</span>
                             <span id="playerTrackBpm" class="badge-bpm font-monospace flex-shrink-0" style="font-size: 0.62rem; padding: 1px 6px;">-- BPM</span>
                             <span id="playerTrackKey" class="badge-camelot font-monospace d-none d-sm-inline-block flex-shrink-0" style="font-size: 0.62rem; padding: 1px 6px;">--</span>
                         </div>
@@ -215,7 +221,7 @@
                     <!-- Format Badge (hidden để giữ id cho JS) -->
                     <span id="playerTrackQuality" class="d-none"></span>
 
-                    <!-- Volume Control with Click-to-Mute -->
+                    <!-- Volume Control with Click-to-Mute (Desktop only) -->
                     <div class="d-none d-md-flex align-items-center gap-2 player-volume-box">
                         <button class="player-btn-ctrl p-0" onclick="toggleMute()" title="Bật/Tắt tiếng (Mute)">
                             <i id="volumeIcon" class="fas fa-volume-up text-dim hover-white" style="font-size: 0.88rem; width: 18px; text-align: center;"></i>
@@ -223,14 +229,16 @@
                         <input type="range" id="playerVolumeSlider" class="seek-slider player-vol-slider" min="0" max="100" value="85" style="width: 75px;" title="Âm lượng" />
                     </div>
 
-                    <!-- Jump to Detail Page -->
+                    <!-- Jump to Detail Page (Desktop) -->
                     <button class="player-btn-ctrl d-none d-lg-inline-flex" onclick="navigateToCurrentTrackDetail(event)" title="Xem trang chi tiết bài hát">
                         <i class="fas fa-arrow-up-right-from-square" style="font-size: 0.85rem;"></i>
                     </button>
 
-                    <!-- Primary Ruby Download Button -->
-                    <button id="playerDownloadBtn" class="btn btn-sm btn-shimmer-ruby py-1.5 px-3.5 d-flex align-items-center gap-1.5 rounded-pill fw-bold shadow" style="font-size: 0.82rem;" onclick="if(window.TLongPlayer.currentTrack) handleDownload(window.TLongPlayer.currentTrack.id, window.TLongPlayer.currentTrack.title, window.TLongPlayer.currentTrack.tierRequired); else showToastNotification('Vui lòng chọn bài để tải!');">
-                        <i class="fas fa-cloud-arrow-down"></i> <span class="d-none d-sm-inline">Tải Nhạc</span><span class="d-inline d-sm-none">Tải</span>
+                    <!-- Nút Tải Đẹp Chuẩn Form Viên Thuốc Ruby Căng Mịn -->
+                    <button id="playerDownloadBtn" class="player-download-pill-btn" onclick="if(window.TLongPlayer.currentTrack) handleDownload(window.TLongPlayer.currentTrack.id, window.TLongPlayer.currentTrack.title, window.TLongPlayer.currentTrack.tierRequired); else showToastNotification('Vui lòng chọn bài để tải!');" title="Tải bài hát này">
+                        <i class="fas fa-cloud-arrow-down"></i>
+                        <span class="d-none d-sm-inline">Tải Nhạc</span>
+                        <span class="d-inline d-sm-none">Tải</span>
                     </button>
                 </div>
             </div>
