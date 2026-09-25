@@ -2435,3 +2435,21 @@ html, body {
     transform: translateY(-2px) scale(1.02) !important;
     filter: brightness(1.15) !important;
 }
+
+/* ========================================================
+   SMOOTH MODAL TRANSITIONS (HIỆU ỨNG CHUYỂN MODAL MƯỢT MÀ)
+   ======================================================== */
+.modal.fade .modal-dialog {
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.28s ease !important;
+    transform: scale(0.94) translateY(-14px);
+    opacity: 0;
+}
+
+.modal.show .modal-dialog {
+    transform: scale(1) translateY(0) !important;
+    opacity: 1 !important;
+}
+
+.modal-backdrop.fade {
+    transition: opacity 0.25s ease !important;
+}

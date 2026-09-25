@@ -1762,15 +1762,60 @@ function closeDemoLimitModal() {
         }
     }
     window.TLongPlayer._isDemoModalShowing = false;
-    // Dọn sạch mọi backdrop thừa và phục hồi thanh cuộn màn hình ngay lập tức
+    // Dọn sạch mọi backdrop thừa và phục hồi thanh cuộn màn hình nếu không có modal khác đang mở
     setTimeout(() => {
         window.TLongPlayer._isDemoModalShowing = false;
-        document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
-        document.body.classList.remove('modal-open');
-        document.body.style.removeProperty('overflow');
-        document.body.style.removeProperty('padding-right');
+        const otherOpenModal = document.querySelector('.modal.show');
+        if (!otherOpenModal) {
+            document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+            document.body.classList.remove('modal-open');
+            document.body.style.removeProperty('overflow');
+            document.body.style.removeProperty('padding-right');
+        }
     }, 150);
 }
+
+// Chuyển đổi mượt mà từ VIP Modal (hoặc bất kỳ popup cảnh báo nào) sang Login Modal, không bị đè popup
+function switchToLoginModal() {
+    const vipModalEl = document.getElementById('vipUpgradeModal');
+    const loginModalEl = document.getElementById('loginModal');
+    
+    if (vipModalEl && (vipModalEl.classList.contains('show') || vipModalEl.style.display === 'block')) {
+        const vipInstance = bootstrap.Modal.getInstance(vipModalEl) || bootstrap.Modal.getOrCreateInstance(vipModalEl);
+        
+        let hasSwitched = false;
+        const doSwitch = () => {
+            if (hasSwitched) return;
+            hasSwitched = true;
+            
+            // Dọn dẹp backdrop rác của modal cũ
+            document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+            document.body.classList.remove('modal-open');
+            document.body.style.removeProperty('overflow');
+            document.body.style.removeProperty('padding-right');
+
+            // Mở modal Đăng Nhập với hiệu ứng chuyển mượt mà
+            setTimeout(() => {
+                if (loginModalEl) {
+                    const loginInstance = bootstrap.Modal.getOrCreateInstance(loginModalEl);
+                    loginInstance.show();
+                }
+            }, 60);
+        };
+
+        vipModalEl.addEventListener('hidden.bs.modal', doSwitch, { once: true });
+        // Timeout bảo hiểm nếu sự kiện hidden bị kẹt
+        setTimeout(doSwitch, 320);
+
+        vipInstance.hide();
+    } else {
+        if (loginModalEl) {
+            const loginInstance = bootstrap.Modal.getOrCreateInstance(loginModalEl);
+            loginInstance.show();
+        }
+    }
+}
+window.switchToLoginModal = switchToLoginModal;
 
 function updateDemoBadge() {
     const demoBadge = document.getElementById('playerDemoBadge');
@@ -2248,7 +2293,7 @@ async function handleDownload(trackId, title, requiredTier) {
                     <h4 class="text-white font-weight-bold mb-2">NGHIÊM CẤM TẢI VỀ KHI CHƯA ĐĂNG NHẬP</h4>
                     <p class="text-muted small">${data.message || 'Theo quy định của TLongMusic, khách vãng lai chỉ được nghe trực tuyến.'}</p>
                     <div class="mt-4 d-flex justify-content-center gap-3">
-                        <button class="btn btn-shimmer-ruby px-4 py-2" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#loginModal">
+                        <button type="button" class="btn btn-shimmer-ruby px-4 py-2" onclick="switchToLoginModal()">
                             <i class="fas fa-arrow-right-to-bracket me-2"></i> Đăng Nhập Ngay
                         </button>
                     </div>
@@ -2311,11 +2356,7 @@ function openCheckoutModal(planName, price) {
     // Check if user is logged in
     if (!window.TLongPlayer || !window.TLongPlayer.currentUser) {
         showToastNotification("Vui lòng đăng nhập trước khi gia hạn / mua gói!");
-        const loginModalEl = document.getElementById('loginModal');
-        if (loginModalEl) {
-            const loginModal = new bootstrap.Modal(loginModalEl);
-            loginModal.show();
-        }
+        switchToLoginModal();
         return;
     }
 
