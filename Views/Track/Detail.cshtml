@@ -831,8 +831,9 @@
 
 @section Scripts {
 <script>
-    // Dữ liệu bài hát hiện tại
-    const currentDetailTrack = {
+(() => {
+    // Dữ liệu bài hát hiện tại của trang chi tiết
+    const trackData = {
         id: "@Model.Music.Id",
         title: "@rawTitle",
         artist: "@rawArtist",
@@ -849,6 +850,7 @@
         quality: "@cleanQuality",
         tierRequired: "@Model.Music.TierRequiredToDownload"
     };
+    window.currentDetailTrack = trackData;
 
     let waveBars = [];
     const totalBars = 160;
@@ -856,11 +858,11 @@
     let lastCanvasHeight = 0;
 
     // Sinh biểu đồ sóng nhạc Studio DJ chính xác (Intro -> Build-up -> Drop 1 -> Breakdown -> Drop 2 -> Outro)
-    // Tốc độ 0.01ms, không tốn băng thông, không làm khựng âm thanh khi click nút chức năng
     function generateDeterministicStudioWaveform() {
         waveBars = [];
         let seed = 42;
-        const str = (currentDetailTrack.id || '') + (currentDetailTrack.title || '');
+        const current = window.currentDetailTrack || trackData;
+        const str = (current.id || '') + (current.title || '');
         for (let i = 0; i < str.length; i++) {
             seed = (seed * 31 + str.charCodeAt(i)) & 0xFFFFFF;
         }
@@ -912,9 +914,12 @@
         generateDeterministicStudioWaveform();
 
         const audio = window.TLongPlayer?.audio;
-        const isCurrent = window.TLongPlayer?.currentTrack?.id === currentDetailTrack.id;
+        const current = window.currentDetailTrack || trackData;
+        const isCurrent = window.TLongPlayer?.currentTrack?.id === current.id;
         const cur = (isCurrent && audio) ? audio.currentTime : 0;
-        const dur = (isCurrent && audio?.duration) ? audio.duration : (currentDetailTrack.durationSeconds || 1);
+        const dur = (isCurrent && audio?.duration && !isNaN(audio.duration) && audio.duration > 0)
+            ? audio.duration
+            : (current.durationSeconds || 1);
         renderWaveform(cur / dur);
     }
 
@@ -1033,51 +1038,83 @@
         let percent = Math.max(0, Math.min(1, clickX / rect.width));
 
         const audio = window.TLongPlayer?.audio;
-        const isCurrent = window.TLongPlayer?.currentTrack?.id === currentDetailTrack.id;
+        const current = window.currentDetailTrack || trackData;
+        if (!audio || !current) return;
 
-        if (!isCurrent) {
-            playTrack(currentDetailTrack);
+        const isCurrent = window.TLongPlayer?.currentTrack?.id === current.id;
+        const duration = current.durationSeconds || (audio?.duration && !isNaN(audio.duration) && audio.duration > 0 ? audio.duration : 0);
+        if (duration <= 0) return;
+
+        let targetTime = percent * duration;
+
+        // Giới hạn demo nếu có
+        if (typeof isDemoPlayback === 'function' && isDemoPlayback(current)) {
+            const limit = current.demoLimit || 30;
+            if (targetTime >= limit) {
+                if (!isCurrent) {
+                    playTrack(current);
+                }
+                audio.currentTime = 0;
+                pauseTrack();
+                renderWaveform(0);
+                const currentTimeElem = document.getElementById('playerCurrentTime');
+                if (currentTimeElem) currentTimeElem.textContent = '00:00';
+                const seekSlider = document.getElementById('playerSeekSlider');
+                if (seekSlider) {
+                    seekSlider.value = 0;
+                    if (typeof updateSeekSliderProgress === 'function') updateSeekSliderProgress(seekSlider);
+                }
+                const detailCurrentTime = document.getElementById('detailCurrentTime');
+                if (detailCurrentTime) detailCurrentTime.textContent = '00:00';
+                if (typeof showDemoLimitModal === 'function') showDemoLimitModal();
+                return;
+            }
         }
 
-        const duration = currentDetailTrack.durationSeconds || (audio?.duration || 0);
-        if (duration > 0 && audio) {
-            let targetTime = percent * duration;
+        if (!isCurrent) {
+            // Bài này chưa phát -> Bắt đầu phát bài này và tua tới vị trí click khi audio sẵn sàng
+            playTrack(current);
+            updateHeroPlayButton(true);
 
-            if (isDemoPlayback(currentDetailTrack)) {
-                const limit = currentDetailTrack.demoLimit || 30;
-                if (targetTime >= limit) {
-                    window.TLongPlayer.currentTrack = currentDetailTrack;
-                    audio.currentTime = 0;
-                    pauseTrack();
-                    renderWaveform(0);
-                    const currentTimeElem = document.getElementById('playerCurrentTime');
-                    if (currentTimeElem) currentTimeElem.textContent = '00:00';
-                    const seekSlider = document.getElementById('playerSeekSlider');
-                    if (seekSlider) {
-                        seekSlider.value = 0;
-                        updateSeekSliderProgress(seekSlider);
-                    }
-                    const detailCurrentTime = document.getElementById('detailCurrentTime');
-                    if (detailCurrentTime) detailCurrentTime.textContent = '00:00';
-                    showDemoLimitModal();
-                    return;
+            const applySeek = () => {
+                try {
+                    const dur = (audio.duration && !isNaN(audio.duration) && audio.duration > 0) ? audio.duration : duration;
+                    audio.currentTime = Math.min(targetTime, dur);
+                } catch (err) {
+                    console.warn("Seek error:", err);
                 }
-            }
+            };
 
-            audio.currentTime = targetTime;
-            renderWaveform(percent);
-            const detailCurrentTime = document.getElementById('detailCurrentTime');
-            if (detailCurrentTime) {
-                detailCurrentTime.textContent = typeof formatTime === 'function' ? formatTime(targetTime) : '00:00';
+            if (audio.readyState >= 1) {
+                applySeek();
+            } else {
+                audio.addEventListener('loadedmetadata', applySeek, { once: true });
+                audio.addEventListener('canplay', applySeek, { once: true });
             }
+        } else {
+            // Đang phát đúng bài này -> Tua trực tiếp
+            try {
+                audio.currentTime = targetTime;
+            } catch (err) {
+                console.warn("Seek error:", err);
+            }
+        }
+
+        renderWaveform(percent);
+        const detailCurrentTime = document.getElementById('detailCurrentTime');
+        if (detailCurrentTime) {
+            detailCurrentTime.textContent = typeof formatTime === 'function' ? formatTime(targetTime) : '00:00';
         }
     }
 
     // Nút Play / Pause to
     function toggleDetailPlayback() {
-        const isCurrent = window.TLongPlayer?.currentTrack?.id === currentDetailTrack.id;
+        const current = window.currentDetailTrack || trackData;
+        if (!current) return;
+
+        const isCurrent = window.TLongPlayer?.currentTrack?.id === current.id;
         if (!isCurrent) {
-            playTrack(currentDetailTrack);
+            playTrack(current);
             updateHeroPlayButton(true);
         } else {
             togglePlayPause();
@@ -1097,32 +1134,51 @@
         const audio = window.TLongPlayer?.audio;
         if (!audio) return;
 
-        audio.addEventListener('timeupdate', () => {
-            const isCurrent = window.TLongPlayer?.currentTrack?.id === currentDetailTrack.id;
+        if (window._detailTimeUpdateHandler) {
+            audio.removeEventListener('timeupdate', window._detailTimeUpdateHandler);
+        }
+        if (window._detailPlayHandler) {
+            audio.removeEventListener('play', window._detailPlayHandler);
+        }
+        if (window._detailPauseHandler) {
+            audio.removeEventListener('pause', window._detailPauseHandler);
+        }
+
+        window._detailTimeUpdateHandler = () => {
+            const current = window.currentDetailTrack || trackData;
+            if (!current) return;
+
+            const isCurrent = window.TLongPlayer?.currentTrack?.id === current.id;
             if (!isCurrent) return;
 
             const cur = audio.currentTime || 0;
-            const dur = (audio.duration && !isNaN(audio.duration) && audio.duration > 0) ? audio.duration : currentDetailTrack.durationSeconds;
+            const dur = (audio.duration && !isNaN(audio.duration) && audio.duration > 0) ? audio.duration : current.durationSeconds;
 
             const timeElem = document.getElementById('detailCurrentTime');
-            if (timeElem) timeElem.textContent = formatTime(cur);
+            if (timeElem && typeof formatTime === 'function') timeElem.textContent = formatTime(cur);
 
             if (dur > 0) {
                 renderWaveform(cur / dur);
             }
-        });
+        };
 
-        audio.addEventListener('play', () => {
-            if (window.TLongPlayer?.currentTrack?.id === currentDetailTrack.id) {
+        window._detailPlayHandler = () => {
+            const current = window.currentDetailTrack || trackData;
+            if (current && window.TLongPlayer?.currentTrack?.id === current.id) {
                 updateHeroPlayButton(true);
             }
-        });
+        };
 
-        audio.addEventListener('pause', () => {
-            if (window.TLongPlayer?.currentTrack?.id === currentDetailTrack.id) {
+        window._detailPauseHandler = () => {
+            const current = window.currentDetailTrack || trackData;
+            if (current && window.TLongPlayer?.currentTrack?.id === current.id) {
                 updateHeroPlayButton(false);
             }
-        });
+        };
+
+        audio.addEventListener('timeupdate', window._detailTimeUpdateHandler);
+        audio.addEventListener('play', window._detailPlayHandler);
+        audio.addEventListener('pause', window._detailPauseHandler);
     }
 
     function copyCurrentTrackLink() {
@@ -1153,10 +1209,11 @@
     }
 
     function shareCurrentTrack() {
+        const current = window.currentDetailTrack || trackData;
         if (navigator.share) {
             navigator.share({
-                title: currentDetailTrack.title,
-                text: `Nghe bài hát ${currentDetailTrack.title} trên TLongMusic`,
+                title: current.title,
+                text: `Nghe bài hát ${current.title} trên TLongMusic`,
                 url: window.location.href
             }).catch(() => {});
         } else {
@@ -1169,7 +1226,8 @@
         syncDetailWaveWithAudio();
 
         const audio = window.TLongPlayer?.audio;
-        const isCurrent = window.TLongPlayer?.currentTrack?.id === currentDetailTrack.id;
+        const current = window.currentDetailTrack || trackData;
+        const isCurrent = current && window.TLongPlayer?.currentTrack?.id === current.id;
 
         if (isCurrent && window.TLongPlayer?.isPlaying) {
             updateHeroPlayButton(true);
@@ -1185,10 +1243,20 @@
             curTimeElem.textContent = typeof formatTime === 'function' ? formatTime(cur) : '00:00';
         }
 
-        if (durTimeElem && currentDetailTrack.durationSeconds) {
-            durTimeElem.textContent = typeof formatTime === 'function' ? formatTime(currentDetailTrack.durationSeconds) : '@Model.Music.FormattedDuration';
+        if (durTimeElem && current.durationSeconds) {
+            durTimeElem.textContent = typeof formatTime === 'function' ? formatTime(current.durationSeconds) : '@Model.Music.FormattedDuration';
         }
     }
+
+    // Export ra window để inline HTML event attributes và SPA handler truy cập được
+    window.renderWaveform = renderWaveform;
+    window.seekWaveform = seekWaveform;
+    window.toggleDetailPlayback = toggleDetailPlayback;
+    window.updateHeroPlayButton = updateHeroPlayButton;
+    window.handleWaveformHover = handleWaveformHover;
+    window.handleWaveformLeave = handleWaveformLeave;
+    window.copyCurrentTrackLink = copyCurrentTrackLink;
+    window.shareCurrentTrack = shareCurrentTrack;
     window.initTrackDetailPage = initTrackDetailPage;
     window.syncDetailWaveWithAudio = syncDetailWaveWithAudio;
 
@@ -1197,5 +1265,6 @@
     } else {
         initTrackDetailPage();
     }
+})();
 </script>
 }

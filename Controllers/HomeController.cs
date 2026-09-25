@@ -31,10 +31,11 @@ public class HomeController : Controller
                 .OrderByDescending(m => m.CreatedAt)
                 .ToListAsync();
 
-            // Kho Track DJ: (Type == "Track" hoặc CategoryCode bắt đầu bằng Track)
+            // Kho Track DJ: Gợi ý 5 bản Track mới nhất
             model.LatestTracks = allMusics
                 .Where(m => m.Type == "Track" || (m.CategoryCode != null && m.CategoryCode.StartsWith("Track")))
                 .Select(MapEntityToViewModel)
+                .Take(5)
                 .ToList();
 
             // Kho Nonstop Dài: (Type == "Nonstop" hoặc CategoryCode bắt đầu bằng Nonstop)

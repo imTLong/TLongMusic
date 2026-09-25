@@ -149,23 +149,28 @@
                             </select>
                         </div>
 
-                        <!-- Hàng 3: Phân cấp Nonstop & Chất lượng -->
-                        <div class="col-12 col-md-6">
-                            <label class="form-label text-white small">Phân Cấp Nonstop (Chỉ nhận gói Nonstop): <span class="text-danger">*</span></label>
+                        <!-- Hàng 3: Phân cấp Nonstop, Chất lượng & Ngày Phát Hành -->
+                        <div class="col-12 col-md-4">
+                            <label class="form-label text-white small">Phân Cấp Nonstop: <span class="text-danger">*</span></label>
                             <select name="categoryCode" id="nonstopCategorySelect" class="form-select bg-dark text-white border-secondary" required>
-                                <option value="NonstopLot">🎵 Nonstop Lọt (Khách nghe full miễn phí, Tải Free)</option>
-                                <option value="NonstopNhom" selected>💎 Nonstop Nhóm (Standard & Premium VIP tải được)</option>
-                                <option value="NonstopSlot">👑 Nonstop Slot / Bản Đặt VIP (Chỉ Premium tải, Demo 30s)</option>
+                                <option value="NonstopLot">🎵 Nonstop Lọt (Free)</option>
+                                <option value="NonstopNhom" selected>💎 Nonstop Nhóm (Standard)</option>
+                                <option value="NonstopSlot">👑 Nonstop Slot VIP (Premium)</option>
                             </select>
                         </div>
 
-                        <div class="col-12 col-md-6">
-                            <label class="form-label text-white small">Chất Lượng Âm Thanh Công Bố:</label>
+                        <div class="col-12 col-md-4">
+                            <label class="form-label text-white small">Chất Lượng Âm Thanh:</label>
                             <select name="qualityAvailable" id="nonstopQualitySelect" class="form-select bg-dark text-white border-secondary">
-                                <option value="MP3 320kbps">MP3 320kbps (Chuẩn phòng thu)</option>
-                                <option value="WAV Lossless 24-Bit">WAV Lossless 24-Bit (Master Club)</option>
-                                <option value="FLAC 24-Bit Lossless">FLAC 24-Bit Lossless</option>
+                                <option value="MP3 320kbps">MP3 320kbps (Chuẩn)</option>
+                                <option value="WAV Lossless 24-Bit">WAV Lossless 24-Bit</option>
+                                <option value="FLAC 24-Bit Lossless">FLAC 24-Bit</option>
                             </select>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <label class="form-label text-white small"><i class="fas fa-calendar-day text-warning me-1"></i> Ngày Phát Hành: <span class="text-danger">*</span></label>
+                            <input type="date" name="releaseDate" id="nonstopReleaseDateInput" class="form-control bg-dark text-white border-secondary fw-bold" value="@DateTime.UtcNow.AddHours(7).ToString("yyyy-MM-dd")" required />
                         </div>
 
                         <!-- Hàng 4: Ảnh bìa Nonstop -->
@@ -474,6 +479,7 @@
                             <th>Bản Nonstop</th>
                             <th>Thời Lượng</th>
                             <th>Phân Cấp</th>
+                            <th>Ngày Đăng</th>
                             <th class="text-end">Thao Tác</th>
                         </tr>
                     </thead>
@@ -510,6 +516,7 @@
                                     </td>
                                     <td class="text-dim small font-monospace">${formatNonstopDuration(t.durationSeconds)}</td>
                                     <td>${catBadge}</td>
+                                    <td class="text-warning small font-monospace">${t.formattedDate || (t.createdAt ? new Date(t.createdAt).toLocaleDateString('vi-VN') : '---')}</td>
                                     <td class="text-end">
                                         <button class="btn btn-sm btn-outline-danger px-2 py-1 rounded-2" onclick="deleteProducerNonstop('${t.musicId}', '${t.title.replace(/'/g, "\\'")}')" title="Xóa bản Nonstop">
                                             <i class="fas fa-trash-can"></i>

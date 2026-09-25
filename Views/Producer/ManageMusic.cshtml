@@ -976,7 +976,7 @@ function renderTracksTable() {
             ? '<span class="d-inline-flex align-items-center gap-1.5 small text-success fw-bold"><span class="studio-pulse-dot dot-green"></span> Phát hành</span>'
             : '<span class="d-inline-flex align-items-center gap-1.5 small text-dim"><span class="studio-pulse-dot dot-gray"></span> Tạm ẩn</span>';
 
-        const dateStr = item.createdAt ? new Date(item.createdAt).toLocaleDateString('vi-VN') : '---';
+        const dateStr = item.formattedDate || (item.createdAt ? new Date(item.createdAt).toLocaleDateString('vi-VN') : '---');
 
         return `
             <tr class="studio-row-track ${rowColorClass}">
@@ -1115,7 +1115,7 @@ function renderNonstopTable() {
             ? '<span class="d-inline-flex align-items-center gap-1.5 small text-success fw-bold"><span class="studio-pulse-dot dot-green"></span> Phát hành</span>'
             : '<span class="d-inline-flex align-items-center gap-1.5 small text-dim"><span class="studio-pulse-dot dot-gray"></span> Tạm ẩn</span>';
 
-        const dateStr = item.createdAt ? new Date(item.createdAt).toLocaleDateString('vi-VN') : '---';
+        const dateStr = item.formattedDate || (item.createdAt ? new Date(item.createdAt).toLocaleDateString('vi-VN') : '---');
 
         return `
             <tr class="studio-row-track ${rowColorClass}">

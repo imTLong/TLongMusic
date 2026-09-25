@@ -61,26 +61,12 @@ public class TrackController : Controller
 
             // Map sang Track model
             var trackList = new List<Track>();
-            int offsetDay = 0;
-            var baseDate = DateTime.Now;
 
             for (int i = 0; i < musics.Count; i++)
             {
                 var m = musics[i];
                 var t = MapEntityToTrack(m);
-
-                // Nếu tất cả bài trong DB có CreatedAt chênh nhau dưới vài phút, phân bổ theo ngày để hiển thị đúng mẫu người dùng yêu cầu
-                if (musics.Count > 1 && Math.Abs((m.CreatedAt - musics[0].CreatedAt).TotalHours) < 1)
-                {
-                    // Cứ mỗi 2 bài chia thành 1 ngày trước đó
-                    offsetDay = i / 2;
-                    t.ReleaseDate = baseDate.AddDays(-offsetDay);
-                }
-                else
-                {
-                    t.ReleaseDate = m.CreatedAt;
-                }
-
+                t.ReleaseDate = m.CreatedAt;
                 trackList.Add(t);
             }
 
@@ -170,7 +156,8 @@ public class TrackController : Controller
 
             viewModel.TotalTracks = trackList.Count;
 
-            // Gom nhóm theo ngày
+            // Gom nhóm theo ngày (Giờ Việt Nam UTC+7)
+            var todayVn = DateTime.UtcNow.AddHours(7).Date;
             var groups = trackList
                 .GroupBy(t => t.ReleaseDate.Date)
                 .OrderByDescending(g => g.Key)
@@ -178,8 +165,8 @@ public class TrackController : Controller
                 {
                     Date = g.Key,
                     FormattedDate = g.Key.ToString("dd/MM/yyyy"),
-                    DayOfWeekName = GetVietnameseDayOfWeek(g.Key),
-                    Tracks = g.OrderByDescending(IsTrackSlot).ThenByDescending(IsTrackNhom).ToList()
+                    DayOfWeekName = GetVietnameseDayOfWeek(g.Key, todayVn),
+                    Tracks = g.OrderByDescending(t => t.ReleaseDate).ToList()
                 })
                 .ToList();
 
@@ -255,10 +242,11 @@ public class TrackController : Controller
         };
     }
 
-    private static string GetVietnameseDayOfWeek(DateTime dt)
+    private static string GetVietnameseDayOfWeek(DateTime dt, DateTime? todayVn = null)
     {
-        if (dt.Date == DateTime.Today) return "Hôm Nay";
-        if (dt.Date == DateTime.Today.AddDays(-1)) return "Hôm Qua";
+        var refToday = todayVn ?? DateTime.UtcNow.AddHours(7).Date;
+        if (dt.Date == refToday) return "Hôm Nay";
+        if (dt.Date == refToday.AddDays(-1)) return "Hôm Qua";
         return dt.DayOfWeek switch
         {
             DayOfWeek.Monday => "Thứ Hai",
@@ -297,6 +285,7 @@ public class TrackController : Controller
     }
 
     [HttpGet("/Track/Detail/{id}")]
+    [HttpGet("/Nonstop/Detail/{id}")]
     [HttpGet("/Music/Detail/{id}")]
     [HttpGet("/Song/{id}")]
     public async Task<IActionResult> Detail(string id)

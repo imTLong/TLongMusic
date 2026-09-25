@@ -127,7 +127,7 @@
             </div>
             <div class="d-flex align-items-center gap-2">
                 <a href="/Track" class="btn btn-sm btn-glass-crystal"><i class="fas fa-calendar-day me-1 text-info"></i> Xem Theo Ngày</a>
-                <span class="badge badge-shimmer-cyan px-3 py-2 fw-bold">@Model.LatestTracks.Count Bản Track Sẵn Sàng</span>
+                <span class="badge badge-shimmer-cyan px-3 py-2 fw-bold">Gợi Ý @Model.LatestTracks.Count Track Mới Nhất</span>
             </div>
         </div>
 
@@ -353,6 +353,13 @@
                         }
                     </tbody>
                 </table>
+            </div>
+
+            <!-- Nút Xem Thêm Toàn Bộ Kho Track -->
+            <div class="text-center mt-3 pt-2">
+                <a href="/Track" class="btn btn-outline-info rounded-pill px-4 py-2 fw-bold shadow">
+                    <i class="fas fa-compact-disc me-2"></i> Xem Toàn Bộ Kho Track Record Pool Theo Ngày <i class="fas fa-arrow-right ms-2"></i>
+                </a>
             </div>
         </section>
     </div>
@@ -1026,7 +1033,7 @@
 
 @section Scripts {
 <script>
-    let currentNonstopTierFilter = 'all';
+    var currentNonstopTierFilter = 'all';
 
     function filterNonstopTier(tier, btnElem) {
         currentNonstopTierFilter = tier;

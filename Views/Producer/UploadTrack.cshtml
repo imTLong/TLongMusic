@@ -219,23 +219,28 @@
                             </div>
                         </div>
 
-                        <!-- Hàng 4: Phân cấp Track & Chất lượng -->
-                        <div class="col-12 col-md-6">
-                            <label class="form-label text-white small">Phân Cấp Track (Chỉ nhận gói Track): <span class="text-danger">*</span></label>
+                        <!-- Hàng 4: Phân cấp Track, Chất lượng & Ngày Phát Hành -->
+                        <div class="col-12 col-md-4">
+                            <label class="form-label text-white small">Phân Cấp Track: <span class="text-danger">*</span></label>
                             <select name="categoryCode" id="trackCategorySelect" class="form-select bg-dark text-white border-secondary" required>
-                                <option value="TrackLot">🎵 Track Lọt (Khách nghe full, Free tải được)</option>
-                                <option value="TrackNhom" selected>💎 Track Nhóm (Standard & Premium tải được)</option>
-                                <option value="TrackSlot">👑 Track Slot VIP (Chỉ Premium tải, Demo 30s)</option>
+                                <option value="TrackLot">🎵 Track Lọt (Free)</option>
+                                <option value="TrackNhom" selected>💎 Track Nhóm (Standard)</option>
+                                <option value="TrackSlot">👑 Track Slot VIP (Premium)</option>
                             </select>
                         </div>
 
-                        <div class="col-12 col-md-6">
-                            <label class="form-label text-white small">Chất Lượng Âm Thanh Công Bố:</label>
+                        <div class="col-12 col-md-4">
+                            <label class="form-label text-white small">Chất Lượng Âm Thanh:</label>
                             <select name="qualityAvailable" id="trackQualitySelect" class="form-select bg-dark text-white border-secondary">
-                                <option value="MP3 320kbps">MP3 320kbps (Chuẩn phòng thu)</option>
-                                <option value="WAV Lossless 24-Bit">WAV Lossless 24-Bit (Master Club)</option>
-                                <option value="FLAC 24-Bit Lossless">FLAC 24-Bit Lossless</option>
+                                <option value="MP3 320kbps">MP3 320kbps (Chuẩn)</option>
+                                <option value="WAV Lossless 24-Bit">WAV Lossless 24-Bit</option>
+                                <option value="FLAC 24-Bit Lossless">FLAC 24-Bit</option>
                             </select>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <label class="form-label text-white small"><i class="fas fa-calendar-day text-info me-1"></i> Ngày Phát Hành: <span class="text-danger">*</span></label>
+                            <input type="date" name="releaseDate" id="trackReleaseDateInput" class="form-control bg-dark text-white border-secondary fw-bold" value="@DateTime.UtcNow.AddHours(7).ToString("yyyy-MM-dd")" required />
                         </div>
 
                         <!-- Hàng 5: Ảnh bìa Track -->
@@ -820,6 +825,7 @@
                             <th>BPM / Key</th>
                             <th>Thời Lượng</th>
                             <th>Phân Cấp</th>
+                            <th>Ngày Đăng</th>
                             <th class="text-end">Thao Tác</th>
                         </tr>
                     </thead>
@@ -860,6 +866,7 @@
                                     </td>
                                     <td class="text-dim small font-monospace">${formatTrackDuration(t.durationSeconds)}</td>
                                     <td>${catBadge}</td>
+                                    <td class="text-info small font-monospace">${t.formattedDate || (t.createdAt ? new Date(t.createdAt).toLocaleDateString('vi-VN') : '---')}</td>
                                     <td class="text-end">
                                         <button class="btn btn-sm btn-outline-danger px-2 py-1 rounded-2" onclick="deleteProducerTrack('${t.musicId}', '${t.title.replace(/'/g, "\\'")}')" title="Xóa bản Track">
                                             <i class="fas fa-trash-can"></i>

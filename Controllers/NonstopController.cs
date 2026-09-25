@@ -62,25 +62,12 @@ public class NonstopController : Controller
 
             // Map sang Track model
             var nonstopList = new List<Track>();
-            int offsetDay = 0;
-            var baseDate = DateTime.Now;
 
             for (int i = 0; i < musics.Count; i++)
             {
                 var m = musics[i];
                 var t = MapEntityToNonstop(m);
-
-                // Nếu các bản ghi trong DB chênh nhau dưới vài phút, phân bổ theo ngày để hiển thị mẫu
-                if (musics.Count > 1 && Math.Abs((m.CreatedAt - musics[0].CreatedAt).TotalHours) < 1)
-                {
-                    offsetDay = i / 2;
-                    t.ReleaseDate = baseDate.AddDays(-offsetDay);
-                }
-                else
-                {
-                    t.ReleaseDate = m.CreatedAt;
-                }
-
+                t.ReleaseDate = m.CreatedAt;
                 nonstopList.Add(t);
             }
 
@@ -170,7 +157,8 @@ public class NonstopController : Controller
 
             viewModel.TotalNonstops = nonstopList.Count;
 
-            // Gom nhóm theo ngày
+            // Gom nhóm theo ngày (Giờ Việt Nam UTC+7)
+            var todayVn = DateTime.UtcNow.AddHours(7).Date;
             var groups = nonstopList
                 .GroupBy(t => t.ReleaseDate.Date)
                 .OrderByDescending(g => g.Key)
@@ -178,8 +166,8 @@ public class NonstopController : Controller
                 {
                     Date = g.Key,
                     FormattedDate = g.Key.ToString("dd/MM/yyyy"),
-                    DayOfWeekName = GetVietnameseDayOfWeek(g.Key),
-                    Nonstops = g.OrderByDescending(IsNonstopSlot).ThenByDescending(IsNonstopNhom).ToList()
+                    DayOfWeekName = GetVietnameseDayOfWeek(g.Key, todayVn),
+                    Nonstops = g.OrderByDescending(t => t.ReleaseDate).ToList()
                 })
                 .ToList();
 
@@ -246,10 +234,11 @@ public class NonstopController : Controller
         };
     }
 
-    private static string GetVietnameseDayOfWeek(DateTime dt)
+    private static string GetVietnameseDayOfWeek(DateTime dt, DateTime? todayVn = null)
     {
-        if (dt.Date == DateTime.Today) return "Hôm Nay";
-        if (dt.Date == DateTime.Today.AddDays(-1)) return "Hôm Qua";
+        var refToday = todayVn ?? DateTime.UtcNow.AddHours(7).Date;
+        if (dt.Date == refToday) return "Hôm Nay";
+        if (dt.Date == refToday.AddDays(-1)) return "Hôm Qua";
         return dt.DayOfWeek switch
         {
             DayOfWeek.Monday => "Thứ Hai",

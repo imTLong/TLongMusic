@@ -68,10 +68,12 @@ namespace TLongMusic.Controllers
                 return StatusCode(StatusCodes.Status403Forbidden, new { success = false, message = "Không tìm thấy hồ sơ Producer của bạn trong hệ thống!" });
             }
 
+            string? releaseDateStr = null;
             UploadMusicFormDto formModel = new();
             if (Request.HasFormContentType)
             {
                 var form = await Request.ReadFormAsync();
+                releaseDateStr = form["releaseDate"].ToString();
                 formModel.Title = form["title"].ToString();
                 formModel.Artist = form["artist"].ToString();
                 formModel.Genre = form["genre"].ToString();
@@ -232,6 +234,18 @@ namespace TLongMusic.Controllers
                 coverUrl = formModel.CoverUrl.Trim();
             }
 
+            // XÁC ĐỊNH NGÀY PHÁT HÀNH (GIỜ VIỆT NAM UTC+7)
+            DateTime createdAtVn;
+            if (!string.IsNullOrWhiteSpace(releaseDateStr) && DateTime.TryParse(releaseDateStr, out var parsedDate))
+            {
+                var nowVn = DateTime.UtcNow.AddHours(7);
+                createdAtVn = new DateTime(parsedDate.Year, parsedDate.Month, parsedDate.Day, nowVn.Hour, nowVn.Minute, nowVn.Second);
+            }
+            else
+            {
+                createdAtVn = DateTime.UtcNow.AddHours(7);
+            }
+
             var newMusic = new Music
             {
                 MusicId = Guid.NewGuid(),
@@ -252,8 +266,8 @@ namespace TLongMusic.Controllers
                 IsDemoOnlyForFree = formModel.IsDemoOnlyForFree || categoryCode.Contains("Slot") || categoryCode.Contains("Nhom"),
                 DemoLimitSeconds = formModel.DemoLimitSeconds > 0 ? formModel.DemoLimitSeconds : 30,
                 Status = "Published",
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
+                CreatedAt = createdAtVn,
+                UpdatedAt = createdAtVn
             };
 
             _context.Musics.Add(newMusic);
@@ -300,7 +314,7 @@ namespace TLongMusic.Controllers
                 query = query.Where(m => m.Type == type);
             }
 
-            var list = await query
+            var rawList = await query
                 .OrderByDescending(m => m.CreatedAt)
                 .Select(m => new
                 {
@@ -324,6 +338,30 @@ namespace TLongMusic.Controllers
                     m.CreatedAt
                 })
                 .ToListAsync();
+
+            var list = rawList.Select(m => new
+            {
+                m.MusicId,
+                m.Title,
+                m.Artist,
+                m.Genre,
+                m.CategoryCode,
+                m.CategoryName,
+                m.Type,
+                m.Bpm,
+                m.MusicalKey,
+                m.DurationSeconds,
+                m.CoverUrl,
+                m.QualityAvailable,
+                m.SourceType,
+                m.SourceUrl,
+                m.PlaysCount,
+                m.DownloadsCount,
+                m.Status,
+                m.CreatedAt,
+                FormattedDate = m.CreatedAt.ToString("dd/MM/yyyy"),
+                CreatedTime = m.CreatedAt.ToString("HH:mm")
+            }).ToList();
 
             return Ok(new { success = true, data = list, stageName = producer.StageName });
         }
