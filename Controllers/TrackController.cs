@@ -21,6 +21,11 @@ public class TrackController : Controller
     [HttpGet("/Track/Index")]
     public async Task<IActionResult> Index(string? date, string? search, string? genre, string? tier)
     {
+        if (User.Identity?.IsAuthenticated != true)
+        {
+            return Redirect("/?login=required&returnUrl=/Track");
+        }
+
         var viewModel = new DailyTracksViewModel
         {
             SelectedDate = date,

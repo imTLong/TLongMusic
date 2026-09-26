@@ -31,23 +31,23 @@ public class HomeController : Controller
                 .OrderByDescending(m => m.CreatedAt)
                 .ToListAsync();
 
-            // Kho Track DJ: Gợi ý 5 bản Track mới nhất
+            // Kho Track DJ: Chỉ hiển thị 5 bản Track mới nhất cho Home page (theo yêu cầu)
             model.LatestTracks = allMusics
-                .Where(m => m.Type == "Track" || (m.CategoryCode != null && m.CategoryCode.StartsWith("Track")))
+                .Where(m => m.Type == "Track" || (m.CategoryCode != null && m.CategoryCode.StartsWith("Track", StringComparison.OrdinalIgnoreCase)))
                 .Select(MapEntityToViewModel)
                 .Take(5)
                 .ToList();
 
-            // Kho Nonstop Dài: (Type == "Nonstop" hoặc CategoryCode bắt đầu bằng Nonstop)
+            // Kho Nonstop Dài: Chỉ hiển thị vài bản Nonstop tiêu biểu mới nhất trên Home page
             var allNonstops = allMusics
-                .Where(m => m.Type == "Nonstop" || (m.CategoryCode != null && m.CategoryCode.StartsWith("Nonstop")))
+                .Where(m => m.Type == "Nonstop" || (m.CategoryCode != null && m.CategoryCode.StartsWith("Nonstop", StringComparison.OrdinalIgnoreCase)))
                 .Select(MapEntityToViewModel)
                 .ToList();
 
-            model.AllNonstops = allNonstops;
-            model.SlotNonstops = allNonstops.Where(IsMusicSlot).ToList();
-            model.NhomNonstops = allNonstops.Where(IsMusicNhom).ToList();
-            model.LotNonstops = allNonstops.Where(IsMusicLot).ToList();
+            model.SlotNonstops = allNonstops.Where(IsMusicSlot).Take(2).ToList();
+            model.NhomNonstops = allNonstops.Where(IsMusicNhom).Take(2).ToList();
+            model.LotNonstops = allNonstops.Where(IsMusicLot).Take(2).ToList();
+            model.AllNonstops = model.SlotNonstops.Concat(model.NhomNonstops).Concat(model.LotNonstops).ToList();
 
             // Tương thích các danh sách cũ
             model.HotNonstops = model.LotNonstops;
@@ -98,16 +98,39 @@ public class HomeController : Controller
 
             if (dbPackages.Any())
             {
-                model.Plans = dbPackages.Select(p => new SubscriptionPlan
+                model.Plans = dbPackages.Select(p =>
                 {
-                    Name = p.Name,
-                    TierCode = p.PackageId.ToLower(),
-                    Price = p.Price,
-                    BillingPeriod = p.DurationDays > 0 ? $"/ {p.DurationDays} ngày" : "/ vĩnh viễn",
-                    BadgeText = p.BadgeText ?? (p.PackageId == "Standard" ? "PHỔ BIẾN NHẤT" : p.PackageId == "Premium" ? "DÀNH CHO PRO DJ" : "MẶC ĐỊNH"),
-                    IsPopular = p.PackageId == "Standard",
-                    Features = GetFeaturesForPackage(p),
-                    ButtonText = p.PackageId == "Free" ? "Đang Sử Dụng" : $"Nâng Cấp {p.Name}"
+                    var tierCode = p.PackageId.ToLower();
+                    string buttonText;
+                    if (currentUserTier == "premium")
+                    {
+                        if (tierCode == "premium") buttonText = "Đang Sử Dụng (Cao Cấp Nhất)";
+                        else if (tierCode == "standard") buttonText = "Gói Thấp Hơn";
+                        else buttonText = "Gói Mặc Định";
+                    }
+                    else if (currentUserTier == "standard")
+                    {
+                        if (tierCode == "standard") buttonText = "Đang Sử Dụng (Standard VIP)";
+                        else if (tierCode == "premium") buttonText = $"Nâng Cấp {p.Name}";
+                        else buttonText = "Gói Mặc Định";
+                    }
+                    else
+                    {
+                        if (tierCode == "free") buttonText = "Gói Mặc Định";
+                        else buttonText = $"Nâng Cấp {p.Name}";
+                    }
+
+                    return new SubscriptionPlan
+                    {
+                        Name = p.Name,
+                        TierCode = tierCode,
+                        Price = p.Price,
+                        BillingPeriod = p.DurationDays > 0 ? $"/ {p.DurationDays} ngày" : "/ vĩnh viễn",
+                        BadgeText = p.BadgeText ?? (p.PackageId == "Standard" ? "PHỔ BIẾN NHẤT" : p.PackageId == "Premium" ? "DÀNH CHO PRO DJ" : "MẶC ĐỊNH"),
+                        IsPopular = p.PackageId == "Standard",
+                        Features = GetFeaturesForPackage(p),
+                        ButtonText = buttonText
+                    };
                 }).ToList();
             }
         }
@@ -337,12 +360,21 @@ public class HomeController : Controller
     [HttpGet("/Membership")]
     public async Task<IActionResult> Membership()
     {
+        if (User.IsInRole("Admin"))
+        {
+            return RedirectToAction("AdminPortal", "Home");
+        }
+        if (User.IsInRole("Producer"))
+        {
+            return RedirectToAction("ProducerManageMusic", "Home");
+        }
+
         var model = new MembershipViewModel();
 
         string? currentUserTier = null;
         bool isPremiumUser = false;
         bool isStandardUser = false;
-        bool isAdminOrProducer = User.IsInRole("Admin") || User.IsInRole("Producer");
+        bool isAdminOrProducer = false;
 
         if (User.Identity?.IsAuthenticated == true)
         {
@@ -389,16 +421,39 @@ public class HomeController : Controller
 
         if (dbPackages.Any())
         {
-            model.Plans = dbPackages.Select(p => new SubscriptionPlan
+            model.Plans = dbPackages.Select(p =>
             {
-                Name = p.Name,
-                TierCode = p.PackageId.ToLower(),
-                Price = p.Price,
-                BillingPeriod = p.DurationDays > 0 ? $"/ {p.DurationDays} ngày" : "/ vĩnh viễn",
-                BadgeText = p.BadgeText ?? (p.PackageId == "Standard" ? "PHỔ BIẾN NHẤT" : p.PackageId == "Premium" ? "DÀNH CHO PRO DJ" : "MẶC ĐỊNH"),
-                IsPopular = p.PackageId == "Standard",
-                Features = GetFeaturesForPackage(p),
-                ButtonText = p.PackageId == "Free" ? "Đang Sử Dụng" : $"Nâng Cấp {p.Name}"
+                var tierCode = p.PackageId.ToLower();
+                string buttonText;
+                if (currentUserTier == "premium")
+                {
+                    if (tierCode == "premium") buttonText = "Đang Sử Dụng (Cao Cấp Nhất)";
+                    else if (tierCode == "standard") buttonText = "Gói Thấp Hơn";
+                    else buttonText = "Gói Mặc Định";
+                }
+                else if (currentUserTier == "standard")
+                {
+                    if (tierCode == "standard") buttonText = "Đang Sử Dụng (Standard VIP)";
+                    else if (tierCode == "premium") buttonText = $"Nâng Cấp {p.Name}";
+                    else buttonText = "Gói Mặc Định";
+                }
+                else
+                {
+                    if (tierCode == "free") buttonText = "Gói Mặc Định";
+                    else buttonText = $"Nâng Cấp {p.Name}";
+                }
+
+                return new SubscriptionPlan
+                {
+                    Name = p.Name,
+                    TierCode = tierCode,
+                    Price = p.Price,
+                    BillingPeriod = p.DurationDays > 0 ? $"/ {p.DurationDays} ngày" : "/ vĩnh viễn",
+                    BadgeText = p.BadgeText ?? (p.PackageId == "Standard" ? "PHỔ BIẾN NHẤT" : p.PackageId == "Premium" ? "DÀNH CHO PRO DJ" : "MẶC ĐỊNH"),
+                    IsPopular = p.PackageId == "Standard",
+                    Features = GetFeaturesForPackage(p),
+                    ButtonText = buttonText
+                };
             }).ToList();
         }
         else
@@ -418,6 +473,15 @@ public class HomeController : Controller
     [HttpGet("/Payment/Checkout")]
     public IActionResult Checkout(string? package)
     {
+        if (User.IsInRole("Admin"))
+        {
+            return RedirectToAction("AdminPortal", "Home");
+        }
+        if (User.IsInRole("Producer"))
+        {
+            return RedirectToAction("ProducerManageMusic", "Home");
+        }
+
         ViewBag.SelectedPackage = !string.IsNullOrWhiteSpace(package) ? package : "Standard";
         return View("~/Views/Payment/Checkout.cshtml");
     }

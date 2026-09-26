@@ -57,7 +57,7 @@
                             </a>
                         </li>
                         <li class="nav-item" id="navItemKhoTrack" style="@(User.Identity?.IsAuthenticated == true ? "" : "display: none !important;")">
-                            <a class="nav-link tlong-nav-link text-nowrap @(Context.Request.Path.StartsWithSegments("/Track") ? "active" : "")" href="/Track">
+                            <a class="nav-link tlong-nav-link text-nowrap @(Context.Request.Path.StartsWithSegments("/Track") ? "active" : "")" href="/Track" onclick="return navigateToTrackPool(event);">
                                 <i class="fas fa-compact-disc text-info"></i> 🎵 Kho Track DJ
                             </a>
                         </li>
@@ -66,7 +66,7 @@
                                 <i class="fas fa-fire-flame-curved text-warning"></i> 🔥 Kho Nonstop
                             </a>
                         </li>
-                        <li class="nav-item">
+                        <li class="nav-item" id="navMembershipItem" style="@(User.IsInRole("Admin") || User.IsInRole("Producer") ? "display: none !important;" : "")">
                             <a class="nav-link tlong-nav-link text-nowrap @(Context.Request.Path.StartsWithSegments("/Goi-Hoi-Vien") || Context.Request.Path.StartsWithSegments("/Membership") ? "active" : "")" href="/Goi-Hoi-Vien">
                                 <i class="fas fa-gem text-danger"></i> Gói Hội Viên
                             </a>
@@ -88,7 +88,7 @@
                         </div>
 
                         <!-- CTA VIP Button -->
-                        <a id="navUpgradeVipBtn" href="/Payment/Checkout?package=Standard" onclick="openCheckoutModal('Standard', 99000); return false;" class="btn btn-shimmer-ruby d-inline-flex align-items-center gap-2 text-nowrap">
+                        <a id="navUpgradeVipBtn" href="/Payment/Checkout?package=Standard" onclick="openCheckoutModal('Standard', 99000); return false;" class="btn btn-shimmer-ruby d-inline-flex align-items-center gap-2 text-nowrap" style="@(User.IsInRole("Admin") || User.IsInRole("Producer") ? "display: none !important;" : "")">
                             <i class="fas fa-sparkles"></i> Nâng Cấp VIP
                         </a>
                     </div>
@@ -114,7 +114,7 @@
                         <h4 class="tlong-brand-title mb-0">TLONG<span>MUSIC</span></h4>
                     </div>
                     <p class="text-dim small mb-0" style="line-height: 1.7;">
-                        Nền tảng âm nhạc trực tuyến và Record Pool thế hệ mới dành cho DJ và người yêu âm nhạc điện tử Việt Nam. Trải nghiệm chất lượng âm thanh Master 24-Bit và tải nhạc phòng thu đỉnh cao.
+                        Trải nghiệm không gian âm nhạc điện tử đẳng cấp với các Track nhạc, Nonstop đặt độc quyền, kho Track DJ ỉm và nhạc nhóm tháng. Hỗ trợ Producer upload chuẩn BPM / Key với chất lượng âm thanh Master chuẩn nhất. Mang lại trải nghiệm tốt nhất cho người sử dụng!
                     </p>
                 </div>
 
@@ -129,7 +129,7 @@
             <hr class="my-4" style="border-color: rgba(255, 255, 255, 0.08);" />
 
             <div class="text-center text-dim small">
-                &copy; 2026 <strong>TLongMusic Crystal</strong>. Toàn bộ bản quyền thuộc về TLongMusic Studio.
+                &copy; 2026 <strong>TLongMusic</strong>. Toàn bộ bản quyền thuộc về TLongMusic Studio.
             </div>
         </div>
     </footer>
@@ -1017,7 +1017,7 @@
              style="background: rgba(18, 19, 32, 0.95); backdrop-filter: blur(20px); border: 1px solid rgba(255, 19, 74, 0.5); border-radius: 14px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(255, 19, 74, 0.3);">
             <div class="toast-header bg-dark text-white border-bottom" style="border-color: rgba(255, 255, 255, 0.1) !important;">
                 <img src="~/images/logo.png" class="rounded me-2" alt="TL" style="width: 18px; height: 18px;" />
-                <strong class="me-auto text-danger" style="font-size: 0.85rem;">TLongMusic Crystal</strong>
+                <strong class="me-auto text-danger" style="font-size: 0.85rem;">TLongMusic</strong>
                 <small class="text-muted">Thông báo</small>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>

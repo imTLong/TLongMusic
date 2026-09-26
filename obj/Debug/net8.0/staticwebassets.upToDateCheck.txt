@@ -65,8 +65,10 @@ wwwroot\uploads\avatars\70575182229c47a58e5221dc01e0a1e4.png
 wwwroot\uploads\avatars\db5eda527bbb4b85a57bc1bf38b0d9e3.png
 wwwroot\uploads\music\1069435967a14e88bc2233ad8e2fc48b.mp3
 wwwroot\uploads\music\37a0ef5a9e374e14a0d3193dd9d3fcdd.mp3
+wwwroot\uploads\music\3acbafa60f514857926fe0d6f34eba88.mp3
 wwwroot\uploads\music\565ffe3e6c29448ca3afbcf5e4b79bcd.wav
 wwwroot\uploads\music\75a40f648dc24f789dce75a3751876b8.mp3
+wwwroot\uploads\music\87283834b83f4890beb5b0f50f0bd5b2.wav
 wwwroot\uploads\music\8eee047710ad4d97a7ee9ed4680d61de.mp3
 wwwroot\uploads\music\dcd5e87592564c10925777846f14d8e8.mp3
 wwwroot\uploads\music\ffae8b1a2c8245c7909b9bf832a0252f.mp3

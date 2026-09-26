@@ -310,6 +310,19 @@
             }
         }
 
+        // Kiểm tra nếu người dùng đang là Premium thì không cho phép chọn gói Standard (hạ cấp)
+        const curTier = (user && user.tier ? user.tier : '').toLowerCase();
+        const btnStd = document.getElementById('btnSelectStandard');
+        if (curTier === 'premium' && btnStd) {
+            btnStd.classList.add('disabled');
+            btnStd.style.opacity = '0.4';
+            btnStd.style.pointerEvents = 'none';
+            btnStd.title = "Không thể hạ cấp từ Premium VIP";
+            if (currentSelectedPackage === 'Standard') {
+                currentSelectedPackage = 'Premium';
+            }
+        }
+
         // Tự động tạo đơn hàng theo gói ban đầu
         await initOrder(currentSelectedPackage);
         startTimer();
@@ -317,6 +330,13 @@
     window.initCheckoutPage = initCheckoutPage;
 
     window.selectCheckoutPackage = async function(pkg) {
+        const user = window.TLongPlayer?.currentUser;
+        const curTier = (user && user.tier ? user.tier : '').toLowerCase();
+        if (curTier === 'premium' && pkg === 'Standard') {
+            showToastNotification("⚠️ Bạn đang sử dụng gói cao nhất Premium VIP! Không thể hạ cấp về gói Standard.");
+            return;
+        }
+
         if (currentSelectedPackage === pkg && currentOrderCode) return;
         currentSelectedPackage = pkg;
 

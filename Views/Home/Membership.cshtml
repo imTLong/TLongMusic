@@ -109,13 +109,14 @@
                     <div class="mt-4 pt-2">
                         @if (isFree)
                         {
-                            <button class="btn btn-outline-secondary w-100 py-2.5 rounded-3 fw-bold disabled" style="opacity: 0.6; font-size: 0.9rem;">
+                            <button class="btn btn-outline-secondary w-100 py-2.5 rounded-3 fw-bold disabled" id="btnMembershipPlan-free" style="opacity: 0.6; font-size: 0.9rem; pointer-events: none;">
                                 <i class="fas fa-check me-1"></i> @(isCurrentPlan ? "Đang Sử Dụng" : "Mặc Định")
                             </button>
                         }
                         else if (isStandard)
                         {
                             <button class="btn btn-shimmer-ruby w-100 py-2.5 rounded-3 fw-bold d-flex align-items-center justify-content-center gap-2"
+                                    id="btnMembershipPlan-standard"
                                     onclick="openCheckoutModal('Standard VIP', 99000)"
                                     style="font-size: 0.92rem;">
                                 <i class="fas fa-gem"></i>
@@ -125,6 +126,7 @@
                         else
                         {
                             <button class="btn btn-shimmer-gold w-100 py-2.5 rounded-3 fw-bold d-flex align-items-center justify-content-center gap-2"
+                                    id="btnMembershipPlan-premium"
                                     onclick="openCheckoutModal('Premium VIP', 199000)"
                                     style="font-size: 0.92rem; color: #0b0c10 !important; background: linear-gradient(135deg, #ffd166 0%, #ff9f1c 100%) !important;">
                                 <i class="fas fa-crown"></i>

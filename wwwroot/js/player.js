@@ -26,6 +26,14 @@ document.addEventListener('DOMContentLoaded', () => {
     updateTierUI();
     updateAuthUI();
     restorePlaybackState();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('login') === 'required') {
+        setTimeout(() => {
+            showToastNotification('<i class="fas fa-lock text-warning me-1"></i> Vui lòng đăng nhập để truy cập kho nhạc Record Pool!');
+            switchToLoginModal();
+        }, 450);
+    }
 });
 
 // ==========================================
@@ -157,21 +165,15 @@ function savePlaybackState() {
     const audio = window.TLongPlayer?.audio;
     if (!currentTrack || !audio) return;
 
-    if (!audio.paused && window.TLongPlayer.isPlaying) {
-        const state = {
-            track: currentTrack,
-            currentTime: audio.currentTime || 0,
-            isPlaying: true,
-            timestamp: Date.now()
-        };
-        try {
-            sessionStorage.setItem('tlong_playback_state', JSON.stringify(state));
-        } catch (e) {}
-    } else {
-        try {
-            sessionStorage.removeItem('tlong_playback_state');
-        } catch (e) {}
-    }
+    const state = {
+        track: currentTrack,
+        currentTime: audio.currentTime || 0,
+        isPlaying: !audio.paused && window.TLongPlayer.isPlaying,
+        timestamp: Date.now()
+    };
+    try {
+        sessionStorage.setItem('tlong_playback_state', JSON.stringify(state));
+    } catch (e) {}
 }
 
 function restorePlaybackState() {
@@ -965,10 +967,20 @@ function updateAuthUI() {
         }
     }
 
-    // Loại bỏ chữ/nút Nâng Cấp VIP ở tài khoản Admin và Producer trên toàn website
+    // Loại bỏ chữ/nút Nâng Cấp VIP & Gói Hội Viên ở tài khoản Admin và Producer trên toàn website
     const isStaff = user && (user.role === 'Admin' || user.primaryRole === 'Admin' || user.role === 'Producer' || user.primaryRole === 'Producer' || (user.roles && (user.roles.includes('Admin') || user.roles.includes('Producer'))));
+    const navMembershipItem = document.getElementById('navMembershipItem');
     const navUpgradeVipBtn = document.getElementById('navUpgradeVipBtn');
     const heroUpgradeVipBtn = document.getElementById('heroUpgradeVipBtn');
+    const pricingSection = document.getElementById('pricingSection');
+
+    if (navMembershipItem) {
+        if (isStaff) {
+            navMembershipItem.style.setProperty('display', 'none', 'important');
+        } else {
+            navMembershipItem.style.removeProperty('display');
+        }
+    }
     if (navUpgradeVipBtn) {
         if (isStaff) {
             navUpgradeVipBtn.style.setProperty('display', 'none', 'important');
@@ -981,6 +993,13 @@ function updateAuthUI() {
             heroUpgradeVipBtn.style.setProperty('display', 'none', 'important');
         } else {
             heroUpgradeVipBtn.style.removeProperty('display');
+        }
+    }
+    if (pricingSection) {
+        if (isStaff) {
+            pricingSection.style.setProperty('display', 'none', 'important');
+        } else {
+            pricingSection.style.removeProperty('display');
         }
     }
 
@@ -1271,12 +1290,107 @@ function updateAuthUI() {
                 activeBadge.innerHTML = `<i class="fas fa-user text-muted me-1"></i> GÓI MIỄN PHÍ HIỆN TẠI`;
             }
         }
+        updatePricingButtonsUI(userTierKey);
+    } else {
+        updatePricingButtonsUI('free');
     }
 
     if (typeof window.syncUserHomepagePrivileges === 'function') {
         window.syncUserHomepagePrivileges();
     }
 }
+
+// Cập nhật trạng thái các nút chọn gói: Đang ở gói nào thì không được chuyển gói, chỉ được nâng cấp lên gói cao hơn
+function updatePricingButtonsUI(userTierKey) {
+    userTierKey = (userTierKey || 'free').toLowerCase();
+
+    const btnFreeHome = document.getElementById('btnPricingPlan-free');
+    const btnStdHome = document.getElementById('btnPricingPlan-standard');
+    const btnPreHome = document.getElementById('btnPricingPlan-premium');
+
+    const btnFreeMem = document.getElementById('btnMembershipPlan-free');
+    const btnStdMem = document.getElementById('btnMembershipPlan-standard');
+    const btnPreMem = document.getElementById('btnMembershipPlan-premium');
+
+    const freeButtons = [btnFreeHome, btnFreeMem].filter(Boolean);
+    const stdButtons = [btnStdHome, btnStdMem].filter(Boolean);
+    const preButtons = [btnPreHome, btnPreMem].filter(Boolean);
+
+    // 1. Nút Gói Free: Luôn luôn disabled, tuyệt đối không cho chuyển về Free
+    freeButtons.forEach(btn => {
+        btn.classList.add('disabled');
+        btn.style.opacity = '0.6';
+        btn.style.cursor = 'not-allowed';
+        btn.style.pointerEvents = 'none';
+        btn.removeAttribute('onclick');
+        if (userTierKey === 'free') {
+            btn.innerHTML = '<i class="fas fa-check me-2"></i> Đang Sử Dụng (Mặc Định)';
+        } else {
+            btn.innerHTML = '<i class="fas fa-lock me-2"></i> Gói Mặc Định (Đã Nâng Cấp)';
+        }
+    });
+
+    // 2. Logic cho tài khoản Standard & Premium
+    if (userTierKey === 'premium') {
+        // Đang ở gói cao nhất: Khóa Standard và Free, không cho hạ cấp
+        stdButtons.forEach(btn => {
+            btn.className = 'btn btn-outline-secondary w-100 py-3 mt-auto font-weight-bold disabled';
+            btn.style.opacity = '0.5';
+            btn.style.cursor = 'not-allowed';
+            btn.style.pointerEvents = 'none';
+            btn.removeAttribute('onclick');
+            btn.innerHTML = '<i class="fas fa-lock me-2"></i> Gói Thấp Hơn (Không Thể Hạ Cấp)';
+        });
+
+        preButtons.forEach(btn => {
+            btn.className = 'btn btn-shimmer-gold w-100 py-3 mt-auto font-weight-bold disabled';
+            btn.style.opacity = '0.9';
+            btn.style.cursor = 'default';
+            btn.style.pointerEvents = 'none';
+            btn.removeAttribute('onclick');
+            btn.innerHTML = '<i class="fas fa-crown me-2"></i> Đang Sử Dụng (Cao Cấp Nhất)';
+        });
+    } else if (userTierKey === 'standard') {
+        // Đang ở Standard: Nút Standard hiển thị Đang Sử Dụng (không đổi). Nút Premium cho phép Nâng Cấp!
+        stdButtons.forEach(btn => {
+            btn.className = 'btn btn-outline-danger w-100 py-3 mt-auto font-weight-bold disabled';
+            btn.style.opacity = '0.9';
+            btn.style.cursor = 'default';
+            btn.style.pointerEvents = 'none';
+            btn.removeAttribute('onclick');
+            btn.innerHTML = '<i class="fas fa-certificate text-danger me-2"></i> Đang Sử Dụng (Standard VIP)';
+        });
+
+        preButtons.forEach(btn => {
+            btn.className = 'btn btn-shimmer-gold w-100 py-3 mt-auto font-weight-bold';
+            btn.style.opacity = '1';
+            btn.style.cursor = 'pointer';
+            btn.style.pointerEvents = '';
+            btn.setAttribute('onclick', "openCheckoutModal('Premium VIP', 199000);");
+            btn.innerHTML = '<i class="fas fa-crown me-2"></i> Nâng Cấp PREMIUM VIP ĐỘC QUYỀN';
+        });
+    } else {
+        // Free hoặc chưa đăng nhập: Cả 2 gói đều có thể Nâng Cấp
+        stdButtons.forEach(btn => {
+            btn.className = 'btn btn-shimmer-ruby w-100 py-3 mt-auto font-weight-bold';
+            btn.style.opacity = '1';
+            btn.style.cursor = 'pointer';
+            btn.style.pointerEvents = '';
+            btn.setAttribute('onclick', "openCheckoutModal('Standard VIP', 99000);");
+            btn.innerHTML = '<i class="fas fa-qrcode me-2"></i> Nâng Cấp STANDARD VIP';
+        });
+
+        preButtons.forEach(btn => {
+            btn.className = 'btn btn-shimmer-gold w-100 py-3 mt-auto font-weight-bold';
+            btn.style.opacity = '1';
+            btn.style.cursor = 'pointer';
+            btn.style.pointerEvents = '';
+            btn.setAttribute('onclick', "openCheckoutModal('Premium VIP', 199000);");
+            btn.innerHTML = '<i class="fas fa-crown me-2"></i> Nâng Cấp PREMIUM VIP ĐỘC QUYỀN';
+        });
+    }
+}
+window.updatePricingButtonsUI = updatePricingButtonsUI;
 
 async function showFavoritesModal() {
     try {
@@ -1449,8 +1563,31 @@ function initPlayerEvents() {
         if (window.TLongPlayer?.repeatMode === 'one') {
             audio.currentTime = 0;
             audio.play().catch(e => {});
-        } else {
+        } else if (window.TLongPlayer?.repeatMode === 'all') {
             playNextTrack();
+        } else {
+            // Khi phát hết 1 bài nhạc hoặc bản nonstop: dừng luôn nhưng vẫn giữ ở thanh phát phía dưới ở trạng thái chờ
+            pauseTrack();
+            audio.currentTime = 0;
+
+            const currentTimeElem = document.getElementById('playerCurrentTime');
+            if (currentTimeElem) currentTimeElem.textContent = '00:00';
+
+            const seekSlider = document.getElementById('playerSeekSlider');
+            if (seekSlider) {
+                seekSlider.value = 0;
+                updateSeekSliderProgress(seekSlider);
+            }
+
+            if (typeof renderWaveform === 'function') {
+                renderWaveform(0);
+            }
+            const detailCurrentTime = document.getElementById('detailCurrentTime');
+            if (detailCurrentTime) detailCurrentTime.textContent = '00:00';
+
+            if (typeof updateHeroPlayButton === 'function') {
+                updateHeroPlayButton(false);
+            }
         }
     });
 
@@ -1818,6 +1955,23 @@ function switchToLoginModal() {
         }
     }
 }
+
+// Bắt buộc đăng nhập khi muốn truy cập toàn bộ kho Track Record Pool theo ngày
+function navigateToTrackPool(event) {
+    const isAuth = !!(window.TLongPlayer?.currentUser && (window.TLongPlayer.currentUser.id || window.TLongPlayer.currentUser.username));
+    if (!isAuth) {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        showToastNotification('<i class="fas fa-lock text-warning me-1"></i> Vui lòng đăng nhập để truy cập toàn bộ kho Track Record Pool!');
+        switchToLoginModal();
+        return false;
+    }
+    return true;
+}
+window.navigateToTrackPool = navigateToTrackPool;
+
 // Tự động kiểm tra và chạy chữ theo vòng tròn chậm vô tận khi tên bài dài
 function checkAndApplyMarquee() {
     const titleEl = document.getElementById('playerTrackTitle');
@@ -2082,7 +2236,14 @@ function resumeTrack() {
     if (window.TLongPlayer.isSynthesizing) {
         startBeatSynthesizer();
     } else {
-        window.TLongPlayer.audio.play();
+        const audio = window.TLongPlayer.audio;
+        if (audio && (audio.ended || (audio.duration && audio.currentTime >= audio.duration))) {
+            audio.currentTime = 0;
+        }
+        window.TLongPlayer.audio.play().catch(err => {
+            console.warn("Direct audio play note:", err);
+            startBeatSynthesizer();
+        });
     }
     updatePlayPauseButton();
     savePlaybackState();
@@ -2311,7 +2472,30 @@ function skipTime(seconds) {
     }
 
     if (targetTime >= duration) {
-        playNextTrack();
+        if (window.TLongPlayer?.repeatMode === 'one') {
+            audio.currentTime = 0;
+            audio.play().catch(e => {});
+        } else if (window.TLongPlayer?.repeatMode === 'all') {
+            playNextTrack();
+        } else {
+            pauseTrack();
+            audio.currentTime = 0;
+            const currentTimeElem = document.getElementById('playerCurrentTime');
+            if (currentTimeElem) currentTimeElem.textContent = '00:00';
+            const seekSlider = document.getElementById('playerSeekSlider');
+            if (seekSlider) {
+                seekSlider.value = 0;
+                updateSeekSliderProgress(seekSlider);
+            }
+            if (typeof renderWaveform === 'function') {
+                renderWaveform(0);
+            }
+            const detailCurrentTime = document.getElementById('detailCurrentTime');
+            if (detailCurrentTime) detailCurrentTime.textContent = '00:00';
+            if (typeof updateHeroPlayButton === 'function') {
+                updateHeroPlayButton(false);
+            }
+        }
         return;
     }
 
@@ -2416,6 +2600,32 @@ function openCheckoutModal(planName, price) {
     if (!window.TLongPlayer || !window.TLongPlayer.currentUser) {
         showToastNotification("Vui lòng đăng nhập trước khi gia hạn / mua gói!");
         switchToLoginModal();
+        return;
+    }
+
+    const curUser = window.TLongPlayer.currentUser;
+    const isStaff = curUser && (curUser.role === 'Admin' || curUser.primaryRole === 'Admin' || curUser.role === 'Producer' || curUser.primaryRole === 'Producer' || (curUser.roles && (curUser.roles.includes('Admin') || curUser.roles.includes('Producer'))));
+    if (isStaff) {
+        showToastNotification("👑 Tài khoản Quản trị viên / Nhà sản xuất có toàn quyền truy cập cao nhất, không cần đăng ký gói hội viên!");
+        return;
+    }
+
+    const curTier = (curUser.tier || 'free').toLowerCase();
+
+    // Tuyệt đối không cho phép hạ cấp từ Premium xuống Standard
+    if (curTier === 'premium' && pkgId === 'Standard') {
+        showToastNotification("⚠️ Bạn đang sử dụng gói cao nhất Premium VIP! Không thể hạ cấp về gói Standard.");
+        return;
+    }
+
+    // Đang ở gói nào thì không chuyển gói (trừ khi nâng cấp lên gói cao hơn)
+    if (curTier === 'standard' && pkgId === 'Standard') {
+        showToastNotification("ℹ️ Bạn đang sử dụng gói Standard VIP! Để chuyển gói, vui lòng chọn Nâng Cấp lên Premium VIP.");
+        return;
+    }
+
+    if (curTier === 'premium' && pkgId === 'Premium') {
+        showToastNotification("👑 Bạn đang sử dụng gói cao nhất Premium VIP!");
         return;
     }
 
@@ -3798,14 +4008,9 @@ async function toggleFavorite(musicId, btnElem) {
 }
 
 function switchUserTier(tier) {
-    if (window.TLongPlayer.currentUser) {
-        window.TLongPlayer.currentUser.tier = tier.charAt(0).toUpperCase() + tier.slice(1);
-        localStorage.setItem('tlong_current_user', JSON.stringify(window.TLongPlayer.currentUser));
-    }
-    window.TLongPlayer.userTier = tier;
-    updateTierUI();
-    updateAuthUI();
-    showToastNotification(`Đã chuyển cấp độ test: <strong class="text-uppercase text-danger">${tier}</strong>`);
+    // Chức năng chuyển đổi gói thử nghiệm đã được loại bỏ hoàn toàn để bảo vệ quyền lợi hội viên.
+    console.warn("Chức năng đổi gói thử nghiệm đã bị vô hiệu hóa.");
+    return false;
 }
 
 function updateTierUI() {
@@ -3822,16 +4027,6 @@ function updateTierUI() {
     } else if (tier === 'standard') {
         badge.className = 'badge badge-standard-red';
         badge.innerHTML = '<i class="fas fa-certificate me-1"></i> Standard VIP';
-        // Tài khoản Standard mặc định chỉ hiển thị Track của Nhóm
-        if (!window.TLongPlayer._customTierSelected || window.TLongPlayer.selectedTierFilter === 'all') {
-            window.TLongPlayer.selectedTierFilter = 'Standard';
-            const nhomBtn = document.getElementById('btnTabTrackNhom');
-            if (nhomBtn) {
-                document.querySelectorAll('#packageFilterPills button').forEach(b => b.classList.remove('active'));
-                nhomBtn.classList.add('active');
-            }
-            if (typeof filterTracks === 'function') filterTracks();
-        }
     } else if (tier === 'premium') {
         badge.className = 'badge badge-premium-gold';
         badge.innerHTML = '<i class="fas fa-crown me-1"></i> Premium Master';
@@ -4103,8 +4298,8 @@ function filterByTier(tier, btnElem) {
 }
 
 function filterTracks() {
-    const query = document.getElementById('trackSearchInput')?.value.toLowerCase() || '';
-    const genreFilter = document.getElementById('genreFilterSelect')?.value.toLowerCase() || '';
+    const query = document.getElementById('trackSearchInput')?.value.toLowerCase().trim() || '';
+    const genreFilter = document.getElementById('genreFilterSelect')?.value.toLowerCase().trim() || '';
     const bpmFilter = document.getElementById('bpmFilterSelect')?.value || '';
     const tierFilter = window.TLongPlayer.selectedTierFilter || 'all';
     const currentUser = window.TLongPlayer.currentUser;
@@ -4112,14 +4307,17 @@ function filterTracks() {
 
     let visibleCount = 0;
 
-    document.querySelectorAll('.crystal-table-row').forEach(row => {
+    document.querySelectorAll('#trackTableBody .crystal-table-row').forEach(row => {
         const title = (row.dataset.title || '').toLowerCase();
         const artist = (row.dataset.artist || '').toLowerCase();
         const genre = (row.dataset.genre || '').toLowerCase();
         const bpm = parseInt(row.dataset.bpm) || 0;
-        const requiredTier = row.dataset.tier || 'Free';
-        const isSlotRow = row.classList.contains('track-row-slot') || requiredTier === 'Premium';
-        const isNhomRow = row.classList.contains('track-row-nhom') || requiredTier === 'Standard';
+        const requiredTier = (row.dataset.tier || 'Free').toLowerCase();
+        const trackType = (row.dataset.trackType || '').toLowerCase();
+
+        const isSlotRow = trackType === 'slot' || row.classList.contains('track-row-slot') || requiredTier === 'premium';
+        const isNhomRow = !isSlotRow && (trackType === 'nhom' || row.classList.contains('track-row-nhom') || requiredTier === 'standard');
+        const isLotRow = !isSlotRow && !isNhomRow;
 
         let matchesQuery = !query || title.includes(query) || artist.includes(query);
         let matchesGenre = !genreFilter || genre.includes(genreFilter);
@@ -4130,37 +4328,23 @@ function filterTracks() {
         else if (bpmFilter === '143+') matchesBpm = bpm >= 143;
 
         let matchesTier = true;
-        if (tierFilter === 'demo_slot') {
-            // NÚT RIÊNG: Chỉ hiển thị track Slot để nghe Demo 30s
-            matchesTier = isSlotRow;
-        } else if (tierFilter === 'Standard') {
-            // Chỉ hiển thị track của Nhóm
-            matchesTier = isNhomRow;
-        } else if (tierFilter === 'all') {
-            const isHighTier = (currentUser && (currentUser.role === 'Admin' || currentUser.role === 'Producer')) || userTier === 'premium';
-            if (isHighTier) {
-                matchesTier = true;
-            } else if (userTier === 'standard') {
-                // Tài khoản Standard: Bỏ phần nhạc slot chỗ Tất Cả (chỉ gồm Nhóm và Lọt)
-                matchesTier = !isSlotRow;
-            } else {
-                // Tài khoản Free: Chỗ Tất Cả chỉ hiện track lọt
-                matchesTier = !isSlotRow && !isNhomRow;
-            }
+        if (tierFilter === 'all') {
+            matchesTier = true; // Tab Tất cả kho nhạc: Hiển thị 100% toàn bộ kho nhạc
+        } else if (tierFilter === 'Standard' || tierFilter === 'nhom') {
+            matchesTier = isNhomRow; // Tab Track Nhóm
+        } else if (tierFilter === 'demo_slot' || tierFilter === 'slot' || tierFilter === 'Premium') {
+            matchesTier = isSlotRow; // Tab Track Slot
+        } else if (tierFilter === 'Free' || tierFilter === 'lot') {
+            matchesTier = isLotRow; // Tab Track Lọt
         } else if (tierFilter === 'my_tier') {
-            if (currentUser && (currentUser.role === 'Admin' || currentUser.role === 'Producer')) {
-                matchesTier = true;
-            } else if (userTier === 'premium') {
+            const isAdminOrProd = currentUser && (currentUser.role === 'Admin' || currentUser.primaryRole === 'Admin' || currentUser.role === 'Producer' || currentUser.primaryRole === 'Producer' || (currentUser.roles && (currentUser.roles.includes('Admin') || currentUser.roles.includes('Producer'))));
+            if (isAdminOrProd || userTier === 'premium') {
                 matchesTier = true;
             } else if (userTier === 'standard') {
-                matchesTier = isNhomRow;
+                matchesTier = isNhomRow || isLotRow;
             } else {
-                matchesTier = (requiredTier === 'Free');
+                matchesTier = isLotRow;
             }
-        } else if (tierFilter === 'Free') {
-            matchesTier = !isSlotRow && !isNhomRow;
-        } else if (tierFilter === 'Premium') {
-            matchesTier = isSlotRow;
         }
 
         const isVisible = matchesQuery && matchesGenre && matchesBpm && matchesTier;
@@ -4168,27 +4352,28 @@ function filterTracks() {
         if (isVisible) visibleCount++;
     });
 
+    const emptyRow = document.getElementById('trackTableEmptyRow');
+    if (emptyRow) {
+        emptyRow.style.display = (visibleCount === 0) ? '' : 'none';
+    }
+
     const summaryElem = document.getElementById('packageFilterSummary');
     if (summaryElem) {
-        if (tierFilter === 'demo_slot') {
-            const isPremium = (currentUser && (currentUser.role === 'Admin' || currentUser.role === 'Producer' || (currentUser.tier && currentUser.tier.toLowerCase() === 'premium'))) || userTier === 'premium';
-            summaryElem.innerHTML = isPremium
-                ? `<span class="text-warning fw-bold"><i class="fas fa-crown me-1"></i> Kho Track Slot VIP (${visibleCount} bài)</span>`
-                : `<span class="text-warning fw-bold"><i class="fas fa-crown me-1"></i> Đang hiển thị Demo track Slot (${visibleCount} bài)</span>`;
-        } else if (tierFilter === 'Standard' || userTier === 'standard') {
-            const isVip = (currentUser && (currentUser.role === 'Admin' || currentUser.role === 'Producer' || (currentUser.tier && (currentUser.tier.toLowerCase() === 'standard' || currentUser.tier.toLowerCase() === 'premium')))) || userTier === 'standard' || userTier === 'premium';
-            summaryElem.innerHTML = isVip
-                ? `<span class="text-danger fw-bold"><i class="fas fa-certificate me-1"></i> Kho Track Nhóm Standard VIP (${visibleCount} bài)</span>`
-                : `<span class="text-danger fw-bold"><i class="fas fa-certificate me-1"></i> Đang hiển thị Demo track Nhóm (${visibleCount} bài)</span>`;
-        } else if (tierFilter === 'all') {
-            summaryElem.textContent = `Hiển thị toàn bộ kho nhạc (${visibleCount} bài)`;
+        if (tierFilter === 'demo_slot' || tierFilter === 'slot' || tierFilter === 'Premium') {
+            summaryElem.innerHTML = `<span class="text-warning fw-bold"><i class="fas fa-crown me-1"></i> Kho Track Slot VIP (${visibleCount} bài)</span>`;
+        } else if (tierFilter === 'Standard' || tierFilter === 'nhom') {
+            summaryElem.innerHTML = `<span class="text-danger fw-bold"><i class="fas fa-certificate me-1"></i> Kho Track Nhóm (${visibleCount} bài)</span>`;
+        } else if (tierFilter === 'Free' || tierFilter === 'lot') {
+            summaryElem.innerHTML = `<span class="text-info fw-bold"><i class="fas fa-music me-1"></i> Kho Track Lọt Miễn Phí (${visibleCount} bài)</span>`;
         } else if (tierFilter === 'my_tier') {
-            summaryElem.innerHTML = `<span class="text-success"><i class="fas fa-check-circle me-1"></i> Có ${visibleCount} bài bạn được phép tải về</span>`;
+            summaryElem.innerHTML = `<span class="text-success fw-bold"><i class="fas fa-unlock-keyhole me-1"></i> Các bài trong Gói Của Bạn (${visibleCount} bài)</span>`;
         } else {
-            summaryElem.textContent = `Đang lọc gói ${tierFilter} (${visibleCount} bài)`;
+            summaryElem.textContent = `Hiển thị toàn bộ kho nhạc (${visibleCount} bài)`;
         }
     }
 }
+window.filterByTier = filterByTier;
+window.filterTracks = filterTracks;
 
 // ==========================================
 // TRUNG TÂM QUẢN TRỊ ADMIN (PORTAL)

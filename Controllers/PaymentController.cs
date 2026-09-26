@@ -33,6 +33,17 @@ namespace TLongMusic.Controllers
                 return NotFound(new { success = false, message = "Gói hội viên không tồn tại hoặc đã ngừng hoạt động!" });
             }
 
+            // Kiểm tra: Không cho phép hạ cấp từ Premium xuống Standard
+            var currentSub = await _context.Subscriptions
+                .Where(s => s.UserId == userId && s.Status == "Active" && s.EndDate >= DateTime.UtcNow)
+                .OrderByDescending(s => s.PackageId == "Premium" ? 2 : (s.PackageId == "Standard" ? 1 : 0))
+                .FirstOrDefaultAsync();
+
+            if (currentSub != null && currentSub.PackageId == "Premium" && package.PackageId == "Standard")
+            {
+                return BadRequest(new { success = false, message = "Bạn đang sử dụng gói cao nhất Premium VIP! Không thể hạ cấp về gói Standard." });
+            }
+
             // Generate OrderCode
             var randomNum = new Random().Next(100000, 999999);
             var orderCode = $"TL{randomNum}";
